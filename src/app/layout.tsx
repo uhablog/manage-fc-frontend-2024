@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from "@/theme";
+import Sidebar from "./component/Sidebar";
+import { Box, CssBaseline } from "@mui/material";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +22,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <UserProvider>
-        <body className={inter.className}>{children}</body>
+        <body className={inter.className}>
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={theme} >
+              <Box sx={{ display: "flex"}}>
+                <CssBaseline/>
+                <Sidebar/>
+                <Box component='main' sx={{ flexGrow: 1, p: 3}} >
+                  {children}
+                </Box>
+              </Box>
+            </ThemeProvider>
+          </AppRouterCacheProvider>
+        </body>
       </UserProvider>
     </html>
   );
