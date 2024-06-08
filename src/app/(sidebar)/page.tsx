@@ -1,5 +1,5 @@
 import { getAccessToken, withPageAuthRequired } from "@auth0/nextjs-auth0";
-import DisplayConventions from "./component/DisplayConventions";
+import DisplayConventions from "../component/DisplayConventions";
 
 export default withPageAuthRequired(async function Home() {
 

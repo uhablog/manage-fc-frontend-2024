@@ -1,29 +1,50 @@
 'use client';
 import { Box, Drawer, List, ListItem, ListItemIcon, Link as MuiLink, Typography } from "@mui/material";
-import { AccountBox, Home, Info } from "@mui/icons-material";
+import { AccountBox, CalendarMonth, FormatListNumbered, Home, Info, Numbers, SportsSoccer } from "@mui/icons-material";
 import NextLink from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
-const list_items = [
-  {
-    title: '大会一覧',
-    icon: <Home/>,
-    href: '/'
-  },
-];
-
-const bottom_items = [
-  {
-    title: 'ユーザー情報',
-    icon: <AccountBox/>,
-    href: '/user'
-  }
-]
 
 const drawerWidth = 240;
 
-function Sidebar() {
+function DetailSidebar() {
 
+  const pathname = usePathname();
+  const convention_id = pathname.split('/').slice(2)[0];
+
+  // サイドバーの中で上に表示される項目
+  const list_items = [
+    {
+      title: '大会一覧',
+      icon: <Home/>,
+      href: '/'
+    },
+    {
+      title: '試合一覧',
+      icon: <CalendarMonth/>,
+      href: `/games/${convention_id}`
+    },
+    {
+      title: '順位表',
+      icon: <FormatListNumbered/>,
+      href: `/ranking/${convention_id}`
+    },
+    {
+      title: '得点王',
+      icon: <SportsSoccer/>,
+      href: `/scorer/${convention_id}`
+    }
+  ];
+
+  // サイドバーの中で下に表示される項目
+  const bottom_items = [
+    {
+      title: 'ユーザー情報',
+      icon: <AccountBox/>,
+      href: '/user'
+    }
+  ]
   const [isOpen, setIsOpen] = useState(false);
 
   const handleDrawerToggle = () => {
@@ -82,4 +103,4 @@ function Sidebar() {
   )
 };
 
-export default Sidebar;
+export default DetailSidebar;
