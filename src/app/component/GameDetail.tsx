@@ -1,5 +1,5 @@
 import { Game } from "@/types/Game"
-import { Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 
 type Props = {
@@ -21,9 +21,8 @@ const GameDetail = ({ game, open, onClose }: Props) => {
               {game?.home_team_score}
             </Typography>
             <Typography variant="body1" component="p">
-              得点者:
               {game?.home_team_scorer.map((scorer, index) => (
-                <Typography key={index} variant="body2">{scorer}</Typography>
+                <Box key={index}>{scorer}</Box>
               ))}
             </Typography>
           </Grid2>
@@ -33,9 +32,8 @@ const GameDetail = ({ game, open, onClose }: Props) => {
               {game?.away_team_score}
             </Typography>
             <Typography variant="body1" component="p">
-              得点者:
               {game?.away_team_scorer.map((scorer, index) => (
-                <Typography key={index} variant="body2">{scorer}</Typography>
+                <Box key={index}>{scorer}</Box>
               ))}
             </Typography>
           </Grid2>

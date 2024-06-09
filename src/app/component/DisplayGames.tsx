@@ -29,16 +29,14 @@ const DisplayGames = ({ convention_id, games }: Props) => {
     <>
       <Grid2 container spacing={2}>
         { games?.map((game, index) => (
-          <>
-            <Grid2 xs={12} sm={6} md={3} key={index}>
-              <Card onClick={() => handleClickOpen(game)}>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component='div'>{game.home_team_name} {game.home_team_score}</Typography>
-                  <Typography gutterBottom variant="h5" component='div'>{game.away_team_name} {game.away_team_score}</Typography>
-                </CardContent>
-              </Card>
-            </Grid2>
-          </>
+          <Grid2 xs={12} sm={6} md={3} key={index}>
+            <Card onClick={() => handleClickOpen(game)}>
+              <CardContent>
+                <Typography gutterBottom variant="h5" component='div'>{game.home_team_name} {game.home_team_score}</Typography>
+                <Typography gutterBottom variant="h5" component='div'>{game.away_team_name} {game.away_team_score}</Typography>
+              </CardContent>
+            </Card>
+          </Grid2>
         ))}
       </Grid2>
       <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >

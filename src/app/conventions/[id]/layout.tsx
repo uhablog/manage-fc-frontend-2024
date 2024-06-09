@@ -19,22 +19,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <UserProvider>
-        <body className={inter.className}>
-          <AppRouterCacheProvider>
-            <ThemeProvider theme={theme} >
-              <Box sx={{ display: "flex"}}>
-                <CssBaseline/>
-                <DetailSidebar/>
-                <Box component='main' sx={{ flexGrow: 1, p: 3}} >
-                  {children}
-                </Box>
-              </Box>
-            </ThemeProvider>
-          </AppRouterCacheProvider>
-        </body>
-      </UserProvider>
-    </html>
+    <>
+      <DetailSidebar/>
+      <Box component='main' sx={{ flexGrow: 1, p: 3}} >
+        {children}
+      </Box>
+    </>
+
   )
 }
