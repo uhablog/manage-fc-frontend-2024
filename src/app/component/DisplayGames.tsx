@@ -1,14 +1,17 @@
 import { Game } from "@/types/Game"
-import { Card, CardContent, Typography } from "@mui/material";
+import { Card, CardContent, Fab, Link as MuiLink,Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useState } from "react";
 import GameDetail from "./GameDetail";
+import { Add } from "@mui/icons-material";
+import NextLink from "next/link";
 
 type Props = {
+  convention_id: string
   games: Game[]
 }
 
-const DisplayGames = ({ games }: Props) => {
+const DisplayGames = ({ convention_id, games }: Props) => {
   
   const [open, setOpen] = useState<boolean>(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -38,6 +41,19 @@ const DisplayGames = ({ games }: Props) => {
           </>
         ))}
       </Grid2>
+      <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16
+          }}
+        >
+          <Add />
+        </Fab>
+      </MuiLink>
       <GameDetail game={selectedGame} open={open} onClose={handleClose} />
     </>
   )

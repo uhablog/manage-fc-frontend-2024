@@ -14,7 +14,7 @@ const DisplayConventions = ({ conventions }: Props) => {
         {conventions?.map( (convention, index) => (
           <>
             <Grid2 xs={12} sm={6} md={3} key={index}>
-              <MuiLink component={NextLink} underline="none" href={`/games/${convention.id}`}>
+              <MuiLink component={NextLink} underline="none" href={`/conventions/${convention.id}`}>
                 <Card>
                   <CardContent>
                     <Typography gutterBottom variant="h5" component='div'>{convention.convention_name}</Typography>

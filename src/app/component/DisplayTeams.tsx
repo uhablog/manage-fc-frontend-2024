@@ -1,5 +1,4 @@
 import { Team } from "@/types/Team";
-import { Typography } from "@mui/material"
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 type Props = {

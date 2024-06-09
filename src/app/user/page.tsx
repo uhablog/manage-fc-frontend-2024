@@ -24,4 +24,4 @@ export default withPageAuthRequired(async function ConventionPage() {
       <a href="/api/auth/logout">logout</a><br/>
     </>
   )
-}, { returnTo: '/convention'});
+}, { returnTo: '/user'});

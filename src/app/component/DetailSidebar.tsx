@@ -18,22 +18,22 @@ function DetailSidebar() {
     {
       title: '大会一覧',
       icon: <Home/>,
-      href: '/'
+      href: '/conventions'
     },
     {
       title: '試合一覧',
       icon: <CalendarMonth/>,
-      href: `/games/${convention_id}`
+      href: `/conventions/${convention_id}`
     },
     {
       title: '順位表',
       icon: <FormatListNumbered/>,
-      href: `/ranking/${convention_id}`
+      href: `/conventions/${convention_id}/ranking`
     },
     {
       title: '得点王',
       icon: <SportsSoccer/>,
-      href: `/scorer/${convention_id}`
+      href: `/conventions/${convention_id}/score`
     }
   ];
 

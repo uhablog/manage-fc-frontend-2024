@@ -8,7 +8,7 @@ const list_items = [
   {
     title: '大会一覧',
     icon: <Home/>,
-    href: '/'
+    href: '/conventions'
   },
 ];
 

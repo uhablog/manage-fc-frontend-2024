@@ -34,4 +34,4 @@ export default withPageAuthRequired(async function Home() {
       <DisplayConventions conventions={conventions?.data} />
     </>
   );
-}, {returnTo: '/'});
+}, {returnTo: '/conventions'});

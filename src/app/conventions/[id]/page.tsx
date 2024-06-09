@@ -22,7 +22,7 @@ export default withPageAuthRequired(function GamePage({ params }: {params: {id: 
 
   return (
     <>
-      <DisplayGames games={games} />
+      <DisplayGames convention_id={id} games={games} />
     </>
   )
 });
