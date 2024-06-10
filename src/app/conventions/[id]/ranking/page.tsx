@@ -19,7 +19,7 @@ export default withPageAuthRequired(function RankingPage({
   // チーム一覧の取得
   useEffect(() => {
     const fetchTeams = async () => {
-      const res = await fetch(`/api/teams/${id}`);
+      const res = await fetch(`/api/convention/${id}/teams`);
       const json = await res.json();
       setTeams(json.data);
     }

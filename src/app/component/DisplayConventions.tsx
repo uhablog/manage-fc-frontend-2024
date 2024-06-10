@@ -1,5 +1,6 @@
 import { Convention } from "@/types/Convention";
-import { Card, CardContent, Link as MuiLink, Typography } from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { Card, CardContent, Fab, Link as MuiLink, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import NextLink from "next/link";
 
@@ -26,6 +27,19 @@ const DisplayConventions = ({ conventions }: Props) => {
           </>
         ))}
       </Grid2>
+      <MuiLink component={NextLink} underline="none" href={`/conventions/add`} >
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16
+          }}
+        >
+          <Add />
+        </Fab>
+      </MuiLink>
     </>
   )
 

@@ -13,7 +13,7 @@ export default withPageAuthRequired(function GamePage({ params }: {params: {id: 
   // 試合一覧の取得
   useEffect(() => {
     const fetchGames = async () => {
-      const res = await fetch(`/api/games/${id}`);
+      const res = await fetch(`/api/convention/${id}/games`);
       const json = await res.json()
       setGames(json.data);
     }

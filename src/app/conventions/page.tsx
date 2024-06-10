@@ -9,7 +9,7 @@ export default withPageAuthRequired(async function Home() {
   const fetch_convention_list = async () => {
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/list`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`
