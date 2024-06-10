@@ -1,8 +1,7 @@
 'use client';
-import { Box, Drawer, List, ListItem, ListItemIcon, Link as MuiLink, Typography } from "@mui/material";
-import { AccountBox, Home, Info } from "@mui/icons-material";
+import { Box, Drawer, List, ListItem, ListItemIcon, Link as MuiLink, Typography, useTheme } from "@mui/material";
+import { AccountBox, Home } from "@mui/icons-material";
 import NextLink from "next/link";
-import { useState } from "react";
 
 const list_items = [
   {
@@ -24,26 +23,28 @@ const drawerWidth = 240;
 
 function Sidebar() {
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleDrawerToggle = () => {
-    setIsOpen(!isOpen);
-  }
+  const theme = useTheme();
 
   return (
     <>
-      {/* <IconButton onClick={handleDrawerToggle}>
-        <Menu/>
-      </IconButton> */}
       <Drawer 
         variant="permanent"
         anchor="left"
         sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
+          [theme.breakpoints.up('md')]: {
             width: drawerWidth,
-            boxSizing: "border-box",
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+            },
+          },
+          [theme.breakpoints.down('sm')]: {
+            width: 0, // これを追加
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              display: 'none',
+            },
           },
         }}
       >

@@ -5,7 +5,8 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from "@/theme";
 import Sidebar from "./component/Sidebar";
-import { Box, CssBaseline } from "@mui/material";
+import { Box, CssBaseline, styled } from "@mui/material";
+import MobileBottomNav from "./component/MobileBottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
                 <Box component='main' sx={{ flexGrow: 1, p: 3}} >
                   {children}
                 </Box>
+                <MobileBottomNav/>
               </Box>
             </ThemeProvider>
           </AppRouterCacheProvider>

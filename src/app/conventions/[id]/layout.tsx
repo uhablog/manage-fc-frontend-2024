@@ -1,10 +1,7 @@
-import { UserProvider } from "@auth0/nextjs-auth0/client"
-import { Box, CssBaseline} from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { Box } from "@mui/material";
 import { Inter } from "next/font/google";
-import theme from "@/theme";
 import DetailSidebar from "../../component/DetailSidebar";
+import DetailMobileBottomNav from "@/app/component/DetailMobileBottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +21,7 @@ export default function RootLayout({
       <Box component='main' sx={{ flexGrow: 1, p: 3}} >
         {children}
       </Box>
+      <DetailMobileBottomNav/>
     </>
 
   )
