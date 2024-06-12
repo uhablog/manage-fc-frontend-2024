@@ -9,8 +9,6 @@ export default withPageAuthRequired(async function ConventionPage() {
     return <p>Loading...</p>
   }
 
-  const access_token = (await getAccessToken()).accessToken;
-
   return (
     <>
       <Image
