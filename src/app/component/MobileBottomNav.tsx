@@ -16,7 +16,7 @@ const nav_items = [
     label: 'ユーザー',
     icon: <AccountBalance/>,
     href: '/user'
-  }
+  },
 ];
 
 const MobileBottomNav = () => {

@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { Inter } from "next/font/google";
 import DetailSidebar from "../../component/DetailSidebar";
 import DetailMobileBottomNav from "@/app/component/DetailMobileBottomNav";
@@ -23,6 +23,5 @@ export default function RootLayout({
       </Box>
       <DetailMobileBottomNav/>
     </>
-
   )
 }

@@ -26,10 +26,10 @@ export default function RootLayout({
         <body className={inter.className}>
           <AppRouterCacheProvider>
             <ThemeProvider theme={theme} >
-              <Box sx={{ display: "flex"}}>
+              <Box sx={{ display: "flex", minHeight: '100vh' }}>
                 <CssBaseline/>
                 <Sidebar/>
-                <Box component='main' sx={{ flexGrow: 1, p: 3}} >
+                <Box component='main' sx={{ flexGrow: 1, p: 3, paddingBottom: 10}} >
                   {children}
                 </Box>
                 <MobileBottomNav/>

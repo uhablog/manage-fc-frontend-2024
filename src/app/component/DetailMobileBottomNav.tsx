@@ -11,7 +11,7 @@ const DetailMobileBottomNav = () => {
   const pathname = usePathname();
   const convention_id = pathname.split('/').slice(2)[0];
 
-  const nav_items = [
+  const detail_nav_items = [
     {
       value: '/conventions',
       label: '大会',
@@ -55,10 +55,10 @@ const DetailMobileBottomNav = () => {
         display: { xs: 'flex', md: 'none' }, // xsからsmまで表示、md以上で非表示
         width: '100%',
         position: 'fixed',
-        bottom: 0,
+        bottom: 100,
       }}
     >
-      {nav_items.map((item, index) => (
+      {detail_nav_items.map((item, index) => (
         <BottomNavigationAction key={index} value={item.value} label={item.label} icon={item.icon} LinkComponent={Link} href={item.href} />
       ))}
     </BottomNavigation>
