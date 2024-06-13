@@ -1,4 +1,4 @@
-import { Claims, Session, getAccessToken, getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { Session, getAccessToken, getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
 import DisplayConventions from "../component/DisplayConventions";
 
 export default withPageAuthRequired(async function Home() {

@@ -1,36 +1,61 @@
-import { Game } from "@/types/Game"
-import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Game } from "@/types/Game";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
+import { useEffect, useState } from "react";
 
 type Props = {
-  game: Game | null
-  open: boolean
-  onClose: () => void
+  game_id: string
 }
 
-const GameDetail = ({ game, open, onClose }: Props) => {
+const GameDetail = ({ game_id }: Props) => {
+
+  const [ game, setGame ] = useState<Game>();
+  const [ error, setError ] = useState<boolean>();
+
+  useEffect( () => {
+    const fetchGame = async () => {
+      const res = await fetch(`/api/game?game_id=${game_id}`);
+      const json = await res.json();
+      console.log(json);
+
+      if (json.success) {
+        setGame(json.data);
+      } else {
+        setError(true);
+      }
+    };
+
+    fetchGame();
+  }, []);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth='lg'>
-      <DialogTitle>試合詳細</DialogTitle>
-      <DialogContent>
+    <Card>
+      <CardContent>
         <Grid2 container spacing={2}>
-          <Grid2 xs={6}>
+          <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'right'}} >
             <Typography variant="h6" component="p">
               {game?.home_team_name}
-              {game?.home_team_score}
             </Typography>
+          </Grid2>
+          <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'center'}} >
+            <Typography variant="h6" component="p">
+              {game?.home_team_score} - {game?.away_team_score}
+            </Typography>
+          </Grid2>
+          <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'left'}} >
+            <Typography variant="h6" component="p">
+              {game?.away_team_name}
+            </Typography>
+          </Grid2>
+          <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
             <Typography variant="body1" component="p">
               {game?.home_team_scorer.map((scorer, index) => (
                 <Box key={index}>{scorer}</Box>
               ))}
             </Typography>
           </Grid2>
-          <Grid2 xs={6}>
-            <Typography variant="h6" component="p">
-              {game?.away_team_name}
-              {game?.away_team_score}
-            </Typography>
+          <Grid2 xs={2} sx={{display: 'flex', justifyContent: 'center'}} ></Grid2>
+          <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
             <Typography variant="body1" component="p">
               {game?.away_team_scorer.map((scorer, index) => (
                 <Box key={index}>{scorer}</Box>
@@ -38,11 +63,8 @@ const GameDetail = ({ game, open, onClose }: Props) => {
             </Typography>
           </Grid2>
         </Grid2>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>閉じる</Button>
-      </DialogActions>
-    </Dialog>
+      </CardContent>
+    </Card>
   )
 };
 
