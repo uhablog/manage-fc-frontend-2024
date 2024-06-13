@@ -45,14 +45,14 @@ export default function BottomTextField({ onButtonClick }: Props) {
     <StickyTextField isMobile={isMobile} onButtonClick={onButtonClick}>
       <TextField
         fullWidth
-        label="Message"
+        label="試合にコメント"
         variant="outlined"
         value={comment}
         onChange={handleChange}
       />
       <Box ml={2}> {/* テキストフィールドとボタンの間にスペースを追加 */}
         <Button onClick={handleSend} variant="contained" color="primary">
-          Send
+          送信
         </Button>
       </Box>
     </StickyTextField>

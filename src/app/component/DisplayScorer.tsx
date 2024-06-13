@@ -1,25 +1,56 @@
 import { Scorer } from "@/types/Scorer";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Card, CardContent, List, ListItem, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
+import { useEffect, useState } from "react";
 
 type Props = {
-  scorers: Scorer[]
+  id: string
 }
 
-const columns: GridColDef[] = [
-  { field: 'rank', headerName: '順位', width: 70},
-  { field: 'scorer_name', headerName: '選手', width: 150},
-  { field: 'team_name', headerName: 'チーム', width: 150},
-  { field: 'score', headerName: '得点数', width: 70},
-]
+const DisplayScorer = ({ id }: Props) => {
+  
+  const [scorers, setScorers] = useState<Scorer[]>([]);
 
-const DisplayScorer = ({ scorers }: Props) => {
+  // 得点者の取得
+  useEffect(() => {
+    const fetchScorer = async () => {
+      const res = await fetch(`/api/convention/${id}/score`);
+      const json = await res.json();
+      setScorers(json.data);
+    }
+
+    fetchScorer();
+  }, [id]);
 
   return (
     <>
-      <DataGrid
-        rows={scorers}
-        columns={columns}
-      />
+      <Card>
+        <CardContent>
+          <List>
+            <Grid2 container spacing={2}>
+              {scorers.map(( scorer, index) => (
+                <ListItem
+                  key={index}
+                  disableGutters
+                >
+                    <Grid2 xs={1}>
+                      <Typography variant="body2">{scorer.rank}</Typography>
+                    </Grid2>
+                    <Grid2 xs={4}>
+                      <Typography variant="body2">{scorer.scorer_name}</Typography>
+                    </Grid2>
+                    <Grid2 xs={4}>
+                      <Typography variant="body2">{scorer.team_name}</Typography>
+                    </Grid2>
+                    <Grid2 xs={3}>
+                      <Typography variant="body2">{scorer.score}</Typography>
+                    </Grid2>
+                </ListItem>
+              ))}
+            </Grid2>
+          </List>
+        </CardContent>
+      </Card>
     </>
   )
 };

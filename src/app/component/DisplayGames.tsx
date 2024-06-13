@@ -3,22 +3,33 @@ import { Card, CardContent, Fab, Link as MuiLink,Typography } from "@mui/materia
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Add } from "@mui/icons-material";
 import NextLink from "next/link";
+import { useEffect, useState } from "react";
 
 type Props = {
   convention_id: string
-  games: Game[]
 }
 
-const DisplayGames = ({ convention_id, games }: Props) => {
+const DisplayGames = ({ convention_id }: Props) => {
+  const [games, setGames] = useState<Game[]>([]);
+
+  // 試合一覧の取得
+  useEffect(() => {
+    const fetchGames = async () => {
+      const res = await fetch(`/api/convention/${convention_id}/games`);
+      const json = await res.json()
+      setGames(json.data);
+    }
+    fetchGames();
+  }, [convention_id]);
   
   return (
     <>
       <Grid2 container spacing={2}>
-        { games?.map((game, index) => (
-          <Grid2 xs={12} sm={6} md={3} key={index}>
-            <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/detail/${game.game_id}`}>
-              <Card>
-                <CardContent>
+        <Grid2 xs={12}>
+          <Card>
+            <CardContent>
+              { games?.map((game, index) => (
+                <MuiLink key={index} component={NextLink} underline="none" href={`/conventions/${convention_id}/games/detail/${game.game_id}`}>
                   <Grid2 container>
                     <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'right'}} >
                       <Typography variant="h6" component="p">
@@ -36,11 +47,11 @@ const DisplayGames = ({ convention_id, games }: Props) => {
                       </Typography>
                     </Grid2>
                   </Grid2>
-                </CardContent>
-              </Card>
-            </MuiLink>
-          </Grid2>
-        ))}
+                </MuiLink>
+              ))}
+            </CardContent>
+          </Card>
+        </Grid2>
       </Grid2>
       <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
         <Fab
