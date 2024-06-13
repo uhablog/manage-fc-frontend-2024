@@ -1,6 +1,6 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
 import { ExpandMore } from "@mui/icons-material";
-import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, List, ListItem, ListItemText } from "@mui/material";
 
 type Props = {
   auth0_user_id: string
@@ -40,10 +40,32 @@ const Head2Head = async ({ auth0_user_id }: Props) => {
               {head2head.opponent_team_name}
             </AccordionSummary>
             <AccordionDetails>
-              試合数: {head2head.games_played}<br/>
-              勝利数: {head2head.wins}<br/>
-              引分数: {head2head.draws}<br/>
-              敗北数: {head2head.losses}
+              <List>
+                <ListItem
+                  disableGutters
+                  secondaryAction={head2head.games_played}
+                >
+                  <ListItemText primary={'試合数'}/>
+                </ListItem>
+                <ListItem
+                  disableGutters
+                  secondaryAction={head2head.wins}
+                >
+                  <ListItemText primary={'勝利数'}/>
+                </ListItem>
+                <ListItem
+                  disableGutters
+                  secondaryAction={head2head.draws}
+                >
+                  <ListItemText primary={'引分数'}/>
+                </ListItem>
+                <ListItem
+                  disableGutters
+                  secondaryAction={head2head.losses}
+                >
+                  <ListItemText primary={'敗北数'}/>
+                </ListItem>
+              </List>
             </AccordionDetails>
           </Accordion>
         </Box>

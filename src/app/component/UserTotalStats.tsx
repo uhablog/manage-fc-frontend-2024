@@ -1,6 +1,6 @@
 import { Team } from "@/types/Team";
 import { getAccessToken } from "@auth0/nextjs-auth0";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Card, CardContent, List, ListItem, ListItemText, Typography } from "@mui/material";
 import Head2Head from "./Head2Head";
 
 type Props = {
@@ -43,12 +43,44 @@ const UserTotalStats = async ({ user_id }: Props) => {
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>通算成績</Typography>
-          <Typography variant="body2">通算試合: {totals.games}</Typography>
-          <Typography variant="body2">通算勝利: {totals.win}</Typography>
-          <Typography variant="body2">通算引分: {totals.draw}</Typography>
-          <Typography variant="body2">通算敗北: {totals.lose}</Typography>
-          <Typography variant="body2">総得点: {totals.totalScore}</Typography>
-          <Typography variant="body2">総失点: {totals.totalConceded}</Typography>
+          <List>
+            <ListItem
+              disableGutters
+              secondaryAction={totals.games}
+            >
+              <ListItemText primary={`通算試合`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={totals.win}
+            >
+              <ListItemText primary={`通算勝利`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={totals.draw}
+            >
+              <ListItemText primary={`通算引分`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={totals.lose}
+            >
+              <ListItemText primary={`通算敗北`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={totals.totalScore}
+            >
+              <ListItemText primary={`総得点`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={totals.totalConceded}
+            >
+              <ListItemText primary={`総失点`} />
+            </ListItem>
+          </List>
           <Typography variant="h6">対戦相手ごとの成績</Typography>
           <Head2Head auth0_user_id={user_id} />
         </CardContent>
