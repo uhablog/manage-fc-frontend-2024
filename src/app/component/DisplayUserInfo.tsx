@@ -2,7 +2,6 @@ import { Claims } from "@auth0/nextjs-auth0";
 import { Box, Container, Grid } from "@mui/material";
 import UserTotalStats from "./UserTotalStats";
 import ProfileCard from "./ProfileCard";
-import Head2Head from "./Head2Head";
 import UserTopScorer from "./UserTopScorer";
 
 type Props = {

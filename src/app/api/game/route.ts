@@ -15,10 +15,20 @@ export async function GET(
   });
 
   if (res.ok) {
+
+    const comment_res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game/comment?game_id=${game_id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessTokenResult.accessToken}`
+      }
+    });
+
     const json = await res.json();
-    console.log(json);
+    const comment = await comment_res.json();
+
     return Response.json({
-      'data': json,
+      game: json,
+      ...comment,
       success: true
     });
   } else {

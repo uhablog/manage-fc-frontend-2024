@@ -1,5 +1,4 @@
 import { Session, getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
-import Image from "next/image";
 import DisplayUserInfo from "../component/DisplayUserInfo";
 
 export default withPageAuthRequired(async function ConventionPage() {

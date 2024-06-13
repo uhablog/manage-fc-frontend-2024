@@ -1,7 +1,10 @@
 import { Game } from "@/types/Game";
-import { Box, Card, CardContent, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
+import GameScore from "./GameScore";
+import DisplayComments from "./DisplayComments";
+import BottomTextField from "./BottomTextField";
+import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
+import { Comment } from "@/types/Comment";
 
 type Props = {
   game_id: string
@@ -10,16 +13,17 @@ type Props = {
 const GameDetail = ({ game_id }: Props) => {
 
   const [ game, setGame ] = useState<Game>();
+  const [ comments, setComments ] = useState<Comment[]>([]);
   const [ error, setError ] = useState<boolean>();
 
   useEffect( () => {
     const fetchGame = async () => {
       const res = await fetch(`/api/game?game_id=${game_id}`);
       const json = await res.json();
-      console.log(json);
 
       if (json.success) {
-        setGame(json.data);
+        setGame(json.game);
+        setComments(json.comments);
       } else {
         setError(true);
       }
@@ -28,43 +32,48 @@ const GameDetail = ({ game_id }: Props) => {
     fetchGame();
   }, []);
 
+  const postComment = async (comment: string) => {
+    if (!comment || comment === "") return;
+
+    try {
+      const response = await fetch(`/api/game/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          game_id,
+          comment
+        })
+      });
+      const json = await response.json();
+      console.log(json);
+      if (json.success) {
+        const newComment = {
+          comment: json.comment.comment,
+          id: json.comment.id,
+          user_id: json.comment.user_id
+        };
+        setComments([newComment, ...comments]);  // 新しいコメントを配列の先頭に追加
+      }
+    } catch (error) {
+      console.log(error);
+      console.log('コメント失敗');
+    }
+  };
+
   return (
-    <Card>
-      <CardContent>
-        <Grid2 container spacing={2}>
-          <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'right'}} >
-            <Typography variant="h6" component="p">
-              {game?.home_team_name}
-            </Typography>
-          </Grid2>
-          <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'center'}} >
-            <Typography variant="h6" component="p">
-              {game?.home_team_score} - {game?.away_team_score}
-            </Typography>
-          </Grid2>
-          <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'left'}} >
-            <Typography variant="h6" component="p">
-              {game?.away_team_name}
-            </Typography>
-          </Grid2>
-          <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
-            <Typography variant="body1" component="p">
-              {game?.home_team_scorer.map((scorer, index) => (
-                <Box key={index}>{scorer}</Box>
-              ))}
-            </Typography>
-          </Grid2>
-          <Grid2 xs={2} sx={{display: 'flex', justifyContent: 'center'}} ></Grid2>
-          <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
-            <Typography variant="body1" component="p">
-              {game?.away_team_scorer.map((scorer, index) => (
-                <Box key={index}>{scorer}</Box>
-              ))}
-            </Typography>
-          </Grid2>
+    <>
+      <Grid2 container spacing={2}>
+        <Grid2 xs={12}>
+          <GameScore game={game}/>
         </Grid2>
-      </CardContent>
-    </Card>
+        <Grid2 xs={12}>
+          <DisplayComments comments={comments} />
+        </Grid2>
+      </Grid2>
+      <BottomTextField onButtonClick={postComment} />
+    </>
   )
 };
 
