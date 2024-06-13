@@ -4,7 +4,6 @@ export async function GET(
   request: Request
 ) {
   const m2m_access_token_result = await m2m_access_token();
-  console.log(m2m_access_token_result);
 
   const res = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users`, {
     method: 'GET',
