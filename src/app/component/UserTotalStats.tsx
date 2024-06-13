@@ -28,7 +28,6 @@ const UserTotalStats = async ({ user_id }: Props) => {
   });
 
   const json = await result.json();
-  console.log(json.data);
 
   const totals = json.data.reduce((acc: TeamStats, item: Team) => ({
     win: acc.win + item.win,
@@ -41,7 +40,7 @@ const UserTotalStats = async ({ user_id }: Props) => {
 
   return (
     <>
-      <Card raised>
+      <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>通算成績</Typography>
           <Typography variant="body2">通算試合: {totals.games}</Typography>

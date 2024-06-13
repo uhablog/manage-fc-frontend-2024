@@ -3,6 +3,7 @@ import { Box, Container, Grid } from "@mui/material";
 import UserTotalStats from "./UserTotalStats";
 import ProfileCard from "./ProfileCard";
 import Head2Head from "./Head2Head";
+import UserTopScorer from "./UserTopScorer";
 
 type Props = {
   user: Claims
@@ -20,6 +21,9 @@ const DisplayUserInfo = ({ user }: Props) => {
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
               <UserTotalStats user_id={user.sub} />
+            </Grid>
+            <Grid item xs={12} md={6} >
+              <UserTopScorer user_id={user.sub}/>
             </Grid>
           </Grid>
         </Box>
