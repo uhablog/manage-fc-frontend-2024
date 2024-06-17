@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { getAccessToken, getSession } from "@auth0/nextjs-auth0";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -38,4 +38,27 @@ export async function GET(
       message: 'gameの取得に失敗'
     });
   };
+}
+
+export async function DELETE(
+  request: NextRequest
+) {
+  const accessTokenResult = await getAccessToken();
+  const body = await request.json();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${accessTokenResult.accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      ...body
+    })
+  });
+
+  const result = await res.json();
+  return Response.json({
+    ...result
+  });
 }

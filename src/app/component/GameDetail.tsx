@@ -5,12 +5,15 @@ import DisplayComments from "./DisplayComments";
 import BottomTextField from "./BottomTextField";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Comment } from "@/types/Comment";
+import { Typography } from "@mui/material";
+import ButtonAppBar from "./GameDetailAppBar";
 
 type Props = {
+  id: string
   game_id: string
 }
 
-const GameDetail = ({ game_id }: Props) => {
+const GameDetail = ({ id, game_id }: Props) => {
 
   const [ game, setGame ] = useState<Game>();
   const [ comments, setComments ] = useState<Comment[]>([]);
@@ -30,7 +33,7 @@ const GameDetail = ({ game_id }: Props) => {
     };
 
     fetchGame();
-  }, []);
+  }, [game_id]);
 
   const postComment = async (comment: string) => {
     if (!comment || comment === "") return;
@@ -47,7 +50,6 @@ const GameDetail = ({ game_id }: Props) => {
         })
       });
       const json = await response.json();
-      console.log(json);
       if (json.success) {
         const newComment = {
           comment: json.comment.comment,
@@ -64,15 +66,25 @@ const GameDetail = ({ game_id }: Props) => {
 
   return (
     <>
-      <Grid2 container spacing={2}>
-        <Grid2 xs={12}>
-          <GameScore game={game}/>
-        </Grid2>
-        <Grid2 xs={12}>
-          <DisplayComments comments={comments} />
-        </Grid2>
-      </Grid2>
-      <BottomTextField onButtonClick={postComment} />
+      {
+        error ?
+        <>
+          <Typography>試合情報の取得に失敗しました。</Typography>
+        </>
+        :
+        <>
+          <ButtonAppBar convention_id={id} game_id={game_id} />
+          <Grid2 container spacing={2}>
+            <Grid2 xs={12}>
+              <GameScore game={game}/>
+            </Grid2>
+            <Grid2 xs={12}>
+              <DisplayComments comments={comments} />
+            </Grid2>
+          </Grid2>
+          <BottomTextField onButtonClick={postComment} />
+        </>
+      }
     </>
   )
 };

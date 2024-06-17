@@ -18,9 +18,9 @@ const StickyTextField = styled('div')<StickyTextFieldProps>(({ theme, isMobile }
   bottom: 0,
   left: 0,
   right: 0,
-  paddingLeft: `${theme.spacing(35)} !important`, // この値はサイドバーの幅によって調整
+  paddingLeft: isMobile ? `${theme.spacing(2)} !important` : `${theme.spacing(35)} !important`, // この値はサイドバーの幅によって調整
   padding: theme.spacing(2),
-  paddingBottom: isMobile ? theme.spacing(23) : theme.spacing(2),
+  paddingBottom: isMobile ? theme.spacing(10) : theme.spacing(2),
   background: theme.palette.background.paper,
   boxShadow: '0 -2px 10px rgba(0,0,0,0.1)'
 }));

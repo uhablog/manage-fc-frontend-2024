@@ -5,11 +5,12 @@ import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 export default withPageAuthRequired(function DetailGamePage(
   { params }: {
     params: {
+      id: string
       game_id: string
     }
   }
 ) {
   return (
-    <GameDetail game_id={params.game_id} />
+    <GameDetail id={params.id} game_id={params.game_id} />
   )
 });
