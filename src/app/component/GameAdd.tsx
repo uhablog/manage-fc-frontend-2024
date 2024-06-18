@@ -22,6 +22,8 @@ const GameAdd = ({ convention_id, teams}: Props) => {
   const [awayTeamAssist, setAwayTeamAssist] = useState<number>();
   const [homeTeamAssists, setHomeTeamAssists] = useState<string[]>([]);
   const [awayTeamAssists, setAwayTeamAssists] = useState<string[]>([]);
+  const [momTeam, setMomTeam] = useState<string>('');
+  const [mom, setMom] = useState<string>('');
   const [errors, setErrors] = useState<{
     selectedSameTeam: boolean,
     homeTeam: boolean,
@@ -34,6 +36,9 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     awayAssist: boolean,
     homeAssists: boolean,
     awayAssists: boolean,
+    momTeam: boolean
+    invalidMomTeam: boolean,
+    mom: boolean
   }>({
     selectedSameTeam: false,
     homeTeam: false,
@@ -46,6 +51,9 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     awayAssist: false,
     homeAssists: false,
     awayAssists: false,
+    momTeam: false,
+    invalidMomTeam: false,
+    mom: false,
   });
 
   const handleHomeScoreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,6 +130,10 @@ const GameAdd = ({ convention_id, teams}: Props) => {
       awayAssist: Number.isNaN(awayTeamAssist) || awayTeamAssist === undefined,
       homeAssists: homeTeamAssists.some(s => !s),
       awayAssists: awayTeamAssists.some(s => !s),
+      momTeam: !momTeam,
+      // MOM所属チームはホームチームorアウェイチームで選択されたチームでないといけない
+      invalidMomTeam: !(momTeam === selectedHomeTeam || momTeam === selectedAwayTeam),
+      mom: !mom
     };
   
     setErrors(errors);
@@ -155,7 +167,9 @@ const GameAdd = ({ convention_id, teams}: Props) => {
           homeTeamScorer,
           awayTeamScorer,
           homeTeamAssists,
-          awayTeamAssists
+          awayTeamAssists,
+          momTeam,
+          mom
         }),
       });
       const result = await response.json();
@@ -175,6 +189,63 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     <>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
+          <Grid2 md={6} xs={12}>
+            <Typography
+              sx={{
+                color: 'secondary.main'
+              }}
+            >MOM所属チーム選択</Typography>
+            <TextField
+              select
+              label="MOM所属チームを選択"
+              value={momTeam}
+              color="secondary"
+             onChange={(e) => setMomTeam(e.target.value)}
+              fullWidth
+              margin="normal"
+              error={errors.momTeam}
+              helperText={errors.momTeam ? 'MOM所属チームを選択してください。' : ''}
+            >
+              {teams.map((team) => (
+                <MenuItem key={team.id} value={team.id}>
+                  {team.team_name}
+                </MenuItem>
+              ))}
+            </TextField>
+            { errors.invalidMomTeam && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'error.main'
+                }}
+              >MOM所属チームはホームチームorアウェイチームで選択されたチームを選んでください。</Typography>
+            )}
+          </Grid2>
+          <Grid2 md={6} xs={12}>
+            <Typography
+              sx={{
+                color: 'secondary.main'
+              }}
+            >MOM</Typography>
+            <TextField
+              label={`MOM`}
+              value={mom}
+              onChange={(e) => setMom(e.target.value)}
+              color="secondary"
+              fullWidth
+              margin="normal"
+              error={mom === ''}
+              helperText={mom === '' ? 'MOMを入力してください。' : ''}
+            />
+            { errors.selectedSameTeam && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'error.main'
+                }}
+              >アウェイチームと同じチームを選択することはできません。</Typography>
+            )}
+          </Grid2>
           <Grid2 md={6} xs={12} >
             <Typography
               sx={{

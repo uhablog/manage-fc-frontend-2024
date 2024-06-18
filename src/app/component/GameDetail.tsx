@@ -7,6 +7,7 @@ import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Comment } from "@/types/Comment";
 import { Typography } from "@mui/material";
 import ButtonAppBar from "./GameDetailAppBar";
+import GameMomCard from "./GameMomCard";
 
 type Props = {
   id: string
@@ -77,6 +78,9 @@ const GameDetail = ({ id, game_id }: Props) => {
           <Grid2 container spacing={2}>
             <Grid2 xs={12}>
               <GameScore game={game}/>
+            </Grid2>
+            <Grid2 xs={12}>
+              <GameMomCard game={game}/>
             </Grid2>
             <Grid2 xs={12}>
               <DisplayComments comments={comments} />

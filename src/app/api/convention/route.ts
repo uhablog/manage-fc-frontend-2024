@@ -16,7 +16,6 @@ export async function GET(
 
   if (res.ok) {
     const json = await res.json();
-    console.log(json);
     return Response.json({
       ...json,
       success: true

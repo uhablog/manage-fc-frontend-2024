@@ -9,4 +9,8 @@ export type Game = {
   away_team_scorer: string[]
   away_team_assists: string[]
   created_date: string
+  mom: string
+  mom_team_id: string
+  home_team_id: string
+  away_team_id: string
 }
