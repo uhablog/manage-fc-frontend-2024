@@ -1,4 +1,4 @@
-import { Scorer } from "@/types/Scorer";
+import { Assist } from "@/types/Assist";
 import { Button, Card, CardContent, List, ListItem, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
@@ -8,23 +8,22 @@ type Props = {
   initialLimit?: number
 }
 
-const DisplayScorer = ({ id, initialLimit }: Props) => {
-  
-  const [scorers, setScorers] = useState<Scorer[]>([]);
+const DisplayAssistRankCard = ({id, initialLimit}: Props) => {
+
+  const [assists, setAssists] = useState<Assist[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
 
-  // 得点者の取得
+  // アシストランクの取得
   useEffect(() => {
-    const fetchScorer = async () => {
-      const res = await fetch(`/api/convention/${id}/score`);
+    const fetchAssistRank = async () => {
+      const res = await fetch(`/api/convention/${id}/assists`);
       const json = await res.json();
-      setScorers(json.data);
-    }
-
-    fetchScorer();
+      setAssists(json);
+    };
+    fetchAssistRank();
   }, [id]);
 
-  const showAllScorers = () => {
+  const showAllAssists = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
   };
 
@@ -42,22 +41,22 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
         <CardContent>
           <List>
             <Grid2 container spacing={2}>
-              {(limit ? scorers.slice(0, limit) : scorers).map((scorer, index) => (
+              {(limit ? assists.slice(0, limit) : assists).map((assist, index) => (
                 <ListItem
                   key={index}
                   disableGutters
                 >
                     <Grid2 xs={1}>
-                      <Typography variant="body2">{scorer.rank}</Typography>
+                      <Typography variant="body2">{assist.rank}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
-                      <Typography variant="body2">{scorer.scorer_name}</Typography>
+                      <Typography variant="body2">{assist.assist_name}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
-                      <Typography variant="body2">{scorer.team_name}</Typography>
+                      <Typography variant="body2">{assist.team_name}</Typography>
                     </Grid2>
                     <Grid2 xs={3}>
-                      <Typography variant="body2">{scorer.score}</Typography>
+                      <Typography variant="body2">{assist.score}</Typography>
                     </Grid2>
                 </ListItem>
               ))}
@@ -67,7 +66,7 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
             limit === undefined ?
             <Button onClick={hideLimit}>部分的に表示</Button>
             :
-            <Button onClick={showAllScorers}>すべて表示</Button>
+            <Button onClick={showAllAssists}>すべて表示</Button>
           }
         </CardContent>
       </Card>
@@ -75,4 +74,4 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
   )
 };
 
-export default DisplayScorer;
+export default DisplayAssistRankCard;

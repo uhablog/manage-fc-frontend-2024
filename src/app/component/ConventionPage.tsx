@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DisplayGames from "./DisplayGames";
 import ConventionHeader from "./ConventionHeader";
-import { Game } from "@/types/Game";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Box } from "@mui/material";
 import DisplayTeams from "./DisplayTeams";
-import DisplayScorer from "./DisplayScorer";
 import ConventionSummary from "./ConventionSummary";
+import StatsGrid from "./StatsGrid";
 
 type Props = {
   id: string
@@ -57,7 +56,7 @@ const ConventionPage = ({id}: Props) => {
             <DisplayGames convention_id={id} />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={3}>
-            <DisplayScorer id={id} />
+            <StatsGrid convention_id={id} />
           </CustomTabPanel>
         </Grid2>
       </Grid2>

@@ -27,7 +27,7 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
       setConvention(json.data[0]);
     }
     fetchConvention();
-  }, []);
+  }, [id]);
 
   return (
     <>
@@ -39,7 +39,7 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
               <Tab label="概要" {...a11yProps(0)} />
               <Tab label="順位表" {...a11yProps(1)} />
               <Tab label="試合" {...a11yProps(2)} />
-              <Tab label="得点ランキング" {...a11yProps(3)} />
+              <Tab label="スタッツ" {...a11yProps(3)} />
             </Tabs>
           </Box>
         </CardContent>

@@ -3,6 +3,7 @@ import DisplayTeams from "./DisplayTeams";
 import DisplayScorer from "./DisplayScorer";
 import DisplayGames from "./DisplayGames";
 import { Typography } from "@mui/material";
+import DisplayAssistRankCard from "./DisplayAssistRankCard";
 
 type Props = {
   id: string
@@ -21,8 +22,10 @@ const ConventionSummary = ({id}: Props) => {
           <DisplayGames convention_id={id} />
         </Grid2>
         <Grid2 xs={12} md={8}>
-          <Typography variant="h6">得点王</Typography>
-          <DisplayScorer id={id}/>
+          <Typography variant="h6" component="p">得点ランク</Typography>
+          <DisplayScorer id={id} initialLimit={5} />
+          <Typography variant="h6" component="p">アシストランク</Typography>
+          <DisplayAssistRankCard id={id} initialLimit={5} />
         </Grid2>
       </Grid2>
     </>
