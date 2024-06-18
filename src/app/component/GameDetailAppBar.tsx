@@ -39,7 +39,7 @@ export default function ButtonAppBar({convention_id, game_id}: Props) {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, paddingBottom: 3 }}>
+    <Box sx={{ flexGrow: 1}}>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>

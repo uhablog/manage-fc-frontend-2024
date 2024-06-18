@@ -18,6 +18,10 @@ const GameAdd = ({ convention_id, teams}: Props) => {
   const [awayTeamScore, setAwayTeamScore] = useState<number>();
   const [homeTeamScorer, setHomeTeamScorer] = useState<string[]>([]);
   const [awayTeamScorer, setAwayTeamScorer] = useState<string[]>([]);
+  const [homeTeamAssist, setHomeTeamAssist] = useState<number>();
+  const [awayTeamAssist, setAwayTeamAssist] = useState<number>();
+  const [homeTeamAssists, setHomeTeamAssists] = useState<string[]>([]);
+  const [awayTeamAssists, setAwayTeamAssists] = useState<string[]>([]);
   const [errors, setErrors] = useState<{
     selectedSameTeam: boolean,
     homeTeam: boolean,
@@ -26,6 +30,10 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     awayScore: boolean,
     homeScorers: boolean,
     awayScorers: boolean,
+    homeAssist: boolean,
+    awayAssist: boolean,
+    homeAssists: boolean,
+    awayAssists: boolean,
   }>({
     selectedSameTeam: false,
     homeTeam: false,
@@ -34,6 +42,10 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     awayScore: false,
     homeScorers: false,
     awayScorers: false,
+    homeAssist: false,
+    awayAssist: false,
+    homeAssists: false,
+    awayAssists: false,
   });
 
   const handleHomeScoreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +78,37 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     setScorer(newScorers);
   };
 
+  const handleHomeAssistChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const score = parseInt(event.target.value, 10);
+
+    if (score < 0 || Number.isNaN(score)) {
+      setHomeTeamAssist(0);
+      setHomeTeamAssists([]);
+    } else {
+      setHomeTeamAssist(score);
+      setHomeTeamAssists(new Array(score).fill(''));
+    }
+  };
+
+  const handleAwayAssistChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const score = parseInt(event.target.value, 10);
+
+    if (score < 0 || Number.isNaN(score)) {
+      setAwayTeamAssist(0);
+      setAwayTeamAssists([]);
+    } else {
+      setAwayTeamAssist(score);
+      setAwayTeamAssists(new Array(score).fill(''));
+    }
+  };
+
+  const handleAssistsChange = (assistsArray: string[], setAssists: React.Dispatch<React.SetStateAction<string[]>>, index: number, value: string) => {
+    const newScorers = [...assistsArray];
+    newScorers[index] = value;
+    setAssists(newScorers);
+  };
+
+
   const validateForm = () => {
     const errors = {
       selectedSameTeam: selectedHomeTeam === selectedAwayTeam && selectedHomeTeam !== '' && selectedAwayTeam !== '', 
@@ -75,6 +118,10 @@ const GameAdd = ({ convention_id, teams}: Props) => {
       awayScore: Number.isNaN(awayTeamScore) || awayTeamScore === undefined,
       homeScorers: homeTeamScorer.some(s => !s),
       awayScorers: awayTeamScorer.some(s => !s),
+      homeAssist: Number.isNaN(homeTeamAssist) || homeTeamAssist === undefined,
+      awayAssist: Number.isNaN(awayTeamAssist) || awayTeamAssist === undefined,
+      homeAssists: homeTeamAssists.some(s => !s),
+      awayAssists: awayTeamAssists.some(s => !s),
     };
   
     setErrors(errors);
@@ -107,6 +154,8 @@ const GameAdd = ({ convention_id, teams}: Props) => {
           awayTeamScore,
           homeTeamScorer,
           awayTeamScorer,
+          homeTeamAssists,
+          awayTeamAssists
         }),
       });
       const result = await response.json();
@@ -192,6 +241,41 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                 helperText={homeTeamScorer[index] === '' ? '得点者を入力してください。' : ''}
               />
             ))}
+            <Typography
+              sx={{
+                color: 'success.main'
+              }}
+            >ホームチームのアシスト数</Typography>
+            <TextField
+              type="number"
+              value={homeTeamAssist}
+              onChange={handleHomeAssistChange}
+              color="success"
+              fullWidth
+              margin="normal"
+              error={errors.homeAssist}
+              helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
+            />
+            { (homeTeamAssists.length > 0) && <>
+              <Typography
+                sx={{
+                  color: 'success.main'
+                }}
+              >ホームチームのアシスト者</Typography>
+            </>}
+            {homeTeamAssists.map((_, index) => (
+              <TextField
+                key={index}
+                label={`ホームチームアシスト${index + 1}`}
+                value={homeTeamAssists[index]}
+                onChange={(e) => handleAssistsChange(homeTeamAssists, setHomeTeamAssists, index, e.target.value)}
+                color="success"
+                fullWidth
+                margin="normal"
+                error={homeTeamAssists[index] === ''}
+                helperText={homeTeamAssists[index] === '' ? 'アシスト者を入力してください。' : ''}
+              />
+            ))}
           </Grid2>
           <Grid2 md={6} xs={12} >
             <Typography
@@ -257,6 +341,41 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                 margin="normal"
                 error={awayTeamScorer[index] === ''}
                 helperText={awayTeamScorer[index] === '' ? '得点者を入力してください。' : ''}
+              />
+            ))}
+            <Typography
+              sx={{
+                color: 'primary.main'
+              }}
+            >アウェイチームのアシスト数</Typography>
+            <TextField
+              type="number"
+              value={awayTeamAssist}
+              onChange={handleAwayAssistChange}
+              color="primary"
+              fullWidth
+              margin="normal"
+              error={errors.awayAssist}
+              helperText={errors.awayAssist ? 'アウェイチームのアシスト数を入力してください。' : ''}
+            />
+            { (awayTeamAssists.length > 0) && <>
+              <Typography
+                sx={{
+                  color: 'primary.main'
+                }}
+              >アウェイチームのアシスト者</Typography>
+            </>}
+            {awayTeamAssists.map((_, index) => (
+              <TextField
+                key={index}
+                label={`アウェイチームアシスト${index + 1}`}
+                value={awayTeamAssists[index]}
+                onChange={(e) => handleAssistsChange(awayTeamAssists, setAwayTeamAssists, index, e.target.value)}
+                color="primary"
+                fullWidth
+                margin="normal"
+                error={awayTeamAssists[index] === ''}
+                helperText={awayTeamAssists[index] === '' ? 'アシスト者を入力してください。' : ''}
               />
             ))}
           </Grid2>
