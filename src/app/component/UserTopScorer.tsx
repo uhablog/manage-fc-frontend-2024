@@ -1,5 +1,6 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
 import { Card, CardContent, CardHeader, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 
 type Props = {
   user_id: string
@@ -12,17 +13,22 @@ type Scorer = {
   rank: string
 }
 
-const UserTopScorer = async ({ user_id }: Props) => {
-  const accessTokenResult = await getAccessToken();
+const UserTopScorer = ({ user_id }: Props) => {
 
-  const result = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/user/top-scorer?user_id=${user_id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`
-    }
-  });
+  const [ scorers, setScorers ] = useState<Scorer[]>([]);
 
-  const json = await result.json();
+  useEffect(() => {
+    const fetchTopScorer = async () => {
+      const res = await fetch(`/api/user/topscorer?user_id=${user_id}`, {
+        method: 'GET'
+      });
+      const json = await res.json();
+      if (json.success) {
+        setScorers(json.data);
+      }
+    };
+    fetchTopScorer();
+  }, [user_id]);
 
   return (
     <>
@@ -30,7 +36,7 @@ const UserTopScorer = async ({ user_id }: Props) => {
         <CardContent>
           <Typography variant="h6">トップスコアラー</Typography>
           <List>
-            {json.data.map( (scorer: Scorer, index: number) => (
+            {scorers.map( (scorer: Scorer, index: number) => (
               <ListItem
                 key={index}
                 disableGutters

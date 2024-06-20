@@ -1,17 +1,20 @@
-import { Session, getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
+'use client';
 import DisplayUserInfo from "../component/DisplayUserInfo";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
-export default withPageAuthRequired(async function ConventionPage() {
-  const session: Session | null | undefined = await getSession();
-  const user = session?.user;
+export default withPageAuthRequired(function ConventionPage() {
 
-  if (!user) {
-    return <p>Loading...</p>
-  }
+  const { user, error, isLoading } = useUser();
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>{error.message}</div>
 
   return (
-    <>
-      <DisplayUserInfo user={user} />
-    </>
+    user && (
+      <>
+        <DisplayUserInfo user={user} />
+      </>
+    )
   )
-}, { returnTo: '/user'});
+});

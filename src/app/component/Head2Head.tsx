@@ -1,6 +1,6 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
 import { ExpandMore } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box, List, ListItem, ListItemText } from "@mui/material";
+import { useEffect, useState } from "react";
 
 type Props = {
   auth0_user_id: string
@@ -15,21 +15,27 @@ type Head2HeadType = {
   match_scorers: []
 }
 
-const Head2Head = async ({ auth0_user_id }: Props) => {
+const Head2Head = ({ auth0_user_id }: Props) => {
 
-  const accessTokenResult = await getAccessToken();
-  const result = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/user/head2head?user_id=${auth0_user_id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`
-    }
-  });
+  const [head2head, setHead2Head] = useState<Head2HeadType[]>([]);
 
-  const json = await result.json();
+  useEffect(() => {
+    const fetchHead2Head = async () => {
+      const res = await fetch(`/api/user/head2head?user_id=${auth0_user_id}`, {
+        method: 'GET'
+      });
+      const json = await res.json();
+      console.log(json);
+      if (json.success) {
+        setHead2Head(json.data);
+      }
+    };
+    fetchHead2Head();
+  }, [auth0_user_id]);
 
   return (
     <>
-      {json.data.map(( head2head: Head2HeadType, index: number) => (
+      {head2head.map(( head2head: Head2HeadType, index: number) => (
         <Box key={index}>
           <Accordion>
             <AccordionSummary
