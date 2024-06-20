@@ -25,7 +25,6 @@ const Head2Head = ({ auth0_user_id }: Props) => {
         method: 'GET'
       });
       const json = await res.json();
-      console.log(json);
       if (json.success) {
         setHead2Head(json.data);
       }

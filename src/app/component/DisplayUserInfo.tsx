@@ -30,7 +30,7 @@ const DisplayUserInfo = ({ user }: Props) => {
               <UserSummary user_id={user.sub} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <Squad user_id="test" />
+              <Squad user_id={user.sub} />
             </CustomTabPanel>
           </Grid2>
         </Grid2>
