@@ -13,4 +13,5 @@ export type Team = {
   created_user: string
   updated_date: string
   updated_user: string
+  auth0_user_id: string
 }
