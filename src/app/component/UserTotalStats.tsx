@@ -18,7 +18,6 @@ const UserTotalStats = ({ user_id }: Props) => {
         method: 'GET'
       });
       const json = await res.json();
-      console.log(json);
       setTotals(json);
     };
     fetchStats();
