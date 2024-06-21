@@ -1,5 +1,5 @@
 import { Assist } from "@/types/Assist";
-import { Button, Card, CardContent, List, ListItem, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 
@@ -49,13 +49,18 @@ const DisplayAssistRankCard = ({id, initialLimit}: Props) => {
                     <Grid2 xs={1}>
                       <Typography variant="body2">{assist.rank}</Typography>
                     </Grid2>
+                    <Grid2 xs={1}>
+                      <ListItemAvatar>
+                        <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${assist.footballapi_player_id}.png`} />
+                      </ListItemAvatar>
+                    </Grid2>
                     <Grid2 xs={4}>
                       <Typography variant="body2">{assist.assist_name}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
                       <Typography variant="body2">{assist.team_name}</Typography>
                     </Grid2>
-                    <Grid2 xs={3}>
+                    <Grid2 xs={2}>
                       <Typography variant="body2">{assist.score}</Typography>
                     </Grid2>
                 </ListItem>

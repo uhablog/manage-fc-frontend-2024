@@ -6,4 +6,5 @@ export type GA = {
   score: string
   assists: string
   total_points: string
+  footballapi_player_id: string
 }
