@@ -1,5 +1,5 @@
 import { GA } from "@/types/GA";
-import { Button, Card, CardContent, List, ListItem, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 
@@ -49,13 +49,18 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
                     <Grid2 xs={1}>
                       <Typography variant="body2">{ga_data.rank}</Typography>
                     </Grid2>
+                    <Grid2 xs={1}>
+                      <ListItemAvatar>
+                        <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${ga_data.footballapi_player_id}.png`} />
+                      </ListItemAvatar>
+                    </Grid2>
                     <Grid2 xs={4}>
                       <Typography variant="body2">{ga_data.scorer_name}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
                       <Typography variant="body2">{ga_data.team_name}</Typography>
                     </Grid2>
-                    <Grid2 xs={3}>
+                    <Grid2 xs={2}>
                       <Typography variant="body2">{ga_data.total_points}</Typography>
                     </Grid2>
                 </ListItem>

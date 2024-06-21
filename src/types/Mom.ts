@@ -4,4 +4,5 @@ export type Mom = {
   score: string
   mom_name: string
   team_name: string
+  footballapi_player_id: string
 }
