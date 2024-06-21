@@ -21,12 +21,13 @@ const GameAdd = ({ convention_id, teams}: Props) => {
   const [awayTeamScorer, setAwayTeamScorer] = useState<Squad[]>([]);
   const [homeTeamAssist, setHomeTeamAssist] = useState<number>();
   const [awayTeamAssist, setAwayTeamAssist] = useState<number>();
-  const [homeTeamAssists, setHomeTeamAssists] = useState<string[]>([]);
-  const [awayTeamAssists, setAwayTeamAssists] = useState<string[]>([]);
+  const [homeTeamAssists, setHomeTeamAssists] = useState<Squad[]>([]);
+  const [awayTeamAssists, setAwayTeamAssists] = useState<Squad[]>([]);
   const [homeTeamSquads, setHomeTeamSquads] = useState<Squad[]>([]);
   const [awayTeamSquads, setAwayTeamSquads] = useState<Squad[]>([]);
+  const [momTeamSquads, setMomTeamSquads] = useState<Squad[]>([]);
   const [momTeam, setMomTeam] = useState<string>('');
-  const [mom, setMom] = useState<string>('');
+  const [mom, setMom] = useState<Squad>();
   const [errors, setErrors] = useState<{
     selectedSameTeam: boolean,
     homeTeam: boolean,
@@ -58,6 +59,13 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     invalidMomTeam: false,
     mom: false,
   });
+
+  const handleMomChange = async (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const mom = momTeamSquads.find( player => player.footballapi_player_id === event.target.value);
+    setMom(mom);
+  };
 
   /**
    * 選択チームが変更されたときに実行し、
@@ -114,37 +122,6 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     }
   };
 
-  const handleHomeAssistChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const score = parseInt(event.target.value, 10);
-
-    if (score < 0 || Number.isNaN(score)) {
-      setHomeTeamAssist(0);
-      setHomeTeamAssists([]);
-    } else {
-      setHomeTeamAssist(score);
-      setHomeTeamAssists(new Array(score).fill(''));
-    }
-  };
-
-  const handleAwayAssistChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const score = parseInt(event.target.value, 10);
-
-    if (score < 0 || Number.isNaN(score)) {
-      setAwayTeamAssist(0);
-      setAwayTeamAssists([]);
-    } else {
-      setAwayTeamAssist(score);
-      setAwayTeamAssists(new Array(score).fill(''));
-    }
-  };
-
-  const handleAssistsChange = (assistsArray: string[], setAssists: React.Dispatch<React.SetStateAction<string[]>>, index: number, value: string) => {
-    const newScorers = [...assistsArray];
-    newScorers[index] = value;
-    setAssists(newScorers);
-  };
-
-
   const validateForm = () => {
     const errors = {
       selectedSameTeam: selectedHomeTeam === selectedAwayTeam && selectedHomeTeam !== '' && selectedAwayTeam !== '', 
@@ -156,8 +133,8 @@ const GameAdd = ({ convention_id, teams}: Props) => {
       awayScorers: awayTeamScorer.some(s => !s.id),
       homeAssist: Number.isNaN(homeTeamAssist) || homeTeamAssist === undefined,
       awayAssist: Number.isNaN(awayTeamAssist) || awayTeamAssist === undefined,
-      homeAssists: homeTeamAssists.some(s => !s),
-      awayAssists: awayTeamAssists.some(s => !s),
+      homeAssists: homeTeamAssists.some(s => !s.id),
+      awayAssists: awayTeamAssists.some(s => !s.id),
       momTeam: !momTeam,
       // MOM所属チームはホームチームorアウェイチームで選択されたチームでないといけない
       invalidMomTeam: !(momTeam === selectedHomeTeam || momTeam === selectedAwayTeam),
@@ -227,7 +204,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
               label="MOM所属チームを選択"
               value={momTeam}
               color="secondary"
-             onChange={(e) => setMomTeam(e.target.value)}
+             onChange={(e) => handleTeamChange(e, setMomTeam, setMomTeamSquads)}
               fullWidth
               margin="normal"
               error={errors.momTeam}
@@ -255,15 +232,24 @@ const GameAdd = ({ convention_id, teams}: Props) => {
               }}
             >MOM</Typography>
             <TextField
+              select
               label={`MOM`}
               value={mom}
-              onChange={(e) => setMom(e.target.value)}
               color="secondary"
+              onChange={(e) => handleMomChange(e)}
               fullWidth
               margin="normal"
-              error={mom === ''}
-              helperText={mom === '' ? 'MOMを入力してください。' : ''}
-            />
+              error={mom?.player_name === undefined}
+              helperText={mom?.footballapi_player_id ? 'MOMを選択してください。' : ''}
+            >
+              {
+                momTeamSquads.map((player) => (
+                  <MenuItem key={player.id} value={player.footballapi_player_id}>
+                    {player.player_name}
+                  </MenuItem>
+                ))
+              }
+            </TextField>
             { errors.selectedSameTeam && (
               <Typography
                 variant="caption"
@@ -337,7 +323,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                 fullWidth
                 margin="normal"
                 error={errors.homeTeam}
-                helperText={errors.homeTeam ? 'ホームチームを選択してください。' : ''}
+                helperText={errors.homeTeam ? '得点者を選択してください。' : ''}
               >
                 {homeTeamSquads.map((player) => (
                   <MenuItem key={player.id} value={player.footballapi_player_id}>
@@ -354,7 +340,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
             <TextField
               type="number"
               value={homeTeamAssist}
-              onChange={handleHomeAssistChange}
+              onChange={(e) => handleScoreChange(e, setHomeTeamAssist, setHomeTeamAssists)}
               color="success"
               fullWidth
               margin="normal"
@@ -371,15 +357,22 @@ const GameAdd = ({ convention_id, teams}: Props) => {
             {homeTeamAssists.map((_, index) => (
               <TextField
                 key={index}
-                label={`ホームチームアシスト${index + 1}`}
-                value={homeTeamAssists[index]}
-                onChange={(e) => handleAssistsChange(homeTeamAssists, setHomeTeamAssists, index, e.target.value)}
+                select
+                label={`アシスト者${index+1}を選択`}
+                value={homeTeamAssists[index].footballapi_player_id ?? ''}
                 color="success"
+                onChange={(e) => handleScorerChange( homeTeamSquads, homeTeamAssists, setHomeTeamAssists, index, e.target.value)}
                 fullWidth
                 margin="normal"
-                error={homeTeamAssists[index] === ''}
-                helperText={homeTeamAssists[index] === '' ? 'アシスト者を入力してください。' : ''}
-              />
+                error={errors.homeTeam}
+                helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
+              >
+                {homeTeamSquads.map((player) => (
+                  <MenuItem key={player.id} value={player.footballapi_player_id}>
+                    {player.player_name}
+                  </MenuItem>
+                ))}
+              </TextField>
             ))}
           </Grid2>
           <Grid2 md={6} xs={12} >
@@ -463,7 +456,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
             <TextField
               type="number"
               value={awayTeamAssist}
-              onChange={handleAwayAssistChange}
+              onChange={(e) => handleScoreChange(e, setAwayTeamAssist, setAwayTeamAssists)}
               color="primary"
               fullWidth
               margin="normal"
@@ -480,15 +473,22 @@ const GameAdd = ({ convention_id, teams}: Props) => {
             {awayTeamAssists.map((_, index) => (
               <TextField
                 key={index}
-                label={`アウェイチームアシスト${index + 1}`}
-                value={awayTeamAssists[index]}
-                onChange={(e) => handleAssistsChange(awayTeamAssists, setAwayTeamAssists, index, e.target.value)}
-                color="primary"
+                select
+                label={`アシスト者${index+1}を選択`}
+                value={awayTeamAssists[index].footballapi_player_id ?? ''}
+                color="success"
+                onChange={(e) => handleScorerChange(awayTeamSquads, awayTeamAssists, setAwayTeamAssists, index, e.target.value)}
                 fullWidth
                 margin="normal"
-                error={awayTeamAssists[index] === ''}
-                helperText={awayTeamAssists[index] === '' ? 'アシスト者を入力してください。' : ''}
-              />
+                error={!awayTeamAssists[index].footballapi_player_id}
+                helperText={!awayTeamAssists[index].footballapi_player_id ? 'アシスト者を選択してください。' : ''}
+              >
+                {awayTeamSquads.map((player) => (
+                  <MenuItem key={player.id} value={player.footballapi_player_id}>
+                    {player.player_name}
+                  </MenuItem>
+                ))}
+              </TextField>
             ))}
           </Grid2>
         </Grid2>
