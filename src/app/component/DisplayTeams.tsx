@@ -1,25 +1,12 @@
 import { Team } from "@/types/Team";
-import { Card, CardContent, List, ListItem, Typography } from "@mui/material";
+import { Card, CardContent, List, Link as MuiLink, ListItem, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import NextLink from "next/link";
 import { useEffect, useState } from "react";
 
 type Props = {
   id: string
 }
-
-const columns: GridColDef[] = [
-  { field: 'id', headerName: '順位', width: 70},
-  { field: 'teamName', headerName: 'クラブ', width: 150 },
-  { field: 'games', headerName: '試合数', type: 'number', width: 70 },
-  { field: 'wins', headerName: '勝', type: 'number', width: 70 },
-  { field: 'draw', headerName: '引', type: 'number', width: 70 },
-  { field: 'lose', headerName: '負', type: 'number', width: 70 },
-  { field: 'totalScore', headerName: '得点', type: 'number', width: 70 },
-  { field: 'concededPoints', headerName: '失点', type: 'number', width: 70 },
-  { field: 'diff', headerName: '得失点', type: 'number', width: 70 },
-  { field: 'winPoints', headerName: '勝点', type: 'number', width: 70 },
-];
 
 const DisplayTeams = ({id}: Props) => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -45,6 +32,7 @@ const DisplayTeams = ({id}: Props) => {
     concededPoints: team.concededPoints,
     diff: team.totalScore - team.concededPoints,
     winPoints: (team.win * 3) + team.draw,
+    team_id: team.id
   }));
 
   // 勝ち点でソートする
@@ -58,10 +46,6 @@ const DisplayTeams = ({id}: Props) => {
 
   return (
     <>
-      {/* <DataGrid
-        rows={rankedTeams}
-        columns={columns}
-      /> */}
       <Card>
         <CardContent>
           <List>
@@ -105,7 +89,9 @@ const DisplayTeams = ({id}: Props) => {
                       <Typography variant="body2">{team.id}</Typography>
                     </Grid2>
                     <Grid2 xs={2}>
-                      <Typography variant="body2">{team.teamName}</Typography>
+                      <MuiLink component={NextLink} underline="none" href={`/conventions/${id}/team/${team.team_id}`}>
+                        <Typography variant="body2">{team.teamName}</Typography>
+                      </MuiLink>
                     </Grid2>
                     <Grid2 xs={1}>
                       <Typography variant="body2">{team.games}</Typography>

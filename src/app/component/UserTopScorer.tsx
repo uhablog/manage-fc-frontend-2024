@@ -1,5 +1,5 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
-import { Card, CardContent, CardHeader, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, CardHeader, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -11,6 +11,7 @@ type Scorer = {
   total_goals: number
   id: string
   rank: string
+  footballapi_player_id: string
 }
 
 const UserTopScorer = ({ user_id }: Props) => {
@@ -44,6 +45,9 @@ const UserTopScorer = ({ user_id }: Props) => {
                   scorer.total_goals
                 }
               >
+                <ListItemAvatar>
+                  <Avatar alt={`scorer${index+1}`} src={`https://media.api-sports.io/football/players/${scorer?.footballapi_player_id}.png`} ></Avatar>
+                </ListItemAvatar>
                 <ListItemText primary={`${scorer.scorer_name}`} />
               </ListItem>
             ))}
