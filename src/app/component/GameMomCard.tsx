@@ -1,6 +1,6 @@
 import { Game } from "@/types/Game";
 import { Star } from "@mui/icons-material";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 
 type Props = {
@@ -9,18 +9,29 @@ type Props = {
 const GameMomCard = ({
   game
 }: Props) => {
+  console.log(game);
   return (
     <>
       <Card>
         <CardContent>
           <Grid2 container spacing={2}>
-            <Grid2 xs={2}>
-              <Star fontSize="large" />
+            <Grid2 xs={1}>
+              <Star fontSize="small"/>
             </Grid2>
-            <Grid2 xs={10}>
-              <Typography variant="h5" component="p">
-                MOM: {game?.mom}
+            <Grid2 xs={2} md={1}>
+              <Typography component="p">
+                MOM
               </Typography>
+            </Grid2>
+            <Grid2 xs={2} md={1}>
+              <Avatar alt={`mom game ${game?.game_id}`} src={`https://media.api-sports.io/football/players/${game?.mom_footballapi_player_id}.png`}/>
+            </Grid2>
+            <Grid2 xs={4} md={1}>
+              <Typography component="p">
+                {game?.mom}
+              </Typography>
+            </Grid2>
+            <Grid2 xs={3}>
               {
                 game?.home_team_id === game?.mom_team_id ?
                 <>

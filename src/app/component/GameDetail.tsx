@@ -26,6 +26,7 @@ const GameDetail = ({ id, game_id }: Props) => {
       const json = await res.json();
 
       if (json.success) {
+        console.log(json);
         setGame(json.game);
         setComments(json.comments);
       } else {
