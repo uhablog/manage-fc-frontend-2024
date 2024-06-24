@@ -6,7 +6,7 @@ export async function GET(
 ) {
 
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/scorer?q=${params.id}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/scorer?convention_id=${params.id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
