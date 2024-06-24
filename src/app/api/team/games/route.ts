@@ -7,24 +7,29 @@ export async function GET(
   const searchParams = request.nextUrl.searchParams;
   const team_id = searchParams.get('team_id');
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/team?team_id=${team_id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game?team_id=${team_id}`,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessTokenResult.accessToken}`
+      }
     }
-  });
+  );
 
   if (res.ok) {
+
     const json = await res.json();
     return Response.json({
-      squads: json,
-    });
+      success: false,
+      data: json
+    })
+
   } else {
-    console.error('Teamの取得に失敗');
-    console.error(res.status);
+    console.error('試合情報の取得に失敗');
     return Response.json({
       success: false,
-      message: 'Teamの取得に失敗'
+      message: '試合情報取得失敗'
     });
   }
-}
+
+};
