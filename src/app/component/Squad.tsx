@@ -21,7 +21,7 @@ const DisplaySquad = ({user_id}: Props) => {
 
   return (
     <Grid2 container spacing={2}>
-      <Grid2 xs={12} md={6}>
+      <Grid2 xs={12}>
         <Card>
           <CardContent>
             <Typography variant="h6"component="p">スカッド</Typography>

@@ -1,5 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
-import { Avatar, Card, CardContent, CardHeader, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 type Props = {
