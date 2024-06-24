@@ -1,5 +1,5 @@
 import { TeamGame } from "@/types/TeamGames";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 
@@ -25,24 +25,20 @@ const TeamGamesCard = ({team_id}: Props) => {
   return (
     <Card>
       <CardContent>
-        <Grid2 container spacing={2}>
+        <Typography>試合結果</Typography>
           {teamGames?.map( (game, index) => (
-            <Box key={index}>
-              <Grid2 md={3}>
+            <Grid2 container key={index} spacing={2}>
+              <Grid2 xs={5} display='flex' justifyContent='right' >
                 <Typography>{game.home_team_name}</Typography>
               </Grid2>
-              <Grid2 md={3}>
-                <Typography>{game.home_team_score}</Typography>
+              <Grid2 xs={2} display={'flex'} justifyContent='center'>
+                <Typography>{game.home_team_score} - {game.away_team_score}</Typography>
               </Grid2>
-              <Grid2 md={3}>
-                <Typography>{game.away_team_score}</Typography>
-              </Grid2>
-              <Grid2 md={3}>
+              <Grid2 xs={5} display='flex' justifyContent='left'>
                 <Typography>{game.away_team_name}</Typography>
               </Grid2>
-            </Box>
+            </Grid2>
           ))}
-        </Grid2>
       </CardContent>
     </Card>
   )
