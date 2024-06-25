@@ -4,6 +4,8 @@ import DisplayScorer from "./DisplayScorer";
 import DisplayGames from "./DisplayGames";
 import { Typography } from "@mui/material";
 import DisplayAssistRankCard from "./DisplayAssistRankCard";
+import DisplayGARankCard from "./DisplayGARankCard";
+import DisplayMomRankCard from "./DisplayMomRankCard";
 
 type Props = {
   id: string
@@ -26,6 +28,10 @@ const ConventionSummary = ({id}: Props) => {
           <DisplayScorer id={id} initialLimit={5} />
           <Typography variant="h6" component="p">アシストランク</Typography>
           <DisplayAssistRankCard id={id} initialLimit={5} />
+          <Typography variant="h6" component="p">G+Aランク</Typography>
+          <DisplayGARankCard id={id} initialLimit={5} />
+          <Typography variant="h6" component="p">MOMランク</Typography>
+          <DisplayMomRankCard id={id} initialLimit={5} />
         </Grid2>
       </Grid2>
     </>

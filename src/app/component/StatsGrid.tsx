@@ -11,7 +11,7 @@ type Props = {
 
 const StatsGrid = ({convention_id}: Props) => {
   return (
-    <Grid2 container spacing={2}>
+    <Grid2 container spacing={1}>
       <Grid2 xs={12} md={6}>
         <Typography variant="h6" component="p">得点ランク</Typography>
         <DisplayScorer id={convention_id} initialLimit={5} />

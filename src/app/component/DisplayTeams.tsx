@@ -89,7 +89,18 @@ const DisplayTeams = ({id}: Props) => {
                       <Typography variant="body2">{team.id}</Typography>
                     </Grid2>
                     <Grid2 xs={2}>
-                      <MuiLink component={NextLink} underline="none" href={`/conventions/${id}/team/${team.team_id}`}>
+                      <MuiLink
+                        component={NextLink}
+                        underline="none"
+                        color={'black'}
+                        href={`/conventions/${id}/team/${team.team_id}`}
+                        sx={{
+                          '&:hover': {
+                            color: 'blue',
+                            textDecoration: 'underline'
+                          }
+                        }}
+                      >
                         <Typography variant="body2">{team.teamName}</Typography>
                       </MuiLink>
                     </Grid2>

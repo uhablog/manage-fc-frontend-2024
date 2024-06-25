@@ -13,7 +13,7 @@ export default withPageAuthRequired(function Team(
 ) {
   return (
     <>
-      <DisplayTeamDetail team_id={params.team_id} />
+      <DisplayTeamDetail convention_id={params.id} team_id={params.team_id} />
     </>
   )
 });

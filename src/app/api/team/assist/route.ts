@@ -7,7 +7,7 @@ export async function GET(
   const searchParams = request.nextUrl.searchParams;
   const team_id = searchParams.get('team_id');
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game?team_id=${team_id}`,{
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/assists/rank?team_id=${team_id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
@@ -15,19 +15,15 @@ export async function GET(
   });
 
   if (res.ok) {
-
     const json = await res.json();
     return Response.json({
       success: true,
       data: json
-    })
-
+    });
   } else {
-    console.error('試合情報の取得に失敗');
     return Response.json({
-      success: false,
-      message: '試合情報取得失敗'
+      message: 'チーム内アシストランキング取得失敗',
+      success: false
     });
   }
-
 };
