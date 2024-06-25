@@ -1,7 +1,9 @@
 import { Team } from "@/types/Team";
-import { Box, Button, Card, CardActions, CardContent, List, ListItem, ListItemText, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Link as MuiLink, Tab, Tabs, Typography } from "@mui/material";
+import NextLink from 'next/link';
 
 type Props = {
+  convention_id: string
   teamData: Team
   value: number
   handleChange: (event: React.SyntheticEvent, newValue: number) => void
@@ -14,7 +16,12 @@ function a11yProps(index: number) {
   };
 }
 
-const TeamDetailHeader = ({teamData, value, handleChange}: Props) => {
+const TeamDetailHeader = ({
+  convention_id,
+  teamData,
+  value,
+  handleChange
+}: Props) => {
   return (
     <Card>
       <CardContent>
@@ -22,28 +29,9 @@ const TeamDetailHeader = ({teamData, value, handleChange}: Props) => {
         <Typography variant="h6" component="p">
           {teamData?.team_name}: {teamData?.manager_name}
         </Typography>
-        <List>
-          <ListItem
-            secondaryAction={teamData?.games}
-          >
-            <ListItemText primary={`試合数`} />
-          </ListItem>
-          <ListItem
-            secondaryAction={teamData?.win}
-          >
-            <ListItemText primary={`勝利`} />
-          </ListItem>
-          <ListItem
-            secondaryAction={teamData?.draw}
-          >
-            <ListItemText primary={`引分`} />
-          </ListItem>
-          <ListItem
-            secondaryAction={teamData?.lose}
-          >
-            <ListItemText primary={`敗北`} />
-          </ListItem>
-        </List>
+        <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}`}>
+          <Button color="primary">大会へ</Button>
+        </MuiLink>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="概要" {...a11yProps(0)} />

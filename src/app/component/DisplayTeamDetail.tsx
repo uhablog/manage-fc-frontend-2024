@@ -4,13 +4,15 @@ import DisplaySquad from "./Squad";
 import { Team } from "@/types/Team";
 import TeamDetailHeader from "./TeamDetailHeader";
 import CustomTabPanel from "./CustomTabPanel";
-import TeamGamesCard from "./TeamGamesCard";
+import TeamSummary from "./TeamSummary";
 
 type Props = {
+  convention_id: string
   team_id: string
 }
 
 const DisplayTeamDetail = ({
+  convention_id,
   team_id
 }: Props) => {
 
@@ -36,12 +38,16 @@ const DisplayTeamDetail = ({
         <Grid2 container spacing={2}>
           <Grid2 xs={12}>
             <TeamDetailHeader
+              convention_id={convention_id}
               teamData={teamData[0]}
               value={value}
               handleChange={handleChange}
             />
             <CustomTabPanel value={value} index={0}>
-              <TeamGamesCard team_id={team_id} />
+              <TeamSummary
+                team_id={team_id}
+                team_data={teamData[0]}
+              />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
               <DisplaySquad user_id={teamData[0]?.auth0_user_id} />

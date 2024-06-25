@@ -26,7 +26,6 @@ const GameDetail = ({ id, game_id }: Props) => {
       const json = await res.json();
 
       if (json.success) {
-        console.log(json);
         setGame(json.game);
         setComments(json.comments);
       } else {
@@ -78,7 +77,10 @@ const GameDetail = ({ id, game_id }: Props) => {
           <ButtonAppBar convention_id={id} game_id={game_id} />
           <Grid2 container spacing={2}>
             <Grid2 xs={12}>
-              <GameScore game={game}/>
+              <GameScore
+                convention_id={id}
+                game={game}
+              />
             </Grid2>
             <Grid2 xs={12}>
               <GameMomCard game={game}/>

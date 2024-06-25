@@ -29,7 +29,19 @@ const DisplayGames = ({ convention_id }: Props) => {
           <Card>
             <CardContent>
               { games?.map((game, index) => (
-                <MuiLink key={index} component={NextLink} underline="none" href={`/conventions/${convention_id}/games/detail/${game.game_id}`}>
+                <MuiLink
+                  key={index}
+                  component={NextLink}
+                  underline="none"
+                  color='black'
+                  href={`/conventions/${convention_id}/games/detail/${game.game_id}`}
+                  sx={{
+                    '&:hover': {
+                      color: 'blue',
+                      textDecoration: 'underline'
+                    }
+                  }}
+                >
                   <Grid2 container>
                     <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
                       <Typography variant="h6" component="p">

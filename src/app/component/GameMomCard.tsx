@@ -9,7 +9,6 @@ type Props = {
 const GameMomCard = ({
   game
 }: Props) => {
-  console.log(game);
   return (
     <>
       <Card>
