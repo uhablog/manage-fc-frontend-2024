@@ -1,5 +1,5 @@
 'use client';
-import DisplayUserInfo from "../component/DisplayUserInfo";
+import DisplayUserInfo from "@/app/component/DisplayUserInfo";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
