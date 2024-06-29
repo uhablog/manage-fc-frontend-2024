@@ -18,6 +18,7 @@ const DisplaySquad = ({squad}: Props) => {
                 <ListItem
                   key={index}
                   disableGutters
+                  sx={{width: '320px'}}
                 >
                   <ListItemAvatar>
                     <Avatar alt="Remy Sharp" src={`https://media.api-sports.io/football/players/${player.footballapi_player_id}.png`} />

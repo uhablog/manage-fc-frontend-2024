@@ -1,5 +1,6 @@
 import { Convention } from "@/types/Convention";
 import { Box, Card, CardContent, Tab, Tabs, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -33,7 +34,7 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
     <>
       <Card>
         <CardContent>
-          <Typography variant="h3">{convention?.convention_name}</Typography>
+          <Typography variant="h4">{convention?.convention_name}</Typography>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
               <Tab label="概要" {...a11yProps(0)} />

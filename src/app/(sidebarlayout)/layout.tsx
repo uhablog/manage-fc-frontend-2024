@@ -22,7 +22,8 @@ export default function RootLayout({
               <Box sx={{ display: "flex", minHeight: '100vh' }}>
                 <CssBaseline/>
                 <Sidebar/>
-                <Box component='main' sx={{ flexGrow: 1, p: 3, paddingBottom: 10}} >
+                {/* <Box component='main' sx={{ flexGrow: 1, p: 3, paddingBottom: 10}} > */}
+                <Box component='main' sx={{ paddingBottom: 10}}>
                   {children}
                 </Box>
                 <MobileBottomNav/>

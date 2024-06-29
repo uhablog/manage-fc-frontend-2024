@@ -1,6 +1,7 @@
 import { Scorer } from "@/types/Scorer";
 import { Avatar, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 type Props = {
   team_id: string
@@ -8,6 +9,8 @@ type Props = {
 export const TeamScorerRank = ({team_id}: Props) => {
 
   const [ teamScorer, setTeamScorer ] = useState<Scorer[]>([]);
+  const [ open, setOpen ] = useState<boolean>(false);
+  const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
 
   useEffect(() => {
     const fetchTeamScorer = async () => {
@@ -22,6 +25,12 @@ export const TeamScorerRank = ({team_id}: Props) => {
     fetchTeamScorer();
   }, [team_id]);
 
+  const onClose = () => { setOpen(false) };
+  const handleClick = (player_id: string) => {
+    setSelectedPlayer(player_id);
+    setOpen(true);
+  }
+
   return (
     <>
       <Card>
@@ -32,6 +41,7 @@ export const TeamScorerRank = ({team_id}: Props) => {
               <ListItem
                 key={index}
                 secondaryAction={player.score}
+                onClick={() => handleClick(player.footballapi_player_id)}
               >
                 <ListItemAvatar>
                   <Avatar alt={`team scorer ${index+1}`} src={`https://media.api-sports.io/football/players/${player.footballapi_player_id}.png`}/>
@@ -42,6 +52,12 @@ export const TeamScorerRank = ({team_id}: Props) => {
           </List>
         </CardContent>
       </Card>
+      <PlayerStatsDialog
+        open={open}
+        onClose={onClose}
+        team_id={team_id}
+        player_id={selectedPlayer}
+      />
     </>
   )
 };
