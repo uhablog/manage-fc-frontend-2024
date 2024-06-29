@@ -3,6 +3,7 @@ import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 import NextLink from 'next/link';
+import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 type Props = {
   id: string
@@ -13,6 +14,9 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
   
   const [scorers, setScorers] = useState<Scorer[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
+  const [ open, setOpen ] = useState<boolean>(false);
+  const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
+  const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
 
   // 得点者の取得
   useEffect(() => {
@@ -37,6 +41,14 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
     }
   }
 
+  const onClose = () => { setOpen(false) };
+  const handleClick = (player_id: string, team_id: string) => {
+    setSelectedPlayer(player_id);
+    setSelectedTeamId(team_id);
+    setOpen(true);
+  }
+
+
   return (
     <>
       <Card>
@@ -47,6 +59,7 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                 <ListItem
                   key={index}
                   disableGutters
+                  onClick={() => handleClick(scorer.footballapi_player_id, scorer.team_id)}
                 >
                     <Grid2 xs={1}>
                       <Typography variant="body2">{scorer.rank}</Typography>
@@ -90,6 +103,12 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
           }
         </CardContent>
       </Card>
+      <PlayerStatsDialog
+        open={open}
+        onClose={onClose}
+        team_id={selectedTeamId}
+        player_id={selectedPlayer}
+      />
     </>
   )
 };

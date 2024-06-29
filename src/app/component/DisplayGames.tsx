@@ -39,7 +39,7 @@ const DisplayGames = ({ convention_id }: Props) => {
                     '&:hover': {
                       color: 'blue',
                       textDecoration: 'underline'
-                    }
+                    },
                   }}
                 >
                   <Grid2 container>

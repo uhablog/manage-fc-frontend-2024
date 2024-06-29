@@ -3,6 +3,7 @@ import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 import NextLink from 'next/link';
+import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 type Props = {
   id: string
@@ -13,6 +14,9 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
 
   const [ga_rank, setGaRank] = useState<GA[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
+  const [ open, setOpen ] = useState<boolean>(false);
+  const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
+  const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
 
   // アシストランクの取得
   useEffect(() => {
@@ -36,6 +40,13 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
     }
   }
 
+  const onClose = () => { setOpen(false) };
+  const handleClick = (player_id: string, team_id: string) => {
+    setSelectedPlayer(player_id);
+    setSelectedTeamId(team_id);
+    setOpen(true);
+  }
+
   return (
     <>
       <Card>
@@ -46,6 +57,7 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
                 <ListItem
                   key={index}
                   disableGutters
+                  onClick={() => handleClick(ga_data.footballapi_player_id, ga_data.team_id)}
                 >
                     <Grid2 xs={1}>
                       <Typography variant="body2">{ga_data.rank}</Typography>
@@ -89,6 +101,12 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
           }
         </CardContent>
       </Card>
+      <PlayerStatsDialog
+        open={open}
+        onClose={onClose}
+        team_id={selectedTeamId}
+        player_id={selectedPlayer}
+      />
     </>
   )
 };
