@@ -1,10 +1,10 @@
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
-import DisplaySquad from "./Squad";
 import { Team } from "@/types/Team";
 import TeamDetailHeader from "./TeamDetailHeader";
 import CustomTabPanel from "./CustomTabPanel";
 import TeamSummary from "./TeamSummary";
+import TeamSquad from "./TeamSquad";
 
 type Props = {
   convention_id: string
@@ -50,12 +50,11 @@ const DisplayTeamDetail = ({
               />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <DisplaySquad user_id={teamData[0]?.auth0_user_id} />
+              <TeamSquad team_id={team_id} />
             </CustomTabPanel>
           </Grid2>
         </Grid2>
       </>
-    // )
   )
 };
 
