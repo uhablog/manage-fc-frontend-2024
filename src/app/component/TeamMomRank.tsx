@@ -15,7 +15,6 @@ export const TeamMomRank = ({team_id}: Props) => {
       const json = await res.json();
 
       if (json.success) {
-        console.log(json);
         setTeamMom(json.data);
       } else {
         window.alert('チーム内MOMランクの取得に失敗しました。');

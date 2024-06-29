@@ -1,12 +1,10 @@
-import UserTotalStats from "./UserTotalStats";
 import ProfileCard from "./ProfileCard";
-import UserTopScorer from "./UserTopScorer";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useState } from "react";
 import CustomTabPanel from "./CustomTabPanel";
-import Squad from "./Squad";
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import UserSummary from "./UserSummary";
+import UserSquad from "./UserSquad";
 
 type Props = {
   user: UserProfile
@@ -30,7 +28,7 @@ const DisplayUserInfo = ({ user }: Props) => {
               <UserSummary user_id={user.sub} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <Squad user_id={user.sub} />
+              <UserSquad user_id={user.sub} />
             </CustomTabPanel>
           </Grid2>
         </Grid2>
