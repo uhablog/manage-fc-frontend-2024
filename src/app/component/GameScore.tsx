@@ -89,14 +89,20 @@ const GameScore = ({
             <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
               <Typography variant="body1" component="p">
                 {game?.away_team_scorer.map((scorer, index) => (
-                  <Box key={index}>{scorer.name}</Box>
+                  <Box
+                    key={index}
+                    onClick={() => handleClick(`${scorer.footballapi_player_id}`, game?.away_team_id)}
+                  >{scorer.name}</Box>
                 ))}
               </Typography>
             </Grid2>
             <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
               <Typography variant="body1" component="p">
                 {game?.home_team_assists.map((assist, index) => (
-                  <Box key={index}>{assist.name}</Box>
+                  <Box
+                    key={index}
+                    onClick={() => handleClick(`${assist.footballapi_player_id}`, game?.home_team_id)}
+                  >{assist.name}</Box>
                 ))}
               </Typography>
             </Grid2>
@@ -106,7 +112,10 @@ const GameScore = ({
             <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
               <Typography variant="body1" component="p">
                 {game?.away_team_assists.map((assist, index) => (
-                  <Box key={index}>{assist.name}</Box>
+                  <Box
+                    key={index}
+                    onClick={() => handleClick(`${assist.footballapi_player_id}`, game?.away_team_id)}
+                  >{assist.name}</Box>
                 ))}
               </Typography>
             </Grid2>
