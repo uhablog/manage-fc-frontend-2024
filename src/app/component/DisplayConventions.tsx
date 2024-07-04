@@ -11,7 +11,7 @@ const DisplayConventions = ({ conventions }: Props) => {
 
   return (
     <>
-      <Grid2 container spacing={2} >
+      <Grid2 container spacing={2} sx={{margin: {md: 3, xs: 1}}}>
         {conventions?.map( (convention, index) => (
           <>
             <Grid2 xs={12} sm={6} md={3} key={index}>

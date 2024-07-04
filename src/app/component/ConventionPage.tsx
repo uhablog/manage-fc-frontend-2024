@@ -21,7 +21,7 @@ const ConventionPage = ({id}: Props) => {
 
   return (
     <>
-      <Grid2 container spacing={2}>
+      <Grid2 container spacing={2} sx={{margin: {md: 3}}} width={'100%'}>
         <Grid2 xs={12}>
           <ConventionHeader id={id} value={value} handleChange={handleChange} />
           <CustomTabPanel value={value} index={0}>
