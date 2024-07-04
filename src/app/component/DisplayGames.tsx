@@ -24,47 +24,44 @@ const DisplayGames = ({ convention_id }: Props) => {
 
   return (
     <>
-      <Grid2 container spacing={2}>
-        <Grid2 xs={12}>
-          <Card>
-            <CardContent>
-              { games?.map((game, index) => (
-                <MuiLink
-                  key={index}
-                  component={NextLink}
-                  underline="none"
-                  color='black'
-                  href={`/conventions/${convention_id}/games/detail/${game.game_id}`}
-                  sx={{
-                    '&:hover': {
-                      color: 'blue',
-                      textDecoration: 'underline'
-                    },
-                  }}
-                >
-                  <Grid2 container>
-                    <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
-                      <Typography variant="h6" component="p">
-                        {game?.home_team_name}
-                      </Typography>
-                    </Grid2>
-                    <Grid2 xs={2} sx={{display: 'flex', justifyContent: 'center'}} >
-                      <Typography variant="h6" component="p">
-                        {game?.home_team_score} - {game?.away_team_score}
-                      </Typography>
-                    </Grid2>
-                    <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
-                      <Typography variant="h6" component="p">
-                        {game?.away_team_name}
-                      </Typography>
-                    </Grid2>
-                  </Grid2>
-                </MuiLink>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid2>
-      </Grid2>
+      <Card>
+        <CardContent>
+          <Typography variant="h6" component={'p'}>試合結果</Typography>
+          { games?.map((game, index) => (
+            <MuiLink
+              key={index}
+              component={NextLink}
+              underline="none"
+              color='black'
+              href={`/conventions/${convention_id}/games/detail/${game.game_id}`}
+              sx={{
+                '&:hover': {
+                  color: 'blue',
+                  textDecoration: 'underline'
+                },
+              }}
+            >
+              <Grid2 container>
+                <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
+                  <Typography variant="h6" component="p">
+                    {game?.home_team_name}
+                  </Typography>
+                </Grid2>
+                <Grid2 xs={2} sx={{display: 'flex', justifyContent: 'center'}} >
+                  <Typography variant="h6" component="p">
+                    {game?.home_team_score} - {game?.away_team_score}
+                  </Typography>
+                </Grid2>
+                <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
+                  <Typography variant="h6" component="p">
+                    {game?.away_team_name}
+                  </Typography>
+                </Grid2>
+              </Grid2>
+            </MuiLink>
+          ))}
+        </CardContent>
+      </Card>
       <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
         <Fab
           color="primary"

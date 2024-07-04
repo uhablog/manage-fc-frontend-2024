@@ -25,8 +25,7 @@ const TeamDetailHeader = ({
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" component="p">今大会成績</Typography>
-        <Typography variant="h6" component="p">
+        <Typography variant="h5" component="p">
           {teamData?.team_name}: {teamData?.manager_name}
         </Typography>
         <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}`}>

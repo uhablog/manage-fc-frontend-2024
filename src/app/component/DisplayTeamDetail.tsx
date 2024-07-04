@@ -50,7 +50,7 @@ const DisplayTeamDetail = ({
               />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <TeamSquad team_id={team_id} />
+              <TeamSquad team_id={team_id} auth0_user_id={teamData[0]?.auth0_user_id} />
             </CustomTabPanel>
           </Grid2>
         </Grid2>

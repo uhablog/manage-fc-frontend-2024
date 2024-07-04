@@ -20,7 +20,6 @@ const ConventionSummary = ({id}: Props) => {
           <DisplayTeams id={id}/>
         </Grid2>
         <Grid2 xs={12} md={4}>
-          <Typography variant="h6">日程</Typography>
           <DisplayGames convention_id={id} />
         </Grid2>
         <Grid2 xs={12} md={8}>
