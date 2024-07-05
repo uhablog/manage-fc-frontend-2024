@@ -7,17 +7,20 @@ import { useEffect, useState } from "react";
 type Props = {
   open: boolean,
   onClose: () => void,
-  squad: Squad[]
+  squad: Squad[],
+  team_id: string
 }
 
 export const TransferDialog = ({
   open,
   onClose,
-  squad
+  squad,
+  team_id
 }: Props) => {
 
   const [ transferPlayerId, setTransferPlayerId ] = useState<string>('');
-  const [ transferTeamId, setTransferTeamId ] = useState<string>('');
+  const [ afterTransferTeamId, setAfterTransferTeamId ] = useState<string | undefined>('');
+  const [ transferTeamAuth0Id, setTransferTeamAuth0Id ] = useState<string | undefined>('');
   const [ teams, setTeams ] = useState<Team[]>([]);
 
   const params = useParams();
@@ -31,8 +34,31 @@ export const TransferDialog = ({
     fetchTeams(params?.id as string);
   }, [params]);
 
-  const handleClick = () => {
-    window.alert(`移籍登録！, ${transferPlayerId}, ${transferTeamId}`);
+  // 移籍先チームが変更された時の処理
+  const handleChangeTransferTeam = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const team = teams.find( t => t.id === e.target.value);
+    console.log(team);
+    setAfterTransferTeamId(team?.id);
+    setTransferTeamAuth0Id(team?.auth0_user_id);
+  };
+
+  const handleClick = async () => {
+    window.alert(`移籍登録！, ${transferPlayerId}, ${afterTransferTeamId}`);
+    const res = await fetch(`/api/team/transfer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        player_id: transferPlayerId,
+        before_team_id: team_id,
+        after_team_id: afterTransferTeamId,
+        auth0_user_id: transferTeamAuth0Id
+      })
+    });
+    const json = await res.json();
+    console.log(json);
     onClose();
   };
 
@@ -64,8 +90,8 @@ export const TransferDialog = ({
           <TextField
             select
             label="移籍先を選択"
-            value={transferTeamId}
-            onChange={(e) => setTransferTeamId(e.target.value)}
+            value={afterTransferTeamId}
+            onChange={handleChangeTransferTeam}
             fullWidth
             margin="normal"
           >

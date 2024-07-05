@@ -46,7 +46,6 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
 
   if (isLoading) return <>Loading...</>
   if (error) return <div>{error.message}</div>
-  console.log(user);
 
   return (
     user && (
@@ -77,17 +76,22 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
           team_id={team_id}
           player_id={selectedPlayer}
         />
-        <Fab
-          color="primary"
-          onClick={() => setOpenTransferDialog(true)}
-        >
-          移籍
-        </Fab>
-        <TransferDialog
-          open={openTransferDialog}
-          onClose={onCloseTransferDialog}
-          squad={squads}
-        />
+        { user.sub === auth0_user_id &&
+          <>
+            <Fab
+              color="primary"
+              onClick={() => setOpenTransferDialog(true)}
+            >
+              移籍
+            </Fab>
+            <TransferDialog
+              open={openTransferDialog}
+              onClose={onCloseTransferDialog}
+              squad={squads}
+              team_id={team_id}
+            />
+          </>
+        }
       </>
     )
   )

@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 export async function GET(
   request: NextRequest
 ) {
-  console.log('team squad api');
   const searchParams = request.nextUrl.searchParams;
   const team_id = searchParams.get('team_id');
 
