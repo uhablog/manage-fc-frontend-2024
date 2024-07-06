@@ -43,7 +43,6 @@ export const TransferDialog = ({
   };
 
   const handleClick = async () => {
-    window.alert(`移籍登録！, ${transferPlayerId}, ${afterTransferTeamId}`);
     const res = await fetch(`/api/team/transfer`, {
       method: 'POST',
       headers: {
