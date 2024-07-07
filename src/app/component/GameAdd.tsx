@@ -1,6 +1,6 @@
 import { Squad } from "@/types/Squads";
 import { Team } from "@/types/Team";
-import { Button, MenuItem, TextField, Typography } from "@mui/material";
+import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -25,6 +25,14 @@ const GameAdd = ({ convention_id, teams}: Props) => {
   const [awayTeamAssists, setAwayTeamAssists] = useState<Squad[]>([]);
   const [homeTeamSquads, setHomeTeamSquads] = useState<Squad[]>([]);
   const [awayTeamSquads, setAwayTeamSquads] = useState<Squad[]>([]);
+  const [homeTeamYellows, setHomeTeamYellows] = useState<number>();
+  const [awayTeamYellows, setAwayTeamYellows] = useState<number>();
+  const [homeTeamYellowCards, setHomeTeamYellowCards] = useState<Squad[]>([]);
+  const [awayTeamYellowCards, setAwayTeamYellowCards] = useState<Squad[]>([]);
+  const [homeTeamReds, setHomeTeamReds] = useState<number>();
+  const [awayTeamReds, setAwayTeamReds] = useState<number>();
+  const [homeTeamRedCards, setHomeTeamRedCards] = useState<Squad[]>([]);
+  const [awayTeamRedCards, setAwayTeamRedCards] = useState<Squad[]>([]);
   const [momTeamSquads, setMomTeamSquads] = useState<Squad[]>([]);
   const [momTeam, setMomTeam] = useState<string>('');
   const [mom, setMom] = useState<Squad>();
@@ -102,7 +110,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
     }
   };
 
-  const handleScorerChange = (
+  const handlePlayerChange = (
     squads: Squad[],
     scorers: Squad[], 
     setTeamScorer: React.Dispatch<React.SetStateAction<Squad[]>>,
@@ -173,6 +181,10 @@ const GameAdd = ({ convention_id, teams}: Props) => {
           awayTeamScorer,
           homeTeamAssists,
           awayTeamAssists,
+          homeTeamYellowCards,
+          awayTeamYellowCards,
+          homeTeamRedCards,
+          awayTeamRedCards,
           momTeam,
           mom
         }),
@@ -191,311 +203,486 @@ const GameAdd = ({ convention_id, teams}: Props) => {
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <Grid2 container spacing={2}>
-          <Grid2 md={6} xs={12}>
-            <Typography
-              sx={{
-                color: 'secondary.main'
-              }}
-            >MOM所属チーム選択</Typography>
-            <TextField
-              select
-              label="MOM所属チームを選択"
-              value={momTeam}
-              color="secondary"
-             onChange={(e) => handleTeamChange(e, setMomTeam, setMomTeamSquads)}
-              fullWidth
-              margin="normal"
-              error={errors.momTeam}
-              helperText={errors.momTeam ? 'MOM所属チームを選択してください。' : ''}
-            >
-              {teams.map((team) => (
-                <MenuItem key={team.id} value={team.id}>
-                  {team.team_name}
-                </MenuItem>
-              ))}
-            </TextField>
-            { errors.invalidMomTeam && (
+      <Box sx={{
+        margin: 3
+      }}>
+        <form onSubmit={handleSubmit}>
+          <Grid2 container spacing={2}>
+            <Grid2 md={6} xs={12}>
               <Typography
-                variant="caption"
                 sx={{
-                  color: 'error.main'
+                  color: 'secondary.main'
                 }}
-              >MOM所属チームはホームチームorアウェイチームで選択されたチームを選んでください。</Typography>
-            )}
-          </Grid2>
-          <Grid2 md={6} xs={12}>
-            <Typography
-              sx={{
-                color: 'secondary.main'
-              }}
-            >MOM</Typography>
-            <TextField
-              select
-              label={`MOM`}
-              value={mom}
-              color="secondary"
-              onChange={(e) => handleMomChange(e)}
-              fullWidth
-              margin="normal"
-              error={mom?.player_name === undefined}
-              helperText={mom?.footballapi_player_id ? 'MOMを選択してください。' : ''}
-            >
-              {
-                momTeamSquads.map((player) => (
-                  <MenuItem key={player.id} value={player.footballapi_player_id}>
-                    {player.player_name}
+              >MOM所属チーム選択</Typography>
+              <TextField
+                select
+                label="MOM所属チームを選択"
+                value={momTeam}
+                color="secondary"
+              onChange={(e) => handleTeamChange(e, setMomTeam, setMomTeamSquads)}
+                fullWidth
+                margin="normal"
+                error={errors.momTeam}
+                helperText={errors.momTeam ? 'MOM所属チームを選択してください。' : ''}
+              >
+                {teams.map((team) => (
+                  <MenuItem key={team.id} value={team.id}>
+                    {team.team_name}
                   </MenuItem>
-                ))
-              }
-            </TextField>
-            { errors.selectedSameTeam && (
+                ))}
+              </TextField>
+              { errors.invalidMomTeam && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'error.main'
+                  }}
+                >MOM所属チームはホームチームorアウェイチームで選択されたチームを選んでください。</Typography>
+              )}
+            </Grid2>
+            <Grid2 md={6} xs={12}>
               <Typography
-                variant="caption"
                 sx={{
-                  color: 'error.main'
+                  color: 'secondary.main'
                 }}
-              >アウェイチームと同じチームを選択することはできません。</Typography>
-            )}
-          </Grid2>
-          <Grid2 md={6} xs={12} >
-            <Typography
-              sx={{
-                color: 'success.main'
-              }}
-            >ホームチーム選択欄</Typography>
-            <TextField
-              select
-              label="ホームチームを選択"
-              value={selectedHomeTeam}
-              color="success"
-              onChange={(e) => handleTeamChange(e, setSelectedHomeTeam, setHomeTeamSquads)}
-              fullWidth
-              margin="normal"
-              error={errors.homeTeam}
-              helperText={errors.homeTeam ? 'ホームチームを選択してください。' : ''}
-            >
-              {teams.map((team) => (
-                <MenuItem key={team.id} value={team.id}>
-                  {team.team_name}
-                </MenuItem>
-              ))}
-            </TextField>
-            { errors.selectedSameTeam && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'error.main'
-                }}
-              >アウェイチームと同じチームを選択することはできません。</Typography>
-            )}
-            <Typography
-              sx={{
-                color: 'success.main'
-              }}
-            >ホームチームの得点</Typography>
-            <TextField
-              type="number"
-              value={homeTeamScore}
-              onChange={(e) => handleScoreChange(e, setHomeTeamScore, setHomeTeamScorer)}
-              color="success"
-              fullWidth
-              margin="normal"
-              error={errors.homeScore}
-              helperText={errors.homeScore ? 'ホームチームの得点数を入力してください。' : ''}
-            />
-            { (homeTeamScorer.length > 0) && <>
+              >MOM</Typography>
+              <TextField
+                select
+                label={`MOM`}
+                value={mom}
+                color="secondary"
+                onChange={(e) => handleMomChange(e)}
+                fullWidth
+                margin="normal"
+                error={mom?.player_name === undefined}
+                helperText={mom?.footballapi_player_id ? 'MOMを選択してください。' : ''}
+              >
+                {
+                  momTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))
+                }
+              </TextField>
+              { errors.selectedSameTeam && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'error.main'
+                  }}
+                >アウェイチームと同じチームを選択することはできません。</Typography>
+              )}
+            </Grid2>
+            <Grid2 md={6} xs={12} >
               <Typography
                 sx={{
                   color: 'success.main'
                 }}
-              >ホームチームの得点者</Typography>
-            </>}
-            {homeTeamScorer.map((_, index) => (
+              >ホームチーム選択欄</Typography>
               <TextField
-                key={index}
                 select
-                label={`得点者${index+1}を選択`}
-                value={homeTeamScorer[index].footballapi_player_id ?? ''}
+                label="ホームチームを選択"
+                value={selectedHomeTeam}
                 color="success"
-                onChange={(e) => handleScorerChange( homeTeamSquads, homeTeamScorer, setHomeTeamScorer,index, e.target.value)}
-                fullWidth
-                margin="normal"
-                error={errors.homeTeam}
-                helperText={errors.homeTeam ? '得点者を選択してください。' : ''}
-              >
-                {homeTeamSquads.map((player) => (
-                  <MenuItem key={player.id} value={player.footballapi_player_id}>
-                    {player.player_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            ))}
-            <Typography
-              sx={{
-                color: 'success.main'
-              }}
-            >ホームチームのアシスト数</Typography>
-            <TextField
-              type="number"
-              value={homeTeamAssist}
-              onChange={(e) => handleScoreChange(e, setHomeTeamAssist, setHomeTeamAssists)}
-              color="success"
-              fullWidth
-              margin="normal"
-              error={errors.homeAssist}
-              helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
-            />
-            { (homeTeamAssists.length > 0) && <>
-              <Typography
-                sx={{
-                  color: 'success.main'
-                }}
-              >ホームチームのアシスト者</Typography>
-            </>}
-            {homeTeamAssists.map((_, index) => (
-              <TextField
-                key={index}
-                select
-                label={`アシスト者${index+1}を選択`}
-                value={homeTeamAssists[index].footballapi_player_id ?? ''}
-                color="success"
-                onChange={(e) => handleScorerChange( homeTeamSquads, homeTeamAssists, setHomeTeamAssists, index, e.target.value)}
-                fullWidth
-                margin="normal"
-                error={errors.homeTeam}
-                helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
-              >
-                {homeTeamSquads.map((player) => (
-                  <MenuItem key={player.id} value={player.footballapi_player_id}>
-                    {player.player_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            ))}
-          </Grid2>
-          <Grid2 md={6} xs={12} >
-            <Typography
-              sx={{
-                color: 'primary.main'
-              }}
-            >アウェイチーム選択欄</Typography>
-            <TextField
-              select
-              label="アウェイチームを選択"
-              value={selectedAwayTeam}
-              onChange={(e) => handleTeamChange(e, setSelectedAwayTeam, setAwayTeamSquads)}
-              color="primary"
-              fullWidth
-              margin="normal"
-              error={errors.awayTeam}
-              helperText={errors.awayTeam ? 'アウェイチームを選択してください。' : ''}
-            >
-              {teams.map((team) => (
-                <MenuItem key={team.id} value={team.id}>
-                  {team.team_name}
-                </MenuItem>
-              ))}
-            </TextField>
-            { errors.selectedSameTeam && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'error.main'
-                }}
-              >ホームチームと同じチームを選択することはできません。</Typography>
-            )}
-            <Typography
-              sx={{
-                color: 'primary.main'
-              }}
-            >アウェイチームの得点</Typography>
-            <TextField
-              type="number"
-              value={awayTeamScore}
-              onChange={(e) => handleScoreChange(e, setAwayTeamScore, setAwayTeamScorer)}
-              color="primary"
-              fullWidth
-              margin="normal"
-              error={errors.awayScore}
-              helperText={errors.awayScore ? 'アウェイチームの得点数を入力してください。' : ''}
-            />
-            { awayTeamScorer.length > 0 && <>
-              <Typography
-                sx={{
-                  color: 'primary.main'
-                }}
-              >アウェイチームの得点者</Typography>
-            </>}
-            {awayTeamScorer.map((_, index) => (
-              <TextField
-                key={index}
-                select
-                label={`得点者${index+1}を選択`}
-                value={awayTeamScorer[index].footballapi_player_id ?? ''}
-                color="success"
-                onChange={(e) => handleScorerChange(awayTeamSquads, awayTeamScorer, setAwayTeamScorer,index, e.target.value)}
+                onChange={(e) => handleTeamChange(e, setSelectedHomeTeam, setHomeTeamSquads)}
                 fullWidth
                 margin="normal"
                 error={errors.homeTeam}
                 helperText={errors.homeTeam ? 'ホームチームを選択してください。' : ''}
               >
-                {awayTeamSquads.map((player) => (
-                  <MenuItem key={player.id} value={player.footballapi_player_id}>
-                    {player.player_name}
+                {teams.map((team) => (
+                  <MenuItem key={team.id} value={team.id}>
+                    {team.team_name}
                   </MenuItem>
                 ))}
               </TextField>
-            ))}
-            <Typography
-              sx={{
-                color: 'primary.main'
-              }}
-            >アウェイチームのアシスト数</Typography>
-            <TextField
-              type="number"
-              value={awayTeamAssist}
-              onChange={(e) => handleScoreChange(e, setAwayTeamAssist, setAwayTeamAssists)}
-              color="primary"
-              fullWidth
-              margin="normal"
-              error={errors.awayAssist}
-              helperText={errors.awayAssist ? 'アウェイチームのアシスト数を入力してください。' : ''}
-            />
-            { (awayTeamAssists.length > 0) && <>
+              { errors.selectedSameTeam && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'error.main'
+                  }}
+                >アウェイチームと同じチームを選択することはできません。</Typography>
+              )}
+              <Typography
+                sx={{
+                  color: 'success.main'
+                }}
+              >ホームチームの得点</Typography>
+              <TextField
+                type="number"
+                value={homeTeamScore}
+                onChange={(e) => handleScoreChange(e, setHomeTeamScore, setHomeTeamScorer)}
+                color="success"
+                fullWidth
+                margin="normal"
+                error={errors.homeScore}
+                helperText={errors.homeScore ? 'ホームチームの得点数を入力してください。' : ''}
+              />
+              { (homeTeamScorer.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'success.main'
+                  }}
+                >ホームチームの得点者</Typography>
+              </>}
+              {homeTeamScorer.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`得点者${index+1}を選択`}
+                  value={homeTeamScorer[index].footballapi_player_id ?? ''}
+                  color="success"
+                  onChange={(e) => handlePlayerChange( homeTeamSquads, homeTeamScorer, setHomeTeamScorer,index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  error={errors.homeTeam}
+                  helperText={errors.homeTeam ? '得点者を選択してください。' : ''}
+                >
+                  {homeTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+              <Typography
+                sx={{
+                  color: 'success.main'
+                }}
+              >ホームチームのアシスト数</Typography>
+              <TextField
+                type="number"
+                value={homeTeamAssist}
+                onChange={(e) => handleScoreChange(e, setHomeTeamAssist, setHomeTeamAssists)}
+                color="success"
+                fullWidth
+                margin="normal"
+                error={errors.homeAssist}
+                helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
+              />
+              { (homeTeamAssists.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'success.main'
+                  }}
+                >ホームチームのアシスト者</Typography>
+              </>}
+              {homeTeamAssists.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`アシスト者${index+1}を選択`}
+                  value={homeTeamAssists[index].footballapi_player_id ?? ''}
+                  color="success"
+                  onChange={(e) => handlePlayerChange( homeTeamSquads, homeTeamAssists, setHomeTeamAssists, index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  error={errors.homeTeam}
+                  helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
+                >
+                  {homeTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+              <Typography
+                sx={{
+                  color: 'success.main'
+                }}
+              >ホームチームのイエローカード数</Typography>
+              <TextField
+                type="number"
+                value={homeTeamYellows}
+                onChange={(e) => handleScoreChange(e, setHomeTeamYellows, setHomeTeamYellowCards)}
+                color="success"
+                fullWidth
+                margin="normal"
+                // error={errors.homeAssist}
+                // helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
+              />
+              { (homeTeamYellowCards.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'success.main'
+                  }}
+                >ホームチームのイエロ-カード</Typography>
+              </>}
+              {homeTeamYellowCards.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`イエローカード選手${index+1}を選択`}
+                  value={homeTeamYellowCards[index].footballapi_player_id ?? ''}
+                  color="success"
+                  onChange={(e) => handlePlayerChange(homeTeamSquads, homeTeamYellowCards, setHomeTeamYellowCards, index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  // error={errors.homeTeam}
+                  // helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
+                >
+                  {homeTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+
+              <Typography
+                sx={{
+                  color: 'success.main'
+                }}
+              >ホームチームのレッドカード数</Typography>
+              <TextField
+                type="number"
+                value={homeTeamReds}
+                onChange={(e) => handleScoreChange(e, setHomeTeamReds, setHomeTeamRedCards)}
+                color="success"
+                fullWidth
+                margin="normal"
+                // error={errors.homeAssist}
+                // helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
+              />
+              { (homeTeamRedCards.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'success.main'
+                  }}
+                >ホームチームのレッドカード</Typography>
+              </>}
+              {homeTeamRedCards.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`レッドカード選手${index+1}を選択`}
+                  value={homeTeamRedCards[index].footballapi_player_id ?? ''}
+                  color="success"
+                  onChange={(e) => handlePlayerChange(homeTeamSquads, homeTeamRedCards, setHomeTeamRedCards, index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  // error={errors.homeTeam}
+                  // helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
+                >
+                  {homeTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+            </Grid2>
+            <Grid2 md={6} xs={12} >
               <Typography
                 sx={{
                   color: 'primary.main'
                 }}
-              >アウェイチームのアシスト者</Typography>
-            </>}
-            {awayTeamAssists.map((_, index) => (
+              >アウェイチーム選択欄</Typography>
               <TextField
-                key={index}
                 select
-                label={`アシスト者${index+1}を選択`}
-                value={awayTeamAssists[index].footballapi_player_id ?? ''}
-                color="success"
-                onChange={(e) => handleScorerChange(awayTeamSquads, awayTeamAssists, setAwayTeamAssists, index, e.target.value)}
+                label="アウェイチームを選択"
+                value={selectedAwayTeam}
+                onChange={(e) => handleTeamChange(e, setSelectedAwayTeam, setAwayTeamSquads)}
+                color="primary"
                 fullWidth
                 margin="normal"
-                error={!awayTeamAssists[index].footballapi_player_id}
-                helperText={!awayTeamAssists[index].footballapi_player_id ? 'アシスト者を選択してください。' : ''}
+                error={errors.awayTeam}
+                helperText={errors.awayTeam ? 'アウェイチームを選択してください。' : ''}
               >
-                {awayTeamSquads.map((player) => (
-                  <MenuItem key={player.id} value={player.footballapi_player_id}>
-                    {player.player_name}
+                {teams.map((team) => (
+                  <MenuItem key={team.id} value={team.id}>
+                    {team.team_name}
                   </MenuItem>
                 ))}
               </TextField>
-            ))}
+              { errors.selectedSameTeam && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'error.main'
+                  }}
+                >ホームチームと同じチームを選択することはできません。</Typography>
+              )}
+              <Typography
+                sx={{
+                  color: 'primary.main'
+                }}
+              >アウェイチームの得点</Typography>
+              <TextField
+                type="number"
+                value={awayTeamScore}
+                onChange={(e) => handleScoreChange(e, setAwayTeamScore, setAwayTeamScorer)}
+                color="primary"
+                fullWidth
+                margin="normal"
+                error={errors.awayScore}
+                helperText={errors.awayScore ? 'アウェイチームの得点数を入力してください。' : ''}
+              />
+              { awayTeamScorer.length > 0 && <>
+                <Typography
+                  sx={{
+                    color: 'primary.main'
+                  }}
+                >アウェイチームの得点者</Typography>
+              </>}
+              {awayTeamScorer.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`得点者${index+1}を選択`}
+                  value={awayTeamScorer[index].footballapi_player_id ?? ''}
+                  color="success"
+                  onChange={(e) => handlePlayerChange(awayTeamSquads, awayTeamScorer, setAwayTeamScorer,index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  error={errors.awayTeam}
+                  helperText={errors.awayTeam ? 'アウェイチームの得点者を選択してください。' : ''}
+                >
+                  {awayTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+              <Typography
+                sx={{
+                  color: 'primary.main'
+                }}
+              >アウェイチームのアシスト数</Typography>
+              <TextField
+                type="number"
+                value={awayTeamAssist}
+                onChange={(e) => handleScoreChange(e, setAwayTeamAssist, setAwayTeamAssists)}
+                color="primary"
+                fullWidth
+                margin="normal"
+                error={errors.awayAssist}
+                helperText={errors.awayAssist ? 'アウェイチームのアシスト数を入力してください。' : ''}
+              />
+              { (awayTeamAssists.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'primary.main'
+                  }}
+                >アウェイチームのアシスト者</Typography>
+              </>}
+              {awayTeamAssists.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`アシスト者${index+1}を選択`}
+                  value={awayTeamAssists[index].footballapi_player_id ?? ''}
+                  color="success"
+                  onChange={(e) => handlePlayerChange(awayTeamSquads, awayTeamAssists, setAwayTeamAssists, index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  error={!awayTeamAssists[index].footballapi_player_id}
+                  helperText={!awayTeamAssists[index].footballapi_player_id ? 'アシスト者を選択してください。' : ''}
+                >
+                  {awayTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+
+              <Typography
+                sx={{
+                  color: 'primary.main'
+                }}
+              >アウェイチームのイエローカード数</Typography>
+              <TextField
+                type="number"
+                value={awayTeamYellows}
+                onChange={(e) => handleScoreChange(e, setAwayTeamYellows, setAwayTeamYellowCards)}
+                color="primary"
+                fullWidth
+                margin="normal"
+                // error={errors.homeAssist}
+                // helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
+              />
+              { (awayTeamYellowCards.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'primary.main'
+                  }}
+                >アウェイチームのイエロ-カード</Typography>
+              </>}
+              {awayTeamYellowCards.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`イエローカード選手${index+1}を選択`}
+                  value={awayTeamYellowCards[index].footballapi_player_id ?? ''}
+                  color="primary"
+                  onChange={(e) => handlePlayerChange(awayTeamSquads, awayTeamYellowCards, setAwayTeamYellowCards, index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  // error={errors.homeTeam}
+                  // helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
+                >
+                  {awayTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+
+              <Typography
+                sx={{
+                  color: 'primary.main'
+                }}
+              >アウェイチームのレッドカード数</Typography>
+              <TextField
+                type="number"
+                value={awayTeamReds}
+                onChange={(e) => handleScoreChange(e, setAwayTeamReds, setAwayTeamRedCards)}
+                color="primary"
+                fullWidth
+                margin="normal"
+                // error={errors.homeAssist}
+                // helperText={errors.homeAssist ? 'ホームチームのアシスト数を入力してください。' : ''}
+              />
+              { (awayTeamRedCards.length > 0) && <>
+                <Typography
+                  sx={{
+                    color: 'primary.main'
+                  }}
+                >アウェイチームのレッドカード</Typography>
+              </>}
+              {awayTeamRedCards.map((_, index) => (
+                <TextField
+                  key={index}
+                  select
+                  label={`レッドカード選手${index+1}を選択`}
+                  value={awayTeamRedCards[index].footballapi_player_id ?? ''}
+                  color="primary"
+                  onChange={(e) => handlePlayerChange(awayTeamSquads, awayTeamRedCards, setAwayTeamRedCards, index, e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  // error={errors.homeTeam}
+                  // helperText={errors.homeTeam ? 'アシスト者を選択してください。' : ''}
+                >
+                  {awayTeamSquads.map((player) => (
+                    <MenuItem key={player.id} value={player.footballapi_player_id}>
+                      {player.player_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
+            </Grid2>
           </Grid2>
-        </Grid2>
-        <Button type="submit" variant="contained" color="primary">
-          試合結果を登録
-        </Button>
-      </form>
+          <Button type="submit" variant="contained" color="primary">
+            試合結果を登録
+          </Button>
+        </form>
+      </Box>
     </>
   )
 };
