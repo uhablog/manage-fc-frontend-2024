@@ -17,18 +17,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-          <AppRouterCacheProvider>
-            <ThemeProvider theme={theme} >
-              <Box sx={{ display: "flex", minHeight: '100vh' }}>
-                <CssBaseline/>
-                <Sidebar/>
-                {/* <Box component='main' sx={{ flexGrow: 1, p: 3, paddingBottom: 10}} > */}
-                <Box component='main' sx={{ paddingBottom: 10}}>
-                  {children}
-                </Box>
-                <MobileBottomNav/>
-              </Box>
-            </ThemeProvider>
-          </AppRouterCacheProvider>
+    <AppRouterCacheProvider>
+      <ThemeProvider theme={theme} >
+        <Box sx={{ display: "flex", minHeight: '100vh' }}>
+          <CssBaseline/>
+          <Sidebar/>
+          <Box component='main' sx={{ paddingBottom: 10, width: '100%'}}>
+            {children}
+          </Box>
+          <MobileBottomNav/>
+        </Box>
+      </ThemeProvider>
+    </AppRouterCacheProvider>
   );
 }
