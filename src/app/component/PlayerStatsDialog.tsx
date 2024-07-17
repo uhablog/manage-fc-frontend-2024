@@ -1,5 +1,5 @@
 import { PlayerStats } from "@/types/PlayerStats";
-import { Avatar, Dialog, DialogContent, DialogContentText, DialogTitle, List, ListItem, ListItemText } from "@mui/material";
+import { Avatar, Dialog, DialogContent, DialogTitle, List, ListItem, ListItemText } from "@mui/material";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -23,7 +23,9 @@ export const PlayerStatsDialog = ({
       const json = await res.json();
       setPlayer(json.player_stats)
     };
-    fetchPlayerStats();
+    if (player_id !== '' && team_id !== '') {
+      fetchPlayerStats();
+    }
   }, [player_id, team_id]);
 
   return (
@@ -56,6 +58,18 @@ export const PlayerStatsDialog = ({
               secondaryAction={player?.mom_count}
             >
               <ListItemText primary={`MOM数`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={player?.yellow_cards}
+            >
+              <ListItemText primary={`イエローカード数`} />
+            </ListItem>
+            <ListItem
+              disableGutters
+              secondaryAction={player?.red_cards}
+            >
+              <ListItemText primary={`レッドカード数`} />
             </ListItem>
           </List>
         </DialogContent>

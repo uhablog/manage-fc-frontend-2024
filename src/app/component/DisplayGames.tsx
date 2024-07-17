@@ -1,5 +1,5 @@
 import { Game } from "@/types/Game"
-import { Card, CardContent, Fab, Link as MuiLink,Typography } from "@mui/material";
+import { Button, Card, CardContent, Fab, Link as MuiLink,Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Add } from "@mui/icons-material";
 import NextLink from "next/link";
@@ -7,10 +7,13 @@ import { useEffect, useState } from "react";
 
 type Props = {
   convention_id: string
+  initialLimit?: number
 }
 
-const DisplayGames = ({ convention_id }: Props) => {
+const DisplayGames = ({ convention_id, initialLimit }: Props) => {
+
   const [games, setGames] = useState<Game[]>([]);
+  const [limit, setLimit] = useState<number | undefined>(initialLimit);
 
   // 試合一覧の取得
   useEffect(() => {
@@ -22,12 +25,24 @@ const DisplayGames = ({ convention_id }: Props) => {
     fetchGames();
   }, [convention_id]);
 
+  const showAllGames = () => {
+    setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
+  };
+
+  const hideLimit = () => {
+    if (initialLimit) {
+      setLimit(initialLimit);
+    } else {
+      setLimit(5);
+    }
+  }
+
   return (
     <>
       <Card>
         <CardContent>
           <Typography variant="h6" component={'p'}>試合結果</Typography>
-          { games?.map((game, index) => (
+          {(limit ? games.slice(0, limit): games).map((game, index) => (
             <MuiLink
               key={index}
               component={NextLink}
@@ -60,6 +75,12 @@ const DisplayGames = ({ convention_id }: Props) => {
               </Grid2>
             </MuiLink>
           ))}
+          {
+            limit === undefined ?
+            <Button onClick={hideLimit}>部分的に表示</Button>
+            :
+            <Button onClick={showAllGames}>すべて表示</Button>
+          }
         </CardContent>
       </Card>
       <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
