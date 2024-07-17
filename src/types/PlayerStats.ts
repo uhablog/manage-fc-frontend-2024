@@ -10,4 +10,6 @@ export type PlayerStats = {
   goals: number
   assists: number
   mom_count: number
+  yellow_cards: number
+  red_cards: number
 }

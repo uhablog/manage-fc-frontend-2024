@@ -219,7 +219,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                 label="MOM所属チームを選択"
                 value={momTeam}
                 color="secondary"
-              onChange={(e) => handleTeamChange(e, setMomTeam, setMomTeamSquads)}
+                onChange={(e) => handleTeamChange(e, setMomTeam, setMomTeamSquads)}
                 fullWidth
                 margin="normal"
                 error={errors.momTeam}
