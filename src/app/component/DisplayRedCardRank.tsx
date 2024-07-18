@@ -1,18 +1,18 @@
-import { YellowCards } from "@/types/YellowCards";
 import { Avatar, Button, Card, CardContent, Link as MuiLink,List, ListItem, ListItemAvatar, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
+import { RedCards } from "@/types/RedCards";
 
 type Props = {
   id: string
   initialLimit?: number
 }
 
-const DisplayYellowCardRank = ({id, initialLimit}: Props) => {
+const DisplayRedCardRank = ({id, initialLimit}: Props) => {
 
-  const [cards, setCards] = useState<YellowCards[]>([]);
+  const [cards, setCards] = useState<RedCards[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
   const [ open, setOpen ] = useState<boolean>(false);
   const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
@@ -20,12 +20,12 @@ const DisplayYellowCardRank = ({id, initialLimit}: Props) => {
 
   // カードランクの取得
   useEffect(() => {
-    const fetchYellowCardRank = async () => {
-      const res = await fetch(`/api/convention/${id}/yellowcard`);
+    const fetchRedCardRank = async () => {
+      const res = await fetch(`/api/convention/${id}/redcard`);
       const json = await res.json();
       setCards(json);
     };
-    fetchYellowCardRank();
+    fetchRedCardRank();
   }, [id]);
 
   const showAllCards = () => {
@@ -111,4 +111,4 @@ const DisplayYellowCardRank = ({id, initialLimit}: Props) => {
   )
 };
 
-export default DisplayYellowCardRank;
+export default DisplayRedCardRank;
