@@ -4,6 +4,8 @@ import { Typography } from "@mui/material"
 import DisplayAssistRankCard from "./DisplayAssistRankCard"
 import DisplayMomRankCard from "./DisplayMomRankCard"
 import DisplayGARankCard from "./DisplayGARankCard"
+import DisplayYellowCardRank from "./DisplayYellowCardRank"
+import DisplayRedCardRank from "./DisplayRedCardRank"
 
 type Props = {
   convention_id: string
@@ -27,6 +29,14 @@ const StatsGrid = ({convention_id}: Props) => {
       <Grid2 xs={12} md={6}>
         <Typography variant="h6" component="p">MOMランク</Typography>
         <DisplayMomRankCard id={convention_id} initialLimit={5} />
+      </Grid2>
+      <Grid2 xs={12} md={6}>
+        <Typography variant="h6" component="p">イエローカードランク</Typography>
+        <DisplayYellowCardRank id={convention_id} initialLimit={5} />
+      </Grid2>
+      <Grid2 xs={12} md={6}>
+        <Typography variant="h6" component="p">レッドカードランク</Typography>
+        <DisplayRedCardRank id={convention_id} initialLimit={5} />
       </Grid2>
     </Grid2>
   )

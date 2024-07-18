@@ -7,6 +7,7 @@ import DisplayAssistRankCard from "./DisplayAssistRankCard";
 import DisplayGARankCard from "./DisplayGARankCard";
 import DisplayMomRankCard from "./DisplayMomRankCard";
 import DisplayYellowCardRank from "./DisplayYellowCardRank";
+import DisplayRedCardRank from "./DisplayRedCardRank";
 
 type Props = {
   id: string
@@ -34,6 +35,8 @@ const ConventionSummary = ({id}: Props) => {
           <DisplayMomRankCard id={id} initialLimit={5} />
           <Typography variant="h6" component="p">イエローカードランク</Typography>
           <DisplayYellowCardRank id={id} initialLimit={5} />
+          <Typography variant="h6" component="p">レッドカードランク</Typography>
+          <DisplayRedCardRank id={id} initialLimit={5} />
         </Grid2>
       </Grid2>
     </>
