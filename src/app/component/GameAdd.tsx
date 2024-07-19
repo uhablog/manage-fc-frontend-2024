@@ -24,7 +24,9 @@ const GameAdd = ({ convention_id, teams}: Props) => {
   const [homeTeamAssists, setHomeTeamAssists] = useState<Squad[]>([]);
   const [awayTeamAssists, setAwayTeamAssists] = useState<Squad[]>([]);
   const [homeTeamSquads, setHomeTeamSquads] = useState<Squad[]>([]);
+  const [homeGoalOptions, setHomeGoalOptions] = useState<Squad[]>([]);
   const [awayTeamSquads, setAwayTeamSquads] = useState<Squad[]>([]);
+  const [awayGoalOptions, setAwayGoalOptions] = useState<Squad[]>([]);
   const [homeTeamYellows, setHomeTeamYellows] = useState<number>();
   const [awayTeamYellows, setAwayTeamYellows] = useState<number>();
   const [homeTeamYellowCards, setHomeTeamYellowCards] = useState<Squad[]>([]);
@@ -85,13 +87,31 @@ const GameAdd = ({ convention_id, teams}: Props) => {
   const handleTeamChange = async (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     setSelectedTeam: React.Dispatch<React.SetStateAction<string>>,
-    setTeamSquads: React.Dispatch<React.SetStateAction<Squad[]>>
+    setTeamSquads: React.Dispatch<React.SetStateAction<Squad[]>>,
+    setGoalOptions?: React.Dispatch<React.SetStateAction<Squad[]>>
   ) => {
     const selectedTeam = teams.find(team => team.id === event.target.value);
     const res = await fetch(`/api/user/squads?user_id=${selectedTeam?.auth0_user_id}`, {method: 'GET'});
     const json = await res.json();
     setSelectedTeam(event.target.value);
     setTeamSquads(json.squads);
+
+    console.log('handle team change', setGoalOptions);
+
+    if (setGoalOptions) {
+      console.log('set goal options');
+      console.log([...json.squads, { footballapi_player_id: '0', name: 'オウンゴール' }])
+      setGoalOptions([
+        ...json.squads,
+        {
+          id: 'own_goal',
+          footballapi_player_id: '0',
+          footballapi_team_id: '0',
+          player_name: 'オウンゴール',
+
+        }
+      ])
+    }
   };
 
   const handleScoreChange = (
@@ -123,6 +143,20 @@ const GameAdd = ({ convention_id, teams}: Props) => {
       const newScorers = [...scorers];
       newScorers[index] = {
         ...scorer
+      }
+      setTeamScorer(newScorers);
+    } else if (value === '0'){
+      console.log('own goal selected');
+      const newScorers = [...scorers];
+      newScorers[index] = {
+        id: 'own_goal',
+        footballapi_player_id: '0',
+        footballapi_team_id: '0',
+        player_name: 'オウンゴール',
+        birth_date: '1998-01-01',
+        nationality: 'JPN',
+        height: '180 cm',
+        weight: '100 kg'
       }
       setTeamScorer(newScorers);
     } else {
@@ -285,7 +319,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                 label="ホームチームを選択"
                 value={selectedHomeTeam}
                 color="success"
-                onChange={(e) => handleTeamChange(e, setSelectedHomeTeam, setHomeTeamSquads)}
+                onChange={(e) => handleTeamChange(e, setSelectedHomeTeam, setHomeTeamSquads, setHomeGoalOptions)}
                 fullWidth
                 margin="normal"
                 error={errors.homeTeam}
@@ -340,7 +374,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                   error={errors.homeTeam}
                   helperText={errors.homeTeam ? '得点者を選択してください。' : ''}
                 >
-                  {homeTeamSquads.map((player) => (
+                  {homeGoalOptions.map((player) => (
                     <MenuItem key={player.id} value={player.footballapi_player_id}>
                       {player.player_name}
                     </MenuItem>
@@ -485,7 +519,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                 select
                 label="アウェイチームを選択"
                 value={selectedAwayTeam}
-                onChange={(e) => handleTeamChange(e, setSelectedAwayTeam, setAwayTeamSquads)}
+                onChange={(e) => handleTeamChange(e, setSelectedAwayTeam, setAwayTeamSquads, setAwayGoalOptions)}
                 color="primary"
                 fullWidth
                 margin="normal"
@@ -541,7 +575,7 @@ const GameAdd = ({ convention_id, teams}: Props) => {
                   error={errors.awayTeam}
                   helperText={errors.awayTeam ? 'アウェイチームの得点者を選択してください。' : ''}
                 >
-                  {awayTeamSquads.map((player) => (
+                  {awayGoalOptions.map((player) => (
                     <MenuItem key={player.id} value={player.footballapi_player_id}>
                       {player.player_name}
                     </MenuItem>
