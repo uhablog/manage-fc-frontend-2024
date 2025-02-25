@@ -13,6 +13,8 @@ const DisplayComments = ({comments}: Props) => {
   useEffect(() => {
     if (comments.length === 0) {
       setNoComment(true);
+    } else {
+      setNoComment(false);
     }
   }, [comments]);
 
