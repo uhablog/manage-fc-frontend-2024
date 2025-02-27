@@ -22,7 +22,7 @@ const ConventionSummary = ({id}: Props) => {
           <DisplayTeams id={id}/>
         </Grid2>
         <Grid2 xs={12} md={4}>
-          <DisplayGames convention_id={id} initialLimit={5} />
+          <DisplayGames convention_id={id} initialLimit={5} addButtonDisplay={false} />
         </Grid2>
         <Grid2 xs={12} md={8}>
           <Typography variant="h6" component="p">得点ランク</Typography>
