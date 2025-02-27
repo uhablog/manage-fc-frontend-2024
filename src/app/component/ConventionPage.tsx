@@ -6,6 +6,7 @@ import DisplayTeams from "./DisplayTeams";
 import ConventionSummary from "./ConventionSummary";
 import StatsGrid from "./StatsGrid";
 import CustomTabPanel from "./CustomTabPanel";
+import DisplayBestEleven from "./ConventionBestEleven";
 
 type Props = {
   id: string
@@ -31,10 +32,13 @@ const ConventionPage = ({id}: Props) => {
             <DisplayTeams id={id} />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
-            <DisplayGames convention_id={id} />
+            <DisplayGames convention_id={id} addButtonDisplay={true} />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={3}>
             <StatsGrid convention_id={id} />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={4}>
+            <DisplayBestEleven convention_id={id} />
           </CustomTabPanel>
         </Grid2>
       </Grid2>

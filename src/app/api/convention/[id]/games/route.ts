@@ -15,8 +15,7 @@ export async function GET(
   if (res.ok) {
     const json = await res.json();
     return Response.json({
-      'data': json.data
-    });
+      'data': json.data});
   } else {
     console.error('gameの取得に失敗',res.status);
     return Response.json({
