@@ -36,9 +36,15 @@ const TeamGamesCard = ({
               color={'black'}
               href={`/conventions/${game.convention_id}/games/detail/${game.id}`}
               sx={{
-                '&:hover': {
-                  color: 'blue',
-                  textDecoration: 'underline'
+                display: "block",
+                px: 2,
+                py: 1,
+                borderRadius: 1,
+                transition: "background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                  boxShadow: 1,
+                  transform: "translateY(-1px)"
                 }
               }}
             >
