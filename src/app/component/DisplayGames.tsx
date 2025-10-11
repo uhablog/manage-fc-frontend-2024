@@ -8,9 +8,10 @@ import { useEffect, useState } from "react";
 type Props = {
   convention_id: string
   initialLimit?: number
+  addButtonDisplay?: boolean
 }
 
-const DisplayGames = ({ convention_id, initialLimit }: Props) => {
+const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: Props) => {
 
   const [games, setGames] = useState<Game[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
@@ -83,19 +84,23 @@ const DisplayGames = ({ convention_id, initialLimit }: Props) => {
           }
         </CardContent>
       </Card>
-      <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{
-            position: 'absolute',
-            bottom: 16,
-            right: 16
-          }}
-        >
-          <Add />
-        </Fab>
-      </MuiLink>
+      {
+        addButtonDisplay && (
+          <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
+            <Fab
+              color="primary"
+              aria-label="add"
+              sx={{
+                position: 'absolute',
+                bottom: 16,
+                right: 16
+              }}
+            >
+              <Add />
+            </Fab>
+          </MuiLink>
+        )
+      }
     </>
   )
 };
