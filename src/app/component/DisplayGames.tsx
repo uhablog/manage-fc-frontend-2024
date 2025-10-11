@@ -8,9 +8,10 @@ import { useEffect, useState } from "react";
 type Props = {
   convention_id: string
   initialLimit?: number
+  addButtonDisplay?: boolean
 }
 
-const DisplayGames = ({ convention_id, initialLimit }: Props) => {
+const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: Props) => {
 
   const [games, setGames] = useState<Game[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
@@ -50,10 +51,16 @@ const DisplayGames = ({ convention_id, initialLimit }: Props) => {
               color='black'
               href={`/conventions/${convention_id}/games/detail/${game.game_id}`}
               sx={{
-                '&:hover': {
-                  color: 'blue',
-                  textDecoration: 'underline'
-                },
+                display: "block",
+                px: 2,
+                py: 1,
+                borderRadius: 1,
+                transition: "background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                  boxShadow: 1,
+                  transform: "translateY(-1px)"
+                }
               }}
             >
               <Grid2 container>
@@ -83,19 +90,23 @@ const DisplayGames = ({ convention_id, initialLimit }: Props) => {
           }
         </CardContent>
       </Card>
-      <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{
-            position: 'absolute',
-            bottom: 16,
-            right: 16
-          }}
-        >
-          <Add />
-        </Fab>
-      </MuiLink>
+      {
+        addButtonDisplay && (
+          <MuiLink component={NextLink} underline="none" href={`/conventions/${convention_id}/games/add`} >
+            <Fab
+              color="primary"
+              aria-label="add"
+              sx={{
+                position: 'absolute',
+                bottom: 16,
+                right: 16
+              }}
+            >
+              <Add />
+            </Fab>
+          </MuiLink>
+        )
+      }
     </>
   )
 };

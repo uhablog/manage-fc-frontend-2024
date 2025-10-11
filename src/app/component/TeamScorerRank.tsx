@@ -42,6 +42,15 @@ export const TeamScorerRank = ({team_id}: Props) => {
                 key={index}
                 secondaryAction={player.score}
                 onClick={() => handleClick(player.footballapi_player_id)}
+                sx={{
+                  borderRadius: 1,
+                  transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                    boxShadow: 1,
+                    transform: "translateY(-1px)"
+                  }
+                }}
               >
                 <ListItemAvatar>
                   <Avatar alt={`team scorer ${index+1}`} src={`https://media.api-sports.io/football/players/${player.footballapi_player_id}.png`}/>
