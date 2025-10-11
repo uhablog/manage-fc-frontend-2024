@@ -84,6 +84,15 @@ const DisplayTeams = ({id}: Props) => {
                 <ListItem
                   key={index}
                   disableGutters
+                  sx={{
+                    borderRadius: 1,
+                    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                      boxShadow: 1,
+                      transform: "translateY(-1px)"
+                    }
+                  }}
                 >
                     <Grid2 xs={1}>
                       <Typography variant="body2">{team.id}</Typography>
@@ -94,12 +103,6 @@ const DisplayTeams = ({id}: Props) => {
                         underline="none"
                         color={'black'}
                         href={`/conventions/${id}/team/${team.team_id}`}
-                        sx={{
-                          '&:hover': {
-                            color: 'blue',
-                            textDecoration: 'underline'
-                          }
-                        }}
                       >
                         <Typography variant="body2">{team.teamName}</Typography>
                       </MuiLink>

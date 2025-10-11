@@ -16,7 +16,17 @@ const DisplayConventions = ({ conventions }: Props) => {
           <>
             <Grid2 xs={12} sm={6} md={3} key={index}>
               <MuiLink component={NextLink} underline="none" href={`/conventions/${convention.id}`}>
-                <Card>
+                <Card
+                  sx={{
+                    cursor: "pointer",
+                    transition: "box-shadow 0.2s ease, transform 0.2s ease",
+                    "&:hover": {
+                      boxShadow: 4,
+                      transform: "translateY(-2px)",
+                      borderColor: "primary.main"
+                    }
+                  }}
+                >
                   <CardContent>
                     <Typography gutterBottom variant="h5" component='div'>{convention.convention_name}</Typography>
                     <Typography variant="body2" color='text.secondary' >{convention.held_day.slice(0, 10)}</Typography>

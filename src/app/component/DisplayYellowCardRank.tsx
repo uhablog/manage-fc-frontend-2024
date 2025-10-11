@@ -58,6 +58,15 @@ const DisplayYellowCardRank = ({id, initialLimit}: Props) => {
                   key={index}
                   disableGutters
                   onClick={() => handleClick(card.footballapi_player_id, card.team_id)}
+                  sx={{
+                    borderRadius: 1,
+                    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                      boxShadow: 1,
+                      transform: "translateY(-1px)"
+                    }
+                  }}
                 >
                     <Grid2 xs={1}>
                       <Typography variant="body2">{card.rank}</Typography>
