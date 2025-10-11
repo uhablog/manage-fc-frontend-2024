@@ -31,19 +31,19 @@ export async function POST(
 ) {
   const accessTokenResult = await getAccessToken();
   const body = await request.json();
-  console.log('request body is ', body);
-  return Response.json({});
-  // const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/best-eleven`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${accessTokenResult.accessToken}`,
-  //     'Content-Type': 'application/json',
-  //     'Accept': 'application/json'
-  //   },
-  //   body: JSON.stringify(await request.json())
-  // });
+  // console.log('request body is ', body);
+  // return Response.json({});
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/best-eleven`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessTokenResult.accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
 
-  // const result = await res.json();
+  const result = await res.json();
 
-  // return Response.json({result});
+  return Response.json({result});
 }
