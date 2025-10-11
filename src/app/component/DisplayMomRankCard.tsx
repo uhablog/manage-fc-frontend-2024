@@ -58,6 +58,15 @@ const DisplayMomRankCard = ({id, initialLimit}: Props) => {
                   key={index}
                   disableGutters
                   onClick={() => handleClick(mom_data.footballapi_player_id, mom_data.team_id)}
+                  sx={{
+                    borderRadius: 1,
+                    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                      boxShadow: 1,
+                      transform: "translateY(-1px)"
+                    }
+                  }}
                 >
                     <Grid2 xs={1}>
                       <Typography variant="body2">{mom_data.rank}</Typography>
