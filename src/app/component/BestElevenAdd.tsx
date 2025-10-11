@@ -2,6 +2,7 @@ import { BestElevenPlayer } from "@/types/BestElevenPlayer";
 import { Squad } from "@/types/Squads";
 import { Team } from "@/types/Team";
 import { Box, Button, Card, CardContent, Grid, MenuItem, TextField, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -26,6 +27,7 @@ const positionOptions = ['FW', 'MF', 'DF', 'GK'];
 
 const BestElevenAdd = ({ convention_id }: Props) => {
 
+  const router = useRouter();
   const [ teams, setTeams ] = useState<Team[]>([]);
   const [ players, setPlayers ] = useState<{[key: string]: Squad[]}>({});
   const [ formPlayers, setFormPlayers ] = useState<RegisterBestElevenPlayer[]>(Array(11).fill(defaultPlayer));
@@ -69,7 +71,7 @@ const BestElevenAdd = ({ convention_id }: Props) => {
 
     if (field === 'player_name') {
       const selectedTeamPlayers = players[formPlayers[index].team_id] || [];
-      const selectedPlayer = selectedTeamPlayers.find((p) => p.id === value);
+      const selectedPlayer = selectedTeamPlayers.find((p) => p.player_name === value);
       console.log('selectedTeamPlayers',selectedTeamPlayers);
       console.log('selectedPlayer', selectedPlayer);
       updatedPlayers[index] = {
@@ -105,7 +107,11 @@ const BestElevenAdd = ({ convention_id }: Props) => {
         })
       });
       const result = await response.json();
-      console.log(result);
+      if (result.result.success) {
+        router.push(`/conventions/${convention_id}`);
+      } else {
+        console.log('error');
+      }
     } catch (error) {
       console.error('Faild to submit best eleven: ', error);
     }
@@ -151,7 +157,7 @@ const BestElevenAdd = ({ convention_id }: Props) => {
                   >
                     <MenuItem value=""><em>選択してください</em></MenuItem>
                     {players[formPlayer.team_id]?.map((player) => (
-                      <MenuItem key={player.id} value={player.id}>
+                      <MenuItem key={player.id} value={player.player_name}>
                         {player.player_name}
                       </MenuItem>
                     ))}
