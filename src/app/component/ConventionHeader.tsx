@@ -36,11 +36,19 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
         <CardContent>
           <Typography variant="h4">{convention?.convention_name}</Typography>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              aria-label="basic tabs example"
+              variant="scrollable" // 横スクロールを有効化
+              scrollButtons="auto" // スクロールボタンを自動表示
+              allowScrollButtonsMobile // モバイルでもスクロールボタンを表示
+            >
               <Tab label="概要" {...a11yProps(0)} />
-              <Tab label="順位表" {...a11yProps(1)} />
+              <Tab label="順位" {...a11yProps(1)} />
               <Tab label="試合" {...a11yProps(2)} />
               <Tab label="スタッツ" {...a11yProps(3)} />
+              <Tab label="ベストイレブン" {...a11yProps(4)} />
             </Tabs>
           </Box>
         </CardContent>
