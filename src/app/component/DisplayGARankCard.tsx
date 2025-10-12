@@ -51,6 +51,7 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
     <>
       <Card>
         <CardContent>
+          <Typography variant="h6" component="p">G+A</Typography>
           <List>
             <Grid2 container spacing={2}>
               {(limit ? ga_rank.slice(0, limit) : ga_rank).map((ga_data, index) => (

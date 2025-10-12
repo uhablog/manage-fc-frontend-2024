@@ -24,18 +24,22 @@ const ConventionSummary = ({id}: Props) => {
         <Grid2 xs={12} md={4}>
           <DisplayGames convention_id={id} initialLimit={5} addButtonDisplay={false} />
         </Grid2>
-        <Grid2 xs={12} md={8}>
-          <Typography variant="h6" component="p">得点ランク</Typography>
+        <Grid2 xs={12} md={4}>
           <DisplayScorer id={id} initialLimit={5} />
-          <Typography variant="h6" component="p">アシストランク</Typography>
+        </Grid2>
+        <Grid2 xs={12} md={4}>
           <DisplayAssistRankCard id={id} initialLimit={5} />
-          <Typography variant="h6" component="p">G+Aランク</Typography>
+        </Grid2>
+        <Grid2 xs={12} md={4}>
           <DisplayGARankCard id={id} initialLimit={5} />
-          <Typography variant="h6" component="p">MOMランク</Typography>
+        </Grid2>
+        <Grid2 xs={12} md={4}>
           <DisplayMomRankCard id={id} initialLimit={5} />
-          <Typography variant="h6" component="p">イエローカードランク</Typography>
+        </Grid2>
+        <Grid2 xs={12} md={4}>
           <DisplayYellowCardRank id={id} initialLimit={5} />
-          <Typography variant="h6" component="p">レッドカードランク</Typography>
+        </Grid2>
+        <Grid2 xs={12} md={4}>
           <DisplayRedCardRank id={id} initialLimit={5} />
         </Grid2>
       </Grid2>
