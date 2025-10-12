@@ -51,6 +51,7 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
     <>
       <Card>
         <CardContent>
+          <Typography variant="h6" component="p">Red Cards</Typography>
           <List>
             <Grid2 container spacing={2}>
               {(limit ? cards.slice(0, limit) : cards).map((card, index) => (

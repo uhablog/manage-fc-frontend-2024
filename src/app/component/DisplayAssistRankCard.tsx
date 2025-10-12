@@ -51,6 +51,7 @@ const DisplayAssistRankCard = ({id, initialLimit}: Props) => {
     <>
       <Card>
         <CardContent>
+          <Typography variant="h6" component="p">Assists</Typography>
           <List>
             <Grid2 container spacing={2}>
               {(limit ? assists.slice(0, limit) : assists).map((assist, index) => (
