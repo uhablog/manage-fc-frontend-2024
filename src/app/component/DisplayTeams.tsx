@@ -28,8 +28,7 @@ const DisplayTeams = ({id}: Props) => {
     wins: team.win,
     draw: team.draw,
     lose: team.lose,
-    totalScore: team.totalScore,
-    concededPoints: team.concededPoints,
+    plusMinus: `${team.totalScore}-${team.concededPoints}`,
     diff: team.totalScore - team.concededPoints,
     winPoints: (team.win * 3) + team.draw,
     team_id: team.id
@@ -51,34 +50,31 @@ const DisplayTeams = ({id}: Props) => {
           <List>
             <Grid2 container spacing={2}>
               <Grid2 xs={1}>
-                <Typography variant="body2">順位</Typography>
+                <Typography variant="body2">#</Typography>
+              </Grid2>
+              <Grid2 xs={3}>
+                <Typography variant="body2"></Typography>
+              </Grid2>
+              <Grid2 xs={1}>
+                <Typography variant="body2">PL</Typography>
+              </Grid2>
+              <Grid2 xs={1}>
+                <Typography variant="body2">W</Typography>
+              </Grid2>
+              <Grid2 xs={1}>
+                <Typography variant="body2">D</Typography>
+              </Grid2>
+              <Grid2 xs={1}>
+                <Typography variant="body2">L</Typography>
               </Grid2>
               <Grid2 xs={2}>
-                <Typography variant="body2">クラブ</Typography>
+                <Typography variant="body2">+/-</Typography>
               </Grid2>
               <Grid2 xs={1}>
-                <Typography variant="body2">試合数</Typography>
+                <Typography variant="body2">GD</Typography>
               </Grid2>
               <Grid2 xs={1}>
-                <Typography variant="body2">勝</Typography>
-              </Grid2>
-              <Grid2 xs={1}>
-                <Typography variant="body2">引</Typography>
-              </Grid2>
-              <Grid2 xs={1}>
-                <Typography variant="body2">負</Typography>
-              </Grid2>
-              <Grid2 xs={1}>
-                <Typography variant="body2">得点</Typography>
-              </Grid2>
-              <Grid2 xs={1}>
-                <Typography variant="body2">失点</Typography>
-              </Grid2>
-              <Grid2 xs={2}>
-                <Typography variant="body2">得失点差</Typography>
-              </Grid2>
-              <Grid2 xs={1}>
-                <Typography variant="body2">勝点</Typography>
+                <Typography variant="body2">PTS</Typography>
               </Grid2>
               {rankedTeams.map(( team, index) => (
                 <ListItem
@@ -97,7 +93,7 @@ const DisplayTeams = ({id}: Props) => {
                     <Grid2 xs={1}>
                       <Typography variant="body2">{team.id}</Typography>
                     </Grid2>
-                    <Grid2 xs={2}>
+                    <Grid2 xs={3}>
                       <MuiLink
                         component={NextLink}
                         underline="none"
@@ -119,13 +115,10 @@ const DisplayTeams = ({id}: Props) => {
                     <Grid2 xs={1}>
                       <Typography variant="body2">{team.lose}</Typography>
                     </Grid2>
-                    <Grid2 xs={1}>
-                      <Typography variant="body2">{team.totalScore}</Typography>
-                    </Grid2>
-                    <Grid2 xs={1}>
-                      <Typography variant="body2">{team.concededPoints}</Typography>
-                    </Grid2>
                     <Grid2 xs={2}>
+                      <Typography variant="body2">{team.plusMinus}</Typography>
+                    </Grid2>
+                    <Grid2 xs={1}>
                       <Typography variant="body2">{team.diff}</Typography>
                     </Grid2>
                     <Grid2 xs={1}>
