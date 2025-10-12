@@ -51,6 +51,7 @@ const DisplayMomRankCard = ({id, initialLimit}: Props) => {
     <>
       <Card>
         <CardContent>
+          <Typography variant="h6" component="p">MOM</Typography>
           <List>
             <Grid2 container spacing={2}>
               {(limit ? mom.slice(0, limit) : mom).map((mom_data, index) => (

@@ -53,6 +53,7 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
     <>
       <Card>
         <CardContent>
+          <Typography variant="h6" component="p">Top Scorer</Typography>
           <List>
             <Grid2 container spacing={2}>
               {(limit ? scorers.slice(0, limit) : scorers).map((scorer, index) => (
