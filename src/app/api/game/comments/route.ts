@@ -7,7 +7,7 @@ export async function POST(
   const accessTokenResult = await getAccessToken();
   const session = await getSession();
   const body = await request.json();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game/comment`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/game/comment`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`,

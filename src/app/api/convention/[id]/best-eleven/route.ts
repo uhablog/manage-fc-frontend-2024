@@ -5,7 +5,7 @@ export async function GET(
   { params }: { params: { id: string }}
 ) {
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/best-eleven?convention_id=${params.id}`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/convention/best-eleven?convention_id=${params.id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
@@ -33,7 +33,7 @@ export async function POST(
   const body = await request.json();
   // console.log('request body is ', body);
   // return Response.json({});
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/best-eleven`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/convention/best-eleven`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`,

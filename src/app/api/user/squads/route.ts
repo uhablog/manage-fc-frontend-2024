@@ -8,7 +8,7 @@ export async function GET(
   const user_id = searchParams.get('user_id');
 
   const accessTokenResult = await getAccessToken();
-  const result = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/user/squads?user_id=${user_id}`, {
+  const result = await fetch(`${process.env.API_ENDPOINT}/api/user/squads?user_id=${user_id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`

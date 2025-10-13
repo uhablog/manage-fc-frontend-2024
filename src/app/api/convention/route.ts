@@ -6,8 +6,19 @@ export async function GET(
 ) {
   const searchParams = request.nextUrl.searchParams;
   const convention_id = searchParams.get('convention_id');
+  const user_id = searchParams.get('user_id');
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention?convention_id=${convention_id}`, {
+
+  console.log('/convention');
+
+  let fetchUrl = `${process.env.API_ENDPOINT}/api/convention`;
+  if (convention_id) {
+    fetchUrl += `?convention_id=${convention_id}`;
+  }
+  if (user_id) {
+    fetchUrl += `?user_id=${user_id}`;
+  }
+  const res = await fetch(fetchUrl, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
@@ -33,7 +44,7 @@ export async function POST(
 ) {
   const accessTokenResult = await getAccessToken();
   const reqBody = await request.json();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/convention`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`,
