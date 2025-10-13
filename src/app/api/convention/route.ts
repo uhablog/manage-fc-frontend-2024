@@ -9,8 +9,6 @@ export async function GET(
   const user_id = searchParams.get('user_id');
   const accessTokenResult = await getAccessToken();
 
-  console.log('/convention');
-
   let fetchUrl = `${process.env.API_ENDPOINT}/api/convention`;
   if (convention_id) {
     fetchUrl += `?convention_id=${convention_id}`;

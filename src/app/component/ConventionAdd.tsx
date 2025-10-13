@@ -1,4 +1,4 @@
-import { Auth0User } from "@/types/Auth0User";
+import { OrgUser } from "@/types/OrgUser.ts";
 import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 const ConventionAdd = () => {
 
   const router = useRouter();
-  const [auth0Users, setAuth0Users] = useState<Auth0User[]>([]);
+  const [orgUsers, setOrgUsers] = useState<OrgUser[]>([]);
   const [convention_name, setConventionName] = useState<string>('');
   const [held_day, setHeldDay] = useState<string>('');
   const [teams, setTeams] = useState([{ team_name: '', manager_name: '', auth0_user_id: '' }]);
@@ -22,13 +22,13 @@ const ConventionAdd = () => {
 
   useEffect(() => {
 
-    const fetchAuth0Users = async () => {
-      const res = await fetch('/api/auth0/users');
+    const fetchOrgUser = async () => {
+      const res = await fetch('/api/org/members');
       const json = await res.json();
-      console.log(json.users);
-      setAuth0Users(json.users);
+      console.log(json);
+      setOrgUsers(json);
     }
-    fetchAuth0Users();
+    fetchOrgUser();
   }, []);
 
   const handleAddTeam = () => {
@@ -141,8 +141,8 @@ const ConventionAdd = () => {
               error={teams[index]['auth0_user_id'] === ''}
               helperText={teams[index]['auth0_user_id'] === ''? '監督名を入力してください。': ''}
             >
-              {auth0Users.map((user) => (
-                <MenuItem key={user.user_id} value={user.user_id}>
+              {orgUsers.map((user) => (
+                <MenuItem key={user.auth0_user_id} value={user.auth0_user_id}>
                   {user.nickname}
                 </MenuItem>
               ))}
