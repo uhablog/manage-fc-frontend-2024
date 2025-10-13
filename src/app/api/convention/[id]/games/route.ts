@@ -5,7 +5,7 @@ export async function GET(
   { params }: { params: { id: string}}
 ) {
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/games?convention_id=${params.id}`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/convention/games?convention_id=${params.id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
@@ -28,7 +28,7 @@ export async function POST(
   request: Request,
 ) {
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/game`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`,
