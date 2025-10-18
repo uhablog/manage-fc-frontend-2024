@@ -1,14 +1,15 @@
 import { Game } from "@/types/Game"
 import { Person, SportsSoccer } from "@mui/icons-material";
-import { Box, Card, CardContent, Link as MuiLink, Typography } from "@mui/material";
+import { Avatar, Box, Card, CardContent, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import NextLink from 'next/link';
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
+import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   convention_id: string
-  game: Game | undefined
+  game: Game
 }
 
 const GameScore = ({
@@ -26,6 +27,12 @@ const GameScore = ({
     setSelectedTeamId(team_id);
     setOpen(true);
   }
+
+  const userIds = useMemo(
+    () => [game.home_team_auth0_user_id, game.away_team_auth0_user_id],
+    [game]
+  );
+  const emblemUrls = useEmblemUrls(userIds);
 
   return (
     <>
@@ -45,9 +52,18 @@ const GameScore = ({
                   }
                 }}
               >
-                <Typography variant="h6" component="p">
-                  {game?.home_team_name}
-                </Typography>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Typography variant="body1" component="p" textAlign="right">
+                    {game?.home_team_name}
+                  </Typography>
+                  <Avatar
+                    src={emblemUrls[game.home_team_auth0_user_id] ?? undefined}
+                    alt={`${game.home_team_name} emblem`}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {game.home_team_name?.charAt(0) ?? "?"}
+                  </Avatar>
+                </Stack>
               </MuiLink>
             </Grid2>
             <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'center'}} >
@@ -68,9 +84,18 @@ const GameScore = ({
                   }
                 }}
               >
-                <Typography variant="h6" component="p">
-                  {game?.away_team_name}
-                </Typography>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Avatar
+                    src={emblemUrls[game.away_team_auth0_user_id] ?? undefined}
+                    alt={`${game.away_team_name} emblem`}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {game.away_team_name?.charAt(0) ?? "?"}
+                  </Avatar>
+                  <Typography variant="body1" component="p">
+                    {game.away_team_name}
+                  </Typography>
+                </Stack>
               </MuiLink>
             </Grid2>
             <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
