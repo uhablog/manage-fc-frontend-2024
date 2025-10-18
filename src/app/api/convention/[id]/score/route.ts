@@ -27,9 +27,7 @@ export async function GET(
   let emblemUrls: Record<string, string | null> = {};
   try {
     const token = ensureBlobToken();
-    const userIds = scorers
-      .map((item: { auth0_user_id?: string }) => item.auth0_user_id)
-      .filter((id): id is string => typeof id === "string");
+    const userIds = scorers.map((item: { auth0_user_id?: string }) => item.auth0_user_id ?? null);
     emblemUrls = await getLatestBlobUrls(userIds, token);
   } catch (error) {
     console.error("Failed to resolve scorer emblems", error);

@@ -26,9 +26,7 @@ export async function GET(
   let emblemUrls: Record<string, string | null> = {};
   try {
     const token = ensureBlobToken();
-    const userIds = yellowCards
-      .map((item: { auth0_user_id?: string }) => item.auth0_user_id)
-      .filter((id): id is string => typeof id === "string");
+    const userIds = yellowCards.map((item: { auth0_user_id?: string }) => item.auth0_user_id ?? null);
     emblemUrls = await getLatestBlobUrls(userIds, token);
   } catch (error) {
     console.error("Failed to resolve yellow card emblems", error);

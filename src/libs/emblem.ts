@@ -38,7 +38,10 @@ export const getLatestBlobUrl = async (userId: string, token: string) => {
   return latestBlob?.url ?? null;
 };
 
-export const getLatestBlobUrls = async (userIds: string[], token?: string) => {
+export const getLatestBlobUrls = async (
+  userIds: Array<string | null | undefined>,
+  token?: string
+) => {
   const uniqueIds = Array.from(
     new Set(
       userIds
@@ -73,4 +76,3 @@ export const getLatestBlobUrls = async (userIds: string[], token?: string) => {
 
   return Object.fromEntries(entries) as Record<string, string | null>;
 };
-
