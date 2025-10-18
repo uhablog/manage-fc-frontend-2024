@@ -1,9 +1,10 @@
 import { Assist } from "@/types/Assist";
-import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link as MuiLink, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NextLink from 'next/link';
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
+import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -27,6 +28,13 @@ const DisplayAssistRankCard = ({id, initialLimit}: Props) => {
     };
     fetchAssistRank();
   }, [id]);
+
+  const userIds = useMemo(
+    () => assists.map((assist) => assist.auth0_user_id),
+    [assists]
+  );
+
+  const emblemUrls = useEmblemUrls(userIds);
 
   const showAllAssists = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
@@ -81,20 +89,29 @@ const DisplayAssistRankCard = ({id, initialLimit}: Props) => {
                       <Typography variant="body2">{assist.assist_name}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
-                      <MuiLink
-                        component={NextLink}
-                        underline="none"
-                        color={'black'}
-                        href={`/conventions/${id}/team/${assist.team_id}`}
-                        sx={{
-                          '&:hover': {
-                            color: 'blue',
-                            textDecoration: 'underline'
-                          }
-                        }}
-                      >
-                        <Typography variant="body2">{assist.team_name}</Typography>
-                      </MuiLink>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar
+                          src={emblemUrls[assist.auth0_user_id] ?? undefined}
+                          alt={`${assist.team_name} emblem`}
+                          sx={{ width: 25, height: 25}}
+                        >
+                          {assist.assist_name?.charAt(0) ?? "?"}
+                        </Avatar>
+                        <MuiLink
+                          component={NextLink}
+                          underline="none"
+                          color={'black'}
+                          href={`/conventions/${id}/team/${assist.team_id}`}
+                          sx={{
+                            '&:hover': {
+                              color: 'blue',
+                              textDecoration: 'underline'
+                            }
+                          }}
+                        >
+                          <Typography variant="body2">{assist.team_name}</Typography>
+                        </MuiLink>
+                      </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
                       <Typography variant="body2">{assist.score}</Typography>

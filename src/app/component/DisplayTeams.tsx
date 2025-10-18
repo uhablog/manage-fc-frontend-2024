@@ -2,7 +2,8 @@ import { Team } from "@/types/Team";
 import { Avatar, Card, CardContent, List, Link as MuiLink, ListItem, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import NextLink from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -10,7 +11,6 @@ type Props = {
 
 const DisplayTeams = ({id}: Props) => {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [emblemUrls, setEmblemUrls] = useState<Record<string, string | null>>({});
 
   // チーム一覧の取得
   useEffect(() => {
@@ -23,51 +23,11 @@ const DisplayTeams = ({id}: Props) => {
     fetchTeams();
   }, [id]);
 
-  useEffect(() => {
-    if (!teams.length) {
-      return;
-    }
-
-    const uniqueUserIds = Array.from(new Set(teams.map((team) => team.auth0_user_id)));
-    let isCancelled = false;
-
-    const fetchEmblems = async () => {
-      const entries = await Promise.all(
-        uniqueUserIds.map(async (userId) => {
-          try {
-            const res = await fetch(`/api/user/emblem?userId=${encodeURIComponent(userId)}`);
-
-            if (!res.ok) {
-              throw new Error("Failed to load emblem");
-            }
-
-            const data: { url: string | null } = await res.json();
-            return [userId, data.url] as const;
-          } catch {
-            return [userId, null] as const;
-          }
-        })
-      );
-
-      if (isCancelled) {
-        return;
-      }
-
-      setEmblemUrls((prev) => {
-        const next = { ...prev };
-        for (const [userId, url] of entries) {
-          next[userId] = url;
-        }
-        return next;
-      });
-    };
-
-    fetchEmblems();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [teams]);
+  const userIds = useMemo(
+    () => teams.map((team) => team.auth0_user_id),
+    [teams]
+  );
+  const emblemUrls = useEmblemUrls(userIds);
 
   // 順位表に表示するデータを整えて、リストに追加する
   const rankingList = teams?.map(team => ({

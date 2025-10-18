@@ -1,9 +1,10 @@
 import { Scorer } from "@/types/Scorer";
-import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link as MuiLink, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NextLink from 'next/link';
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
+import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -28,6 +29,12 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
 
     fetchScorer();
   }, [id]);
+
+  const userIds = useMemo(
+    () => scorers.map((scorer) => scorer.auth0_user_id),
+    [scorers]
+  );
+  const emblemUrls = useEmblemUrls(userIds);
 
   const showAllScorers = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
@@ -83,20 +90,29 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                       <Typography variant="body2">{scorer.scorer_name}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
-                      <MuiLink
-                        component={NextLink}
-                        underline="none"
-                        color={'black'}
-                        href={`/conventions/${id}/team/${scorer.team_id}`}
-                        sx={{
-                          '&:hover': {
-                            color: 'blue',
-                            textDecoration: 'underline'
-                          }
-                        }}
-                      >
-                        <Typography variant="body2">{scorer.team_name}</Typography>
-                      </MuiLink>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar
+                          src={emblemUrls[scorer.auth0_user_id] ?? undefined}
+                          alt={`${scorer.team_name} emblem`}
+                          sx={{ width: 25, height: 25}}
+                        >
+                          {scorer.scorer_name?.charAt(0) ?? "?"}
+                        </Avatar>
+                        <MuiLink
+                          component={NextLink}
+                          underline="none"
+                          color={'black'}
+                          href={`/conventions/${id}/team/${scorer.team_id}`}
+                          sx={{
+                            '&:hover': {
+                              color: 'blue',
+                              textDecoration: 'underline'
+                            }
+                          }}
+                        >
+                          <Typography variant="body2">{scorer.team_name}</Typography>
+                        </MuiLink>
+                      </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
                       <Typography variant="body2">{scorer.score}</Typography>
