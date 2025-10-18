@@ -3,8 +3,7 @@ import { Avatar, Button, Card, CardContent, Fab, Link as MuiLink, Stack, Typogra
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Add } from "@mui/icons-material";
 import NextLink from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
+import { useEffect, useState } from "react";
 
 type Props = {
   convention_id: string
@@ -27,12 +26,6 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
     fetchGames();
   }, [convention_id]);
 
-  const userIds = useMemo(
-    () =>
-      games.flatMap((game) => [game.home_team_auth0_user_id, game.away_team_auth0_user_id]),
-    [games]
-  );
-  const emblemUrls = useEmblemUrls(userIds);
   const showAllGames = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
   };
@@ -77,7 +70,7 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
                       {game?.home_team_name}
                     </Typography>
                     <Avatar
-                      src={emblemUrls[game.home_team_auth0_user_id] ?? undefined}
+                      src={game.home_team_emblem_url ?? undefined}
                       alt={`${game.home_team_name} emblem`}
                       sx={{ width: 32, height: 32 }}
                     >
@@ -93,7 +86,7 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
                 <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Avatar
-                      src={emblemUrls[game.away_team_auth0_user_id] ?? undefined}
+                      src={game.away_team_emblem_url ?? undefined}
                       alt={`${game.away_team_name} emblem`}
                       sx={{ width: 32, height: 32 }}
                     >

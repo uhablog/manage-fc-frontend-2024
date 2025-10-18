@@ -1,9 +1,8 @@
 import { TeamGame } from "@/types/TeamGames";
-import { Avatar, Card, CardContent, Link as MuiLink,Stack,Typography } from "@mui/material";
+import { Avatar, Card, CardContent, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useMemo, useState } from "react";
-import NextLink from 'next/link';
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
+import { useEffect, useState } from "react";
+import NextLink from "next/link";
 
 type Props = {
   team_id: string
@@ -24,13 +23,6 @@ const TeamGamesCard = ({
     };
     fetchTeamGames();
   }, [team_id]);
-
-  const userIds = useMemo(
-    () =>
-      teamGames.flatMap((game) => [game.home_team_auth0_user_id, game.away_team_auth0_user_id]),
-    [teamGames]
-  );
-  const emblemUrls = useEmblemUrls(userIds);
 
   return (
     <Card>
@@ -63,7 +55,7 @@ const TeamGamesCard = ({
                       {game?.home_team_name}
                     </Typography>
                     <Avatar
-                      src={emblemUrls[game.home_team_auth0_user_id] ?? undefined}
+                      src={game.home_team_emblem_url ?? undefined}
                       alt={`${game.home_team_name} emblem`}
                       sx={{ width: 32, height: 32 }}
                     >
@@ -82,7 +74,7 @@ const TeamGamesCard = ({
                 <Grid2 xs={5} display='flex' justifyContent='left'>
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Avatar
-                      src={emblemUrls[game.away_team_auth0_user_id] ?? undefined}
+                      src={game.away_team_emblem_url ?? undefined}
                       alt={`${game.away_team_name} emblem`}
                       sx={{ width: 32, height: 32 }}
                     >

@@ -1,45 +1,8 @@
 import { getSession } from "@auth0/nextjs-auth0";
-import { list, put, del } from "@vercel/blob";
+import { del, list, put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-
-const BLOB_PREFIX = "emblems";
-
-const ensureToken = () => {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
-    throw new Error("Missing BLOB_READ_WRITE_TOKEN");
-  }
-  return token;
-};
-
-const toSafeUserId = (raw: string) => {
-  const sanitized = raw.replaceAll("..", "").replaceAll("\\", "").replaceAll("?", "").trim();
-  if (!sanitized || sanitized.includes("/")) {
-    throw new Error("Invalid userId");
-  }
-  return sanitized;
-};
-
-const buildPrefix = (userId: string) => `${BLOB_PREFIX}/${userId}/`;
-
-const getLatestBlobUrl = async (userId: string, token: string) => {
-  const prefix = buildPrefix(userId);
-  const { blobs } = await list({ prefix, token });
-
-  if (!blobs.length) {
-    return null;
-  }
-
-  const latestBlob = blobs.reduce((latest, current) => {
-    if (!latest) {
-      return current;
-    }
-    return new Date(current.uploadedAt) > new Date(latest.uploadedAt) ? current : latest;
-  });
-
-  return latestBlob?.url ?? null;
-};
+import { buildPrefix, ensureBlobToken, getLatestBlobUrl, toSafeUserId } from "@/libs/emblem";
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,7 +26,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const token = ensureToken();
+    const token = ensureBlobToken();
     const url = await getLatestBlobUrl(safeUserId, token);
 
     return NextResponse.json({ url });
@@ -104,7 +67,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
     }
 
-    const token = ensureToken();
+    const token = ensureBlobToken();
     const prefix = buildPrefix(safeUserId);
     const arrayBuffer = await emblemFile.arrayBuffer();
 
