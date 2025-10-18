@@ -1,10 +1,9 @@
 import { Mom } from "@/types/Mom";
 import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useMemo, useState } from "react";
-import NextLink from 'next/link';
+import { useEffect, useState } from "react";
+import NextLink from "next/link";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -18,12 +17,6 @@ const DisplayMomRankCard = ({id, initialLimit}: Props) => {
   const [ open, setOpen ] = useState<boolean>(false);
   const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
   const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
-  const userIds = useMemo(
-    () => mom.map((item) => item.auth0_user_id),
-    [mom]
-  );
-  const emblemUrls = useEmblemUrls(userIds);
-
   // アシストランクの取得
   useEffect(() => {
     const fetchMomRank = async () => {
@@ -89,7 +82,7 @@ const DisplayMomRankCard = ({id, initialLimit}: Props) => {
                     <Grid2 xs={4}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
-                          src={emblemUrls[mom_data.auth0_user_id] ?? undefined}
+                          src={mom_data.emblem_url ?? undefined}
                           alt={`${mom_data.team_name} emblem`}
                           sx={{ width: 25, height: 25 }}
                         >

@@ -1,10 +1,9 @@
 import { Scorer } from "@/types/Scorer";
 import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useMemo, useState } from "react";
-import NextLink from 'next/link';
+import { useEffect, useState } from "react";
+import NextLink from "next/link";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -29,12 +28,6 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
 
     fetchScorer();
   }, [id]);
-
-  const userIds = useMemo(
-    () => scorers.map((scorer) => scorer.auth0_user_id),
-    [scorers]
-  );
-  const emblemUrls = useEmblemUrls(userIds);
 
   const showAllScorers = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
@@ -92,7 +85,7 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                     <Grid2 xs={4}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
-                          src={emblemUrls[scorer.auth0_user_id] ?? undefined}
+                          src={scorer.emblem_url ?? undefined}
                           alt={`${scorer.team_name} emblem`}
                           sx={{ width: 25, height: 25}}
                         >

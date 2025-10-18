@@ -1,10 +1,9 @@
-import { Avatar, Button, Card, CardContent, Link as MuiLink,List, ListItem, ListItemAvatar, Stack, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, Link as MuiLink, List, ListItem, ListItemAvatar, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
 import { RedCards } from "@/types/RedCards";
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -18,12 +17,6 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
   const [ open, setOpen ] = useState<boolean>(false);
   const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
   const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
-  const userIds = useMemo(
-    () => cards.map((card) => card.auth0_user_id),
-    [cards]
-  );
-  const emblemUrls = useEmblemUrls(userIds);
-
 
   // カードランクの取得
   useEffect(() => {
@@ -90,7 +83,7 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
                     <Grid2 xs={4}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
-                          src={emblemUrls[card.auth0_user_id] ?? undefined}
+                          src={card.emblem_url ?? undefined}
                           alt={`${card.team_name} emblem`}
                           sx={{ width: 25, height: 25 }}
                         >
