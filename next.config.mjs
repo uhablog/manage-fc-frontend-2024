@@ -1,8 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: true,
+  },
   images: {
-    domains: ['s.gravatar.com']
-  }
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "s.gravatar.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.vercel-storage.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
