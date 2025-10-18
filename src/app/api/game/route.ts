@@ -7,7 +7,7 @@ export async function GET(
   const searchParams = request.nextUrl.searchParams;
   const game_id = searchParams.get('game_id');
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game?game_id=${game_id}`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/game?game_id=${game_id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
@@ -16,7 +16,7 @@ export async function GET(
 
   if (res.ok) {
 
-    const comment_res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game/comment?game_id=${game_id}`, {
+    const comment_res = await fetch(`${process.env.API_ENDPOINT}/api/game/comment?game_id=${game_id}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessTokenResult.accessToken}`
@@ -45,7 +45,7 @@ export async function DELETE(
 ) {
   const accessTokenResult = await getAccessToken();
   const body = await request.json();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/game`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/game`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`,

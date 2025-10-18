@@ -1,9 +1,10 @@
 import { Game } from "@/types/Game"
-import { Button, Card, CardContent, Fab, Link as MuiLink,Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, Fab, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Add } from "@mui/icons-material";
 import NextLink from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   convention_id: string
@@ -26,6 +27,12 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
     fetchGames();
   }, [convention_id]);
 
+  const userIds = useMemo(
+    () =>
+      games.flatMap((game) => [game.home_team_auth0_user_id, game.away_team_auth0_user_id]),
+    [games]
+  );
+  const emblemUrls = useEmblemUrls(userIds);
   const showAllGames = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
   };
@@ -43,9 +50,9 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
       <Card>
         <CardContent>
           <Typography variant="h6" component={'p'}>試合結果</Typography>
-          {(limit ? games.slice(0, limit): games).map((game, index) => (
+          {(limit ? games.slice(0, limit): games).map((game) => (
             <MuiLink
-              key={index}
+              key={game.game_id}
               component={NextLink}
               underline="none"
               color='black'
@@ -65,9 +72,18 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
             >
               <Grid2 container>
                 <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
-                  <Typography variant="h6" component="p">
-                    {game?.home_team_name}
-                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="body1" component="p" textAlign="right">
+                      {game?.home_team_name}
+                    </Typography>
+                    <Avatar
+                      src={emblemUrls[game.home_team_auth0_user_id] ?? undefined}
+                      alt={`${game.home_team_name} emblem`}
+                      sx={{ width: 32, height: 32 }}
+                    >
+                      {game.home_team_name?.charAt(0) ?? "?"}
+                    </Avatar>
+                  </Stack>
                 </Grid2>
                 <Grid2 xs={2} sx={{display: 'flex', justifyContent: 'center'}} >
                   <Typography variant="h6" component="p">
@@ -75,9 +91,18 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
                   </Typography>
                 </Grid2>
                 <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
-                  <Typography variant="h6" component="p">
-                    {game?.away_team_name}
-                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Avatar
+                      src={emblemUrls[game.away_team_auth0_user_id] ?? undefined}
+                      alt={`${game.away_team_name} emblem`}
+                      sx={{ width: 32, height: 32 }}
+                    >
+                      {game.away_team_name?.charAt(0) ?? "?"}
+                    </Avatar>
+                    <Typography variant="body1" component="p">
+                      {game?.away_team_name}
+                    </Typography>
+                  </Stack>
                 </Grid2>
               </Grid2>
             </MuiLink>

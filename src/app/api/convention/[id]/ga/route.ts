@@ -5,7 +5,7 @@ export async function GET(
   { params }: {params: {id: string}}
 ) {
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/convention/ga-rank?convention_id=${params.id}`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/convention/ga-rank?convention_id=${params.id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`

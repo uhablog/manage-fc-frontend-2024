@@ -4,7 +4,7 @@ export async function POST(
   request: Request
 ) {
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/team/transfer`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/team/transfer`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`,

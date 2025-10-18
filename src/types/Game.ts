@@ -14,6 +14,8 @@ export type Game = {
   mom_team_id: string
   home_team_id: string
   away_team_id: string
+  home_team_auth0_user_id: string
+  away_team_auth0_user_id: string
 }
 
 type Scorers = {
