@@ -1,9 +1,10 @@
-import { Avatar, Button, Card, CardContent, Link as MuiLink,List, ListItem, ListItemAvatar, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, Link as MuiLink,List, ListItem, ListItemAvatar, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
 import { RedCards } from "@/types/RedCards";
+import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
 type Props = {
   id: string
@@ -17,6 +18,12 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
   const [ open, setOpen ] = useState<boolean>(false);
   const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
   const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
+  const userIds = useMemo(
+    () => cards.map((card) => card.auth0_user_id),
+    [cards]
+  );
+  const emblemUrls = useEmblemUrls(userIds);
+
 
   // カードランクの取得
   useEffect(() => {
@@ -81,20 +88,29 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
                       <Typography variant="body2">{card.player_name}</Typography>
                     </Grid2>
                     <Grid2 xs={4}>
-                      <MuiLink
-                        component={NextLink}
-                        underline="none"
-                        color={'black'}
-                        href={`/conventions/${id}/team/${card.team_id}`}
-                        sx={{
-                          '&:hover': {
-                            color: 'blue',
-                            textDecoration: 'underline'
-                          }
-                        }}
-                      >
-                        <Typography variant="body2">{card.team_name}</Typography>
-                      </MuiLink>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar
+                          src={emblemUrls[card.auth0_user_id] ?? undefined}
+                          alt={`${card.team_name} emblem`}
+                          sx={{ width: 25, height: 25 }}
+                        >
+                          {card.team_name?.charAt(0) ?? "?"}
+                        </Avatar>
+                        <MuiLink
+                          component={NextLink}
+                          underline="none"
+                          color={'black'}
+                          href={`/conventions/${id}/team/${card.team_id}`}
+                          sx={{
+                            '&:hover': {
+                              color: 'blue',
+                              textDecoration: 'underline'
+                            }
+                          }}
+                        >
+                          <Typography variant="body2">{card.team_name}</Typography>
+                        </MuiLink>
+                      </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
                       <Typography variant="body2">{card.score}</Typography>
