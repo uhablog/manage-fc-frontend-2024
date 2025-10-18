@@ -24,6 +24,7 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
   );
   const emblemUrls = useEmblemUrls(userIds);
 
+
   // カードランクの取得
   useEffect(() => {
     const fetchRedCardRank = async () => {

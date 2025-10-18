@@ -6,6 +6,7 @@ import NextLink from 'next/link';
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
 import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 
+
 type Props = {
   id: string
   initialLimit?: number

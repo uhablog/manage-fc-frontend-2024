@@ -24,6 +24,7 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
   );
   const emblemUrls = useEmblemUrls(userIds);
 
+
   // アシストランクの取得
   useEffect(() => {
     const fetchGaRank = async () => {

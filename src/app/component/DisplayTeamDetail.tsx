@@ -19,6 +19,7 @@ const DisplayTeamDetail = ({
   const [teamData, setTeamData] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [value, setValue] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

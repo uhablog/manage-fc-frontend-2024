@@ -33,7 +33,6 @@ const DisplayGames = ({ convention_id, initialLimit, addButtonDisplay = true }: 
     [games]
   );
   const emblemUrls = useEmblemUrls(userIds);
-
   const showAllGames = () => {
     setLimit(undefined);  // 'すべて表示'をクリックしたらlimitを解除
   };
