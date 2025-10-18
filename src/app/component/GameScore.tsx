@@ -67,7 +67,7 @@ const GameScore = ({
               </MuiLink>
             </Grid2>
             <Grid2 xs={4} sx={{display: 'flex', justifyContent: 'center'}} >
-              <Typography variant="h6" component="p">
+              <Typography variant="h5" component="p">
                 {game?.home_team_score} - {game?.away_team_score}
               </Typography>
             </Grid2>
