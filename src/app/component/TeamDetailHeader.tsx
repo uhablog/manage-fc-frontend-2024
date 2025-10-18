@@ -1,7 +1,5 @@
 'use client'
 
-import { useMemo } from "react";
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
 import { Team } from "@/types/Team";
 import { Avatar, Box, Button, Card, CardContent, Stack, Tab, Tabs, Typography } from "@mui/material";
 import NextLink from 'next/link';
@@ -27,8 +25,7 @@ const TeamDetailHeader = ({
   handleChange
 }: Props) => {
 
-  const userIds = useMemo(() => [teamData.auth0_user_id], [teamData.auth0_user_id]);
-  const emblemUrl = useEmblemUrls(userIds);
+  const emblemUrl = teamData.emblem_url ?? undefined;
 
   return (
     <Card>
@@ -36,7 +33,7 @@ const TeamDetailHeader = ({
         <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
           <Stack direction="row" spacing={2} alignItems="center">
           <Avatar
-            src={emblemUrl[teamData.auth0_user_id] ?? undefined}
+            src={emblemUrl}
             alt={`${teamData.team_name} emblem`}
             sx={{ width: 64, height: 64}}
           >
