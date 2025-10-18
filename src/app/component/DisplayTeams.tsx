@@ -1,5 +1,5 @@
 import { Team } from "@/types/Team";
-import { Card, CardContent, List, Link as MuiLink, ListItem, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, List, Link as MuiLink, ListItem, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import NextLink from "next/link";
 import { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ type Props = {
 
 const DisplayTeams = ({id}: Props) => {
   const [teams, setTeams] = useState<Team[]>([]);
+  const [emblemUrls, setEmblemUrls] = useState<Record<string, string | null>>({});
 
   // チーム一覧の取得
   useEffect(() => {
@@ -21,6 +22,53 @@ const DisplayTeams = ({id}: Props) => {
 
     fetchTeams();
   }, [id]);
+
+  useEffect(() => {
+    if (!teams.length) {
+      return;
+    }
+
+    const uniqueUserIds = Array.from(new Set(teams.map((team) => team.auth0_user_id)));
+    let isCancelled = false;
+
+    const fetchEmblems = async () => {
+      const entries = await Promise.all(
+        uniqueUserIds.map(async (userId) => {
+          try {
+            const res = await fetch(`/api/user/emblem?userId=${encodeURIComponent(userId)}`);
+
+            if (!res.ok) {
+              throw new Error("Failed to load emblem");
+            }
+
+            const data: { url: string | null } = await res.json();
+            return [userId, data.url] as const;
+          } catch {
+            return [userId, null] as const;
+          }
+        })
+      );
+
+      if (isCancelled) {
+        return;
+      }
+
+      setEmblemUrls((prev) => {
+        const next = { ...prev };
+        for (const [userId, url] of entries) {
+          next[userId] = url;
+        }
+        return next;
+      });
+    };
+
+    fetchEmblems();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [teams]);
+
   // 順位表に表示するデータを整えて、リストに追加する
   const rankingList = teams?.map(team => ({
     teamName: team.team_name,
@@ -31,7 +79,8 @@ const DisplayTeams = ({id}: Props) => {
     plusMinus: `${team.totalScore}-${team.concededPoints}`,
     diff: team.totalScore - team.concededPoints,
     winPoints: (team.win * 3) + team.draw,
-    team_id: team.id
+    team_id: team.id,
+    userId: team.auth0_user_id
   }));
 
   // 勝ち点でソートする
@@ -93,15 +142,24 @@ const DisplayTeams = ({id}: Props) => {
                     <Grid2 xs={1}>
                       <Typography variant="body2">{team.id}</Typography>
                     </Grid2>
-                    <Grid2 xs={3}>
-                      <MuiLink
-                        component={NextLink}
-                        underline="none"
-                        color={'black'}
-                        href={`/conventions/${id}/team/${team.team_id}`}
-                      >
-                        <Typography variant="body2">{team.teamName}</Typography>
-                      </MuiLink>
+                    <Grid2 xs={3} sx={{ display: "flex", alignItems: "center" }}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar
+                          src={emblemUrls[team.userId] ?? undefined}
+                          alt={`${team.teamName} emblem`}
+                          sx={{ width: 32, height: 32 }}
+                        >
+                          {team.teamName.charAt(0)}
+                        </Avatar>
+                        <MuiLink
+                          component={NextLink}
+                          underline="none"
+                          color={'black'}
+                          href={`/conventions/${id}/team/${team.team_id}`}
+                        >
+                          <Typography variant="body2">{team.teamName}</Typography>
+                        </MuiLink>
+                      </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
                       <Typography variant="body2">{team.games}</Typography>
