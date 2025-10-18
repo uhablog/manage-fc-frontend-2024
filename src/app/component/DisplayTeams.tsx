@@ -2,8 +2,7 @@ import { Team } from "@/types/Team";
 import { Avatar, Card, CardContent, List, Link as MuiLink, ListItem, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import NextLink from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useEmblemUrls } from "@/hooks/useEmblemUrls";
+import { useEffect, useState } from "react";
 
 type Props = {
   id: string
@@ -23,12 +22,6 @@ const DisplayTeams = ({id}: Props) => {
     fetchTeams();
   }, [id]);
 
-  const userIds = useMemo(
-    () => teams.map((team) => team.auth0_user_id),
-    [teams]
-  );
-  const emblemUrls = useEmblemUrls(userIds);
-
   // 順位表に表示するデータを整えて、リストに追加する
   const rankingList = teams?.map(team => ({
     teamName: team.team_name,
@@ -40,7 +33,8 @@ const DisplayTeams = ({id}: Props) => {
     diff: team.totalScore - team.concededPoints,
     winPoints: (team.win * 3) + team.draw,
     team_id: team.id,
-    userId: team.auth0_user_id
+    userId: team.auth0_user_id,
+    emblemUrl: team.emblem_url ?? null,
   }));
 
   // 勝ち点でソートする
@@ -105,7 +99,7 @@ const DisplayTeams = ({id}: Props) => {
                     <Grid2 xs={3} sx={{ display: "flex", alignItems: "center" }}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
-                          src={emblemUrls[team.userId] ?? undefined}
+                          src={team.emblemUrl ?? undefined}
                           alt={`${team.teamName} emblem`}
                           sx={{ width: 32, height: 32 }}
                         >
