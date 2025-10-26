@@ -1,5 +1,4 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
-import { ensureBlobToken, getLatestBlobUrls } from "@/libs/emblem";
 
 export async function GET(
   request: Request,
@@ -21,26 +20,5 @@ export async function GET(
   }
 
   const json = await res.json();
-  const teams = Array.isArray(json.data) ? json.data : [];
-
-  let emblemUrls: Record<string, string | null> = {};
-  try {
-    const token = ensureBlobToken();
-    const userIds = teams.map((team: { auth0_user_id?: string }) => team.auth0_user_id ?? null);
-    emblemUrls = await getLatestBlobUrls(userIds, token);
-  } catch (error) {
-    console.error("Failed to resolve team emblems", error);
-  }
-
-  const enrichedTeams = teams.map((team: { auth0_user_id?: string }) => ({
-    ...team,
-    emblem_url:
-      team.auth0_user_id && emblemUrls[team.auth0_user_id]
-        ? emblemUrls[team.auth0_user_id]
-        : null,
-  }));
-
-  return Response.json({
-    data: enrichedTeams,
-  });
+  return Response.json(json);
 }

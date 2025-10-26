@@ -1,8 +1,15 @@
-import { getSession } from "@auth0/nextjs-auth0";
+import { getAccessToken, getSession } from "@auth0/nextjs-auth0";
 import { del, list, put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { buildPrefix, ensureBlobToken, getLatestBlobUrl, toSafeUserId } from "@/libs/emblem";
+import {
+  buildPrefix,
+  ensureBlobToken,
+  getLatestBlobUrl,
+  toSafeUserId,
+  fetchEmblemUrlFromDb,
+  saveEmblemUrlToDb,
+} from "@/libs/emblem";
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,8 +33,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const token = ensureBlobToken();
-    const url = await getLatestBlobUrl(safeUserId, token);
+    let url: string | null = null;
+    try {
+      const accessTokenResult = await getAccessToken();
+      if (accessTokenResult?.accessToken) {
+        url = await fetchEmblemUrlFromDb(userId, accessTokenResult.accessToken);
+      }
+    } catch (error) {
+      console.error("Failed to load emblem from database", error);
+    }
+
+    if (!url) {
+      try {
+        const blobToken = ensureBlobToken();
+        url = await getLatestBlobUrl(safeUserId, blobToken);
+      } catch (blobError) {
+        console.error("Failed to load emblem from blob storage", blobError);
+      }
+    }
 
     return NextResponse.json({ url });
   } catch (error) {
@@ -67,15 +90,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
     }
 
-    const token = ensureBlobToken();
+    const blobToken = ensureBlobToken();
     const prefix = buildPrefix(safeUserId);
     const arrayBuffer = await emblemFile.arrayBuffer();
 
-    const { blobs } = await list({ prefix, token });
+    const { blobs } = await list({ prefix, token: blobToken });
+    console.log('listでblobを取得: route.ts');
     if (blobs.length) {
       await Promise.all(
         blobs.map((blob) =>
-          del(blob.url, { token }).catch((err) => {
+          del(blob.url, { token: blobToken }).catch((err) => {
             console.error("Failed to remove old emblem", err);
           })
         )
@@ -86,8 +110,17 @@ export async function POST(request: NextRequest) {
     const { url } = await put(key, arrayBuffer, {
       access: "public",
       contentType: emblemFile.type,
-      token,
+      token: blobToken,
     });
+
+    try {
+      const accessTokenResult = await getAccessToken();
+      if (accessTokenResult?.accessToken) {
+        await saveEmblemUrlToDb(url, accessTokenResult.accessToken);
+      }
+    } catch (error) {
+      console.error("Failed to persist emblem url in database", error);
+    }
 
     return NextResponse.json({ url }, { status: 201 });
   } catch (error) {
