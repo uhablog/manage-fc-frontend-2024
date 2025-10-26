@@ -70,7 +70,7 @@ const GameDetail = ({ id, game_id }: Props) => {
       {
         error || game === undefined ?
         <>
-          <Typography>試合情報の取得に失敗しました。</Typography>
+          <Typography>試合情報の取得中</Typography>
         </>
         :
         <>

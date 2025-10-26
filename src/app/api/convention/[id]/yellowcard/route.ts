@@ -1,5 +1,4 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
-import { ensureBlobToken, getLatestBlobUrls } from "@/libs/emblem";
 
 export async function GET(
   request: Request,
@@ -21,24 +20,5 @@ export async function GET(
   }
 
   const json = await res.json();
-  const yellowCards = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
-
-  let emblemUrls: Record<string, string | null> = {};
-  try {
-    const token = ensureBlobToken();
-    const userIds = yellowCards.map((item: { auth0_user_id?: string }) => item.auth0_user_id ?? null);
-    emblemUrls = await getLatestBlobUrls(userIds, token);
-  } catch (error) {
-    console.error("Failed to resolve yellow card emblems", error);
-  }
-
-  const enrichedYellowCards = yellowCards.map((item: { auth0_user_id?: string }) => ({
-    ...item,
-    emblem_url:
-      item.auth0_user_id && emblemUrls[item.auth0_user_id]
-        ? emblemUrls[item.auth0_user_id]
-        : null,
-  }));
-
-  return Response.json(enrichedYellowCards);
+  return Response.json(json);
 };
