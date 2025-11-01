@@ -13,7 +13,6 @@ import DisplayComments from "./DisplayComments";
 import BottomTextField from "./BottomTextField";
 import { Game } from "@/types/Game";
 import { Comment } from "@/types/Comment";
-import { ResultPreview } from "@/types/ResultPreview";
 import GameResisterScorer from "./GameResisterScorer";
 import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
@@ -23,6 +22,9 @@ import { ResultFormState } from "@/types/ResultFormState";
 import GameResultConfirm from "./GameResultConfirm";
 import GameScore from "./GameScore";
 import GameMomCard from "./GameMomCard";
+import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
+import { CardTimelineEvent } from "@/types/CardTimelineEvent";
+import GameFlowTimeline from "./GameFlowTimeline";
 
 type Props = {
   id: string;
@@ -42,12 +44,6 @@ const GameDetail = ({ id, game_id }: Props) => {
     confirmed: false,
   });
 
-  const [resultPreview, setResultPreview] = useState<ResultPreview>({
-    homeScore: 0,
-    awayScore: 0,
-    momName: "",
-    momSide: null,
-  });
   const [homePlayers, setHomePlayers] = useState<PlayerOption[]>([]);
   const [awayPlayers, setAwayPlayers] = useState<PlayerOption[]>([]);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
@@ -55,6 +51,8 @@ const GameDetail = ({ id, game_id }: Props) => {
     message: "",
     severity: "success",
   });
+  const [goalEvents, setGoalEvents] = useState<GoalTimelineEvent[]>([]);
+  const [cardEvents, setCardEvents] = useState<CardTimelineEvent[]>([]);
   const [isResultConfirmed, setIsResultConfirmed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -84,28 +82,16 @@ const GameDetail = ({ id, game_id }: Props) => {
 
   useEffect(() => {
     if (!game) return;
-    setResultForm((prev) => ({
-      ...prev,
-      homeScore: String(game.home_team_score ?? 0),
-      awayScore: String(game.away_team_score ?? 0),
+    setResultForm({
       momSide:
         game.mom_team_id && game.away_team_id && game.mom_team_id === game.away_team_id
           ? "AWAY"
           : "HOME",
       momPlayer: null,
       confirmed: Boolean(game.confirmed),
-    }));
-    setResultPreview({
-      homeScore: game.home_team_score ?? 0,
-      awayScore: game.away_team_score ?? 0,
-      momName: game.mom ?? "",
-      momSide:
-        game.mom_team_id && game.away_team_id && game.mom_team_id === game.away_team_id
-          ? "AWAY"
-          : game.mom_team_id
-          ? "HOME"
-          : null,
     });
+    setGoalEvents(sortGoalEvents(buildGoalEventsFromGame(game)));
+    setCardEvents(sortCardEvents(buildCardEventsFromGame(game)));
     setIsResultConfirmed(Boolean(game.confirmed));
   }, [game]);
 
@@ -157,16 +143,89 @@ const GameDetail = ({ id, game_id }: Props) => {
     fetchSquads();
   }, [game]);
 
-  const goalResistered = (side: string) => {
-    setResultPreview((prev) => ({
-      ...prev,
-      homeScore: prev.homeScore + (side === "HOME" ? 1 : 0),
-      awayScore: prev.awayScore + (side === "AWAY" ? 1 : 0),
-    }));
-    setResultForm((prev) => ({
-      ...prev,
-    }));
-  }
+  const handleGoalAdded = (event: GoalTimelineEvent) => {
+    setGoalEvents((prev) => sortGoalEvents([...prev, event]));
+    setGame((prev) => {
+      if (!prev) return prev;
+      if (event.side === "HOME") {
+        const updatedAssists = event.assist
+          ? [...prev.home_team_assists, {
+              name: event.assist.label,
+              footballapi_player_id: parsePlayerId(event.assist.value),
+            }]
+          : prev.home_team_assists;
+        return {
+          ...prev,
+          home_team_score: prev.home_team_score + 1,
+          home_team_scorer: [
+            ...prev.home_team_scorer,
+            {
+              name: event.scorer.label,
+              footballapi_player_id: parsePlayerId(event.scorer.value),
+              minuts: normalizeMinute(event.minute),
+            },
+          ],
+          home_team_assists: updatedAssists,
+        };
+      }
+
+      const updatedAssists = event.assist
+        ? [...prev.away_team_assists, {
+            name: event.assist.label,
+            footballapi_player_id: parsePlayerId(event.assist.value),
+          }]
+        : prev.away_team_assists;
+      return {
+        ...prev,
+        away_team_score: prev.away_team_score + 1,
+        away_team_scorer: [
+          ...prev.away_team_scorer,
+          {
+            name: event.scorer.label,
+            footballapi_player_id: parsePlayerId(event.scorer.value),
+            minuts: normalizeMinute(event.minute),
+          },
+        ],
+        away_team_assists: updatedAssists,
+      };
+    });
+  };
+
+  const handleCardAdded = (event: CardTimelineEvent) => {
+    setCardEvents((prev) => sortCardEvents([...prev, event]));
+    setGame((prev) => {
+      if (!prev) return prev;
+      const cardEntry = {
+        name: event.player.label,
+        footballapi_player_id: parsePlayerId(event.player.value),
+        minuts: normalizeMinute(event.minute),
+      };
+
+      if (event.side === "HOME") {
+        if (event.cardType === "YELLOW") {
+          return {
+            ...prev,
+            home_team_yellow_cards: [...prev.home_team_yellow_cards, cardEntry],
+          };
+        }
+        return {
+          ...prev,
+          home_team_red_cards: [...prev.home_team_red_cards, cardEntry],
+        };
+      }
+
+      if (event.cardType === "YELLOW") {
+        return {
+          ...prev,
+          away_team_yellow_cards: [...prev.away_team_yellow_cards, cardEntry],
+        };
+      }
+      return {
+        ...prev,
+        away_team_red_cards: [...prev.away_team_red_cards, cardEntry],
+      };
+    });
+  };
 
   const postComment = async (comment: string) => {
     if (!comment || comment === "") return;
@@ -237,6 +296,12 @@ const GameDetail = ({ id, game_id }: Props) => {
           {isResultConfirmed ? (
             <>
               <GameMomCard game={game} />
+              <GameFlowTimeline
+                goalEvents={goalEvents}
+                cardEvents={cardEvents}
+                homeTeamName={game.home_team_name}
+                awayTeamName={game.away_team_name}
+              />
               <DisplayComments comments={comments} />
             </>
           ) : (
@@ -248,41 +313,51 @@ const GameDetail = ({ id, game_id }: Props) => {
                 scrollButtons="auto"
                 aria-label="game management tabs"
               >
+                <Tab label="Event" />
                 <Tab label="得点" />
                 <Tab label="カード" />
                 <Tab label="試合結果" />
                 <Tab label="コメント" />
               </Tabs>
               <TabPanel value={tab} index={0}>
+                <GameFlowTimeline
+                  goalEvents={goalEvents}
+                  cardEvents={cardEvents}
+                  homeTeamName={game.home_team_name}
+                  awayTeamName={game.away_team_name}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={1}>
                 <GameResisterScorer
                   game={game}
                   homePlayers={homePlayers}
                   awayPlayers={awayPlayers}
                   setSnackbar={setSnackbar}
-                  onGoalRegistered={goalResistered}
+                  goalEvents={goalEvents}
+                  onGoalAdded={handleGoalAdded}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={1}>
+              <TabPanel value={tab} index={2}>
                 <GameResisterCard
                   game={game}
                   homePlayers={homePlayers}
                   awayPlayers={awayPlayers}
                   setSnackbar={setSnackbar}
+                  cardEvents={cardEvents}
+                  onCardAdded={handleCardAdded}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={2}>
+              <TabPanel value={tab} index={3}>
                 <GameResultConfirm
                   game={game}
                   homePlayers={homePlayers}
                   awayPlayers={awayPlayers}
                   setSnackbar={setSnackbar}
-                  preview={resultPreview}
                   resultForm={resultForm}
                   setResultForm={setResultForm}
-                  setResultPreview={setResultPreview}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={3}>
+              <TabPanel value={tab} index={4}>
                 <DisplayComments comments={comments} />
               </TabPanel>
             </Box>
@@ -312,8 +387,104 @@ const TabPanel = ({ children, value, index }: { children?: ReactNode; value: num
 };
 
 const mapSquadToPlayerOption = (player: Squad): PlayerOption => ({
-  value: player.footballapi_player_id,
+  value: String(player.footballapi_player_id),
   label: player.player_name,
 });
+
+const sortGoalEvents = (events: GoalTimelineEvent[]): GoalTimelineEvent[] =>
+  [...events].sort((a, b) => {
+    const minuteA = normalizeMinute(a.minute);
+    const minuteB = normalizeMinute(b.minute);
+    if (minuteA === minuteB) {
+      return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+    }
+    return minuteA - minuteB;
+  });
+
+const sortCardEvents = (events: CardTimelineEvent[]): CardTimelineEvent[] =>
+  [...events].sort((a, b) => {
+    const minuteA = normalizeMinute(a.minute);
+    const minuteB = normalizeMinute(b.minute);
+    if (minuteA === minuteB) {
+      return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+    }
+    return minuteA - minuteB;
+  });
+
+const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
+  const events: GoalTimelineEvent[] = [];
+
+  const createOption = (id: number | string | null | undefined, name: string): PlayerOption => ({
+    value: String(id ?? name),
+    label: name,
+  });
+
+  const build = (
+    scorers: { name: string; footballapi_player_id: number; minuts: number }[] = [],
+    assists: { name: string; footballapi_player_id: number }[] = [],
+    side: TeamSide,
+  ) => {
+    scorers.forEach((scorer, index) => {
+      const scorerOption = createOption(scorer.footballapi_player_id, scorer.name);
+      const assistSource = assists[index];
+      const assistOption = assistSource
+        ? createOption(assistSource.footballapi_player_id, assistSource.name)
+        : null;
+
+      events.push({
+        minute: normalizeMinute(scorer.minuts),
+        side,
+        scorer: scorerOption,
+        assist: assistOption,
+      });
+    });
+  };
+
+  build(game.home_team_scorer, game.home_team_assists, "HOME");
+  build(game.away_team_scorer, game.away_team_assists, "AWAY");
+
+  return sortGoalEvents(events);
+};
+
+const buildCardEventsFromGame = (game: Game): CardTimelineEvent[] => {
+  const events: CardTimelineEvent[] = [];
+
+  const createOption = (id: number | string | null | undefined, name: string): PlayerOption => ({
+    value: String(id ?? name),
+    label: name,
+  });
+
+  const build = (
+    cards: { name: string; footballapi_player_id: number; minuts: number }[] = [],
+    side: TeamSide,
+    cardType: "YELLOW" | "RED",
+  ) => {
+    cards.forEach((card) => {
+      events.push({
+        minute: normalizeMinute(card.minuts),
+        side,
+        player: createOption(card.footballapi_player_id, card.name),
+        cardType,
+      });
+    });
+  };
+
+  build(game.home_team_yellow_cards, "HOME", "YELLOW");
+  build(game.away_team_yellow_cards, "AWAY", "YELLOW");
+  build(game.home_team_red_cards, "HOME", "RED");
+  build(game.away_team_red_cards, "AWAY", "RED");
+
+  return sortCardEvents(events);
+};
+
+const normalizeMinute = (minute: number | null | undefined) => {
+  const parsed = Number(minute);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const parsePlayerId = (value: string | number | null | undefined) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 export default GameDetail;

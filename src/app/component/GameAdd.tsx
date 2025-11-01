@@ -108,7 +108,6 @@ const GameAdd = ({ convention_id, teams}: Props) => {
           footballapi_player_id: '0',
           footballapi_team_id: '0',
           player_name: 'オウンゴール',
-
         }
       ])
     }

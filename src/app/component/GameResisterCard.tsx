@@ -1,9 +1,19 @@
-import { CardTimelineEvent } from "@/types/CardTimelineEvent";
+import {
+  Autocomplete,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
-import { Autocomplete, Button, Card, CardContent, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { CardTimelineEvent } from "@/types/CardTimelineEvent";
 import { CardTimeline } from "./CardTimeline";
 import { Game } from "@/types/Game";
 
@@ -19,18 +29,23 @@ type CardFormErrors = Partial<{
   player: string;
 }>;
 
-export default function GameResisterCard({
-  game,
-  homePlayers,
-  awayPlayers,
-  setSnackbar
-}: {
+type Props = {
   game: Game;
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
-}) {
+  cardEvents: CardTimelineEvent[];
+  onCardAdded: (event: CardTimelineEvent) => void;
+};
 
+export default function GameResisterCard({
+  game,
+  homePlayers,
+  awayPlayers,
+  setSnackbar,
+  cardEvents,
+  onCardAdded,
+}: Props) {
   const [cardForm, setCardForm] = useState<CardFormState>({
     side: "HOME",
     minute: "",
@@ -38,81 +53,6 @@ export default function GameResisterCard({
     cardType: "YELLOW",
   });
   const [cardErrors, setCardErrors] = useState<CardFormErrors>({});
-  const [cardEvents, setCardEvents] = useState<CardTimelineEvent[]>([]);
-
-  useEffect(() => {
-    if (!game) {
-      setCardEvents([]);
-      return;
-    };
-
-    const events: CardTimelineEvent[] = [];
-
-    const findPlayerOption = (players: PlayerOption[], id: number, name: string): PlayerOption => {
-      const stringId = String(id);
-      return (
-        players.find((player) => player.value === stringId) ?? {
-          value: stringId,
-          label: name,
-        }
-      );
-    };
-
-    const buildEvents = (
-      cards: { name: string; footballapi_player_id: number, minuts: number }[],
-      side: TeamSide,
-      players: PlayerOption[],
-      cardType: "YELLOW" | "RED"
-    ) => {
-      cards.forEach((card, index) => {
-        const cardOption = findPlayerOption(players, card.footballapi_player_id, card.name);
-
-        events.push({
-          minute: card.minuts,
-          side,
-          player: cardOption,
-          cardType: cardType
-        });
-      });
-    };
-
-    buildEvents(
-      game.home_team_yellow_cards ?? [],
-      "HOME",
-      homePlayers,
-      "YELLOW"
-    );
-    buildEvents(
-      game.away_team_yellow_cards ?? [],
-      "AWAY",
-      awayPlayers,
-      "YELLOW"
-    );
-    buildEvents(
-      game.home_team_red_cards ?? [],
-      "HOME",
-      homePlayers,
-      "RED"
-    );
-    buildEvents(
-      game.away_team_red_cards ?? [],
-      "AWAY",
-      awayPlayers,
-      "RED"
-    );
-
-    const sorted = events.sort((a, b) => {
-      const minuteA = Number.isFinite(a.minute) ? a.minute : 0;
-      const minuteB = Number.isFinite(b.minute) ? b.minute : 0;
-      if (minuteA === minuteB) {
-        return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
-      }
-      return minuteA - minuteB;
-    });
-
-    setCardEvents(sorted);
-
-  }, [game, homePlayers, awayPlayers]);
 
   const cardPlayerOptions = useMemo(
     () => (cardForm.side === "HOME" ? homePlayers : awayPlayers),
@@ -121,6 +61,7 @@ export default function GameResisterCard({
 
   const handleCardSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     const errors: CardFormErrors = {};
     const minuteValue = Number(cardForm.minute);
     if (Number.isNaN(minuteValue) || minuteValue < 1) {
@@ -138,20 +79,20 @@ export default function GameResisterCard({
 
     try {
       const response = await fetch(`/api/game/v2/card`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           game_id: game.game_id,
           card_info: {
             player_name: cardForm.player?.label,
-            footballapi_player_id: cardForm.player?.value
+            footballapi_player_id: cardForm.player?.value,
           },
-          team_id: cardForm.side === "HOME" ? game.home_team_id: game.away_team_id,
+          team_id: cardForm.side === "HOME" ? game.home_team_id : game.away_team_id,
           minute: cardForm.minute,
-          card_type: cardForm.cardType
-        })
+          card_type: cardForm.cardType,
+        }),
       });
 
       if (response.ok) {
@@ -162,12 +103,11 @@ export default function GameResisterCard({
           cardType: cardForm.cardType,
         };
 
-        setCardEvents((prev) => [...prev, newEvent].sort((a, b) => a.minute - b.minute));
+        onCardAdded(newEvent);
         setCardForm((prev) => ({
           ...prev,
           minute: "",
           player: null,
-          note: "",
         }));
         setCardErrors({});
         setSnackbar({
@@ -175,11 +115,12 @@ export default function GameResisterCard({
           message: "カードイベントを追加しました",
           severity: "success",
         });
+      } else {
+        window.alert("カードイベントの登録に失敗しました");
       }
     } catch (error) {
-      
+      console.error("Failed to submit card event", error);
     }
-
   };
 
   return (
@@ -283,5 +224,5 @@ export default function GameResisterCard({
         </Card>
       </Grid2>
     </Grid2>
-  )
-}; 
+  );
+}

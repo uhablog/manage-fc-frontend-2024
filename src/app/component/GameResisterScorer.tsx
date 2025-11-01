@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { GoalTimeline } from "./GoalTimeLine";
 import { PlayerOption } from "@/types/PlayerOption";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
@@ -31,7 +31,7 @@ type GoalFormErrors = Partial<{
 }>;
 
 const OWN_GOAL_OPTION: PlayerOption = {
-  value: "own-goal",
+  value: "0",
   label: "オウンゴール",
   isOwnGoal: true,
 };
@@ -41,13 +41,15 @@ export default function GameResisterScorer({
   homePlayers,
   awayPlayers,
   setSnackbar,
-  onGoalRegistered,
+  goalEvents,
+  onGoalAdded,
 }: {
   game: Game
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
-  onGoalRegistered: (side: TeamSide) => void;
+  goalEvents: GoalTimelineEvent[];
+  onGoalAdded: (event: GoalTimelineEvent) => void;
 }) {
 
   const [goalForm, setGoalForm] = useState<GoalFormState>({
@@ -57,64 +59,6 @@ export default function GameResisterScorer({
     assist: null,
   });
   const [goalErrors, setGoalErrors] = useState<GoalFormErrors>({});
-  const [goalEvents, setGoalEvents] = useState<GoalTimelineEvent[]>([]);
-
-  useEffect(() => {
-    if (!game) {
-      setGoalEvents([]);
-      return;
-    }
-
-    const events: GoalTimelineEvent[] = [];
-
-    const findPlayerOption = (players: PlayerOption[], id: number, name: string): PlayerOption => {
-      const stringId = String(id);
-      return (
-        players.find((player) => player.value === stringId) ?? {
-          value: stringId,
-          label: name,
-        }
-      );
-    };
-
-    const buildEvents = (
-      scorers: { name: string; footballapi_player_id: number, minuts: number }[],
-      assists: { name: string; footballapi_player_id: number }[],
-      side: TeamSide,
-      players: PlayerOption[],
-    ) => {
-      scorers.forEach((scorer, index) => {
-        const scorerOption = findPlayerOption(players, scorer.footballapi_player_id, scorer.name);
-        const assistSource = assists[index];
-        const assistOption = assistSource
-          ? findPlayerOption(players, assistSource.footballapi_player_id, assistSource.name)
-          : null;
-
-        events.push({
-          minute: scorer.minuts,
-          side,
-          scorer: scorerOption,
-          assist: assistOption,
-        });
-      });
-    };
-
-    buildEvents(
-      game.home_team_scorer ?? [],
-      game.home_team_assists ?? [],
-      "HOME",
-      homePlayers,
-    );
-    buildEvents(
-      game.away_team_scorer ?? [],
-      game.away_team_assists ?? [],
-      "AWAY",
-      awayPlayers,
-    );
-
-    setGoalEvents(events);
-  }, [game, homePlayers, awayPlayers]);
-
   const goalScorerOptions = useMemo(() => {
     const base = goalForm.side === "HOME" ? homePlayers : awayPlayers;
     return [...base, OWN_GOAL_OPTION];
@@ -160,12 +104,14 @@ export default function GameResisterScorer({
           minute: minuteValue,
           scorer: {
             player_name: goalForm.scorer?.label,
-            footballapi_player_id: goalForm.scorer?.value
+            footballapi_player_id: goalForm.scorer?.value,
           },
-          assist: {
-            player_name: goalForm.assist?.label,
-            footballapi_player_id: goalForm.assist?.value
-          }
+          assist: goalForm.assist
+            ? {
+                player_name: goalForm.assist.label,
+                footballapi_player_id: goalForm.assist.value,
+              }
+            : null,
         }),
       });
 
@@ -177,7 +123,7 @@ export default function GameResisterScorer({
           assist: goalForm.assist,
         };
 
-        setGoalEvents((prev) => [...prev, newEvent].sort((a, b) => a.minute - b.minute));
+        onGoalAdded(newEvent);
         setGoalForm((prev) => ({
           ...prev,
           minute: "",
@@ -190,7 +136,6 @@ export default function GameResisterScorer({
           message: "得点を追加しました",
           severity: "success",
         });
-        onGoalRegistered(goalForm.side);
       } else {
         window.alert('試合の登録に失敗');
       }

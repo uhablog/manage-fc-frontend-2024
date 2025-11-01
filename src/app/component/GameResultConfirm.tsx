@@ -1,10 +1,8 @@
 import { Autocomplete, Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { ResultPreviewCard } from "./ResultPreviewCard";
 import { PlayerOption } from "@/types/PlayerOption";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { SnackbarState } from "@/types/SnackbarState";
-import { ResultPreview } from "@/types/ResultPreview";
 import { ResultFormState } from "@/types/ResultFormState";
 import { Game } from "@/types/Game";
 
@@ -25,10 +23,8 @@ export default function GameResultConfirm({
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
-  preview: ResultPreview;
   resultForm: ResultFormState;
   setResultForm: Dispatch<SetStateAction<ResultFormState>>;
-  setResultPreview: Dispatch<SetStateAction<ResultPreview>>;
 }) {
 
   const [resultErrors, setResultErrors] = useState<ResultFormErrors>({});
