@@ -6,12 +6,10 @@ export const ResultPreviewCard = ({
   homeTeamName,
   awayTeamName,
   preview,
-  note,
 }: {
   homeTeamName: string;
   awayTeamName: string;
   preview: ResultPreview;
-  note: string;
 }) => (
   <Card variant="outlined">
     <CardContent>
@@ -24,9 +22,6 @@ export const ResultPreviewCard = ({
         </Typography>
         <Typography variant="body2" color={grey[600]}>
           MOM: {preview.momName || "未選択"}
-        </Typography>
-        <Typography variant="body2" color={grey[600]}>
-          備考: {note || "入力なし"}
         </Typography>
       </Stack>
     </CardContent>

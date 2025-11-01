@@ -161,7 +161,6 @@ const buildFlowEvents = (
       type: "CARD",
       cardType: card.cardType,
       title: card.player.label,
-      description: card.note || undefined,
     };
   });
 
