@@ -114,29 +114,6 @@ const GameScore = ({
                 ))}
               </Typography>
             </Grid2>
-            <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'right'}} >
-              <Typography variant="body1" component="p">
-                {game?.home_team_assists.map((assist, index) => (
-                  <Box
-                    key={index}
-                    onClick={() => handleClick(`${assist.footballapi_player_id}`, game?.home_team_id)}
-                  >{assist.name}</Box>
-                ))}
-              </Typography>
-            </Grid2>
-            <Grid2 xs={2} sx={{display: 'flex', justifyContent: 'center'}} >
-              <Person/>
-            </Grid2>
-            <Grid2 xs={5} sx={{display: 'flex', justifyContent: 'left'}} >
-              <Typography variant="body1" component="p">
-                {game?.away_team_assists.map((assist, index) => (
-                  <Box
-                    key={index}
-                    onClick={() => handleClick(`${assist.footballapi_player_id}`, game?.away_team_id)}
-                  >{assist.name}</Box>
-                ))}
-              </Typography>
-            </Grid2>
           </Grid2>
         </CardContent>
       </Card>
