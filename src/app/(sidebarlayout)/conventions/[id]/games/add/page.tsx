@@ -1,5 +1,5 @@
 'use client'
-import GameAdd from "@/app/component/GameAdd";
+import GameAddV2 from "@/app/component/GameAddV2";
 import { Team } from "@/types/Team";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import { useEffect, useState } from "react";
@@ -27,7 +27,7 @@ export default withPageAuthRequired(function GameAddPage({
   }, [id]);
   return (
     <>
-      <GameAdd convention_id={id} teams={teams} />
+      <GameAddV2 convention_id={id} teams={teams} />
     </>
   )
 }); 
