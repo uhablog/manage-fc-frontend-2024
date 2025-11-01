@@ -84,6 +84,7 @@ export default function GameResultConfirm({
           message: "試合結果を確定しました",
           severity: "success",
         });
+        window.location.reload();
       } else {
         window.alert('試合結果の確定に失敗');
       }
