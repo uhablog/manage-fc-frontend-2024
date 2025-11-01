@@ -14,7 +14,6 @@ import BottomTextField from "./BottomTextField";
 import { Game } from "@/types/Game";
 import { Comment } from "@/types/Comment";
 import { ResultPreview } from "@/types/ResultPreview";
-import MatchSummaryCard from "./MatchSummaryCard";
 import GameResisterScorer from "./GameResisterScorer";
 import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
@@ -22,6 +21,8 @@ import { Squad } from "@/types/Squads";
 import GameResisterCard from "./GameResisterCard";
 import { ResultFormState } from "@/types/ResultFormState";
 import GameResultConfirm from "./GameResultConfirm";
+import GameScore from "./GameScore";
+import GameMomCard from "./GameMomCard";
 
 type Props = {
   id: string;
@@ -65,7 +66,6 @@ const GameDetail = ({ id, game_id }: Props) => {
         const json = await res.json();
 
         if (json.success) {
-          console.log(json.game);
           setGame(json.game);
           setComments(Array.isArray(json.comments) ? json.comments : []);
         } else {
@@ -157,9 +157,6 @@ const GameDetail = ({ id, game_id }: Props) => {
     fetchSquads();
   }, [game]);
 
-  const homeTeamName = game?.home_team_name ?? "ホームチーム";
-  const awayTeamName = game?.away_team_name ?? "アウェイチーム";
-
   const goalResistered = (side: string) => {
     setResultPreview((prev) => ({
       ...prev,
@@ -233,15 +230,15 @@ const GameDetail = ({ id, game_id }: Props) => {
       <ButtonAppBar convention_id={id} game_id={game_id} />
       <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
         <Stack spacing={3}>
-          <MatchSummaryCard
-            homeTeamName={homeTeamName}
-            awayTeamName={awayTeamName}
-            homeEmblem={game.home_team_emblem_url}
-            awayEmblem={game.away_team_emblem_url}
-            preview={resultPreview}
+          <GameScore
+            convention_id={id}
+            game={game}
           />
           {isResultConfirmed ? (
-            <DisplayComments comments={comments} />
+            <>
+              <GameMomCard game={game} />
+              <DisplayComments comments={comments} />
+            </>
           ) : (
             <Box>
               <Tabs
