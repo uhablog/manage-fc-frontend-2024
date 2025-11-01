@@ -30,7 +30,6 @@ export const CardTimeline = ({
                   <Typography variant="subtitle1">{event.player.label}</Typography>
                   <Typography variant="body2" color={grey[600]}>
                     {teamName}
-                    {event.note ? ` / 備考: ${event.note}` : ""}
                   </Typography>
                 </Box>
                 <SquareRoundedIcon
