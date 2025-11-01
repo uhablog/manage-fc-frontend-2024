@@ -30,7 +30,6 @@ const GameAddV2 = ({ convention_id, teams}: Props) => {
    * 選択チームの設定と選択チームのスカッドを取得
    * @param event チェンジイベント
    * @param setSelectedTeam 選択チームのセッター
-   * @param setTeamSquads 選択チームスカッドのセッター
    */
   const handleTeamChange = async (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

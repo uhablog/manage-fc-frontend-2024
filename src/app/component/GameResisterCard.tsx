@@ -3,15 +3,15 @@ import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
 import { Autocomplete, Button, Card, CardContent, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { CardTimeline } from "./CardTimeline";
+import { Game } from "@/types/Game";
 
 type CardFormState = {
   side: TeamSide;
   minute: string;
   player: PlayerOption | null;
   cardType: "YELLOW" | "RED";
-  note: string;
 };
 
 type CardFormErrors = Partial<{
@@ -20,14 +20,12 @@ type CardFormErrors = Partial<{
 }>;
 
 export default function GameResisterCard({
-  homeTeamName,
-  awayTeamName,
+  game,
   homePlayers,
   awayPlayers,
   setSnackbar
 }: {
-  homeTeamName: string;
-  awayTeamName: string;
+  game: Game;
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
@@ -38,22 +36,98 @@ export default function GameResisterCard({
     minute: "",
     player: null,
     cardType: "YELLOW",
-    note: "",
   });
   const [cardErrors, setCardErrors] = useState<CardFormErrors>({});
   const [cardEvents, setCardEvents] = useState<CardTimelineEvent[]>([]);
+
+  useEffect(() => {
+    if (!game) {
+      setCardEvents([]);
+      return;
+    };
+
+    const events: CardTimelineEvent[] = [];
+
+    const findPlayerOption = (players: PlayerOption[], id: number, name: string): PlayerOption => {
+      const stringId = String(id);
+      return (
+        players.find((player) => player.value === stringId) ?? {
+          value: stringId,
+          label: name,
+        }
+      );
+    };
+
+    const buildEvents = (
+      cards: { name: string; footballapi_player_id: number, minuts: number }[],
+      side: TeamSide,
+      players: PlayerOption[],
+      cardType: "YELLOW" | "RED"
+    ) => {
+      cards.forEach((card, index) => {
+        const cardOption = findPlayerOption(players, card.footballapi_player_id, card.name);
+
+        events.push({
+          minute: card.minuts,
+          side,
+          player: cardOption,
+          cardType: cardType
+        });
+      });
+    };
+
+    buildEvents(
+      game.home_team_yellow_cards ?? [],
+      "HOME",
+      homePlayers,
+      "YELLOW"
+    );
+    buildEvents(
+      game.away_team_yellow_cards ?? [],
+      "AWAY",
+      awayPlayers,
+      "YELLOW"
+    );
+    buildEvents(
+      game.home_team_red_cards ?? [],
+      "HOME",
+      homePlayers,
+      "RED"
+    );
+    buildEvents(
+      game.away_team_red_cards ?? [],
+      "AWAY",
+      awayPlayers,
+      "RED"
+    );
+
+    const sorted = events.sort((a, b) => {
+      const minuteA = Number.isFinite(a.minute) ? a.minute : 0;
+      const minuteB = Number.isFinite(b.minute) ? b.minute : 0;
+      if (minuteA === minuteB) {
+        return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+      }
+      return minuteA - minuteB;
+    });
+
+    setCardEvents(sorted);
+
+  }, [game, homePlayers, awayPlayers]);
 
   const cardPlayerOptions = useMemo(
     () => (cardForm.side === "HOME" ? homePlayers : awayPlayers),
     [cardForm.side, homePlayers, awayPlayers],
   );
 
-  const handleCardSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleCardSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors: CardFormErrors = {};
     const minuteValue = Number(cardForm.minute);
-    if (Number.isNaN(minuteValue) || minuteValue < 0) {
-      errors.minute = "0以上の分を入力してください。";
+    if (Number.isNaN(minuteValue) || minuteValue < 1) {
+      errors.minute = "1以上の分を入力してください。";
+    }
+    if (Number.isNaN(minuteValue) || minuteValue > 100) {
+      errors.minute = "100以下の分を入力してください。";
     }
     if (!cardForm.player) {
       errors.player = "対象選手を選択してください。";
@@ -62,28 +136,50 @@ export default function GameResisterCard({
     setCardErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    const newEvent: CardTimelineEvent = {
-      id: `card-${Date.now()}`,
-      minute: minuteValue,
-      side: cardForm.side,
-      player: cardForm.player!,
-      cardType: cardForm.cardType,
-      note: cardForm.note ? cardForm.note : undefined,
-    };
+    try {
+      const response = await fetch(`/api/game/v2/card`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          game_id: game.game_id,
+          card_info: {
+            player_name: cardForm.player?.label,
+            footballapi_player_id: cardForm.player?.value
+          },
+          team_id: cardForm.side === "HOME" ? game.home_team_id: game.away_team_id,
+          minute: cardForm.minute,
+          card_type: cardForm.cardType
+        })
+      });
 
-    setCardEvents((prev) => [...prev, newEvent].sort((a, b) => a.minute - b.minute));
-    setCardForm((prev) => ({
-      ...prev,
-      minute: "",
-      player: null,
-      note: "",
-    }));
-    setCardErrors({});
-    setSnackbar({
-      open: true,
-      message: "カードイベントを追加しました（API未接続）。",
-      severity: "success",
-    });
+      if (response.ok) {
+        const newEvent: CardTimelineEvent = {
+          minute: minuteValue,
+          side: cardForm.side,
+          player: cardForm.player!,
+          cardType: cardForm.cardType,
+        };
+
+        setCardEvents((prev) => [...prev, newEvent].sort((a, b) => a.minute - b.minute));
+        setCardForm((prev) => ({
+          ...prev,
+          minute: "",
+          player: null,
+          note: "",
+        }));
+        setCardErrors({});
+        setSnackbar({
+          open: true,
+          message: "カードイベントを追加しました",
+          severity: "success",
+        });
+      }
+    } catch (error) {
+      
+    }
+
   };
 
   return (
@@ -92,7 +188,7 @@ export default function GameResisterCard({
         <Card variant="outlined">
           <CardContent>
             <Stack component="form" spacing={2} onSubmit={handleCardSubmit}>
-              <Typography variant="h6">カードの登録（デザインのみ）</Typography>
+              <Typography variant="h6">カードの登録</Typography>
               <ToggleButtonGroup
                 value={cardForm.side}
                 exclusive
@@ -104,13 +200,12 @@ export default function GameResisterCard({
                     minute: "",
                     player: null,
                     cardType: cardForm.cardType,
-                    note: "",
                   });
                   setCardErrors({});
                 }}
               >
-                <ToggleButton value="HOME">{homeTeamName}</ToggleButton>
-                <ToggleButton value="AWAY">{awayTeamName}</ToggleButton>
+                <ToggleButton value="HOME">{game.home_team_name}</ToggleButton>
+                <ToggleButton value="AWAY">{game.away_team_name}</ToggleButton>
               </ToggleButtonGroup>
               <ToggleButtonGroup
                 value={cardForm.cardType}
@@ -164,19 +259,6 @@ export default function GameResisterCard({
                 )}
                 isOptionEqualToValue={(option, value) => option.value === value?.value}
               />
-              <TextField
-                label="備考（任意）"
-                placeholder="例: 2枚目"
-                value={cardForm.note}
-                onChange={(event) =>
-                  setCardForm((prev) => ({
-                    ...prev,
-                    note: event.target.value,
-                  }))
-                }
-                multiline
-                minRows={2}
-              />
               <Stack direction="row" justifyContent="flex-end">
                 <Button type="submit" variant="contained">
                   カードを追加
@@ -190,12 +272,12 @@ export default function GameResisterCard({
         <Card variant="outlined">
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              登録済みのカードイベント
+              登録済みのカード
             </Typography>
             <CardTimeline
               events={cardEvents}
-              homeTeamName={homeTeamName}
-              awayTeamName={awayTeamName}
+              homeTeamName={game.home_team_name}
+              awayTeamName={game.away_team_name}
             />
           </CardContent>
         </Card>

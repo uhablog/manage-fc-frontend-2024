@@ -18,12 +18,21 @@ export const GoalTimeline = ({
     return <TimelineEmpty message="まだ得点が登録されていません。" />;
   }
 
+  const sortedEvents = [...events].sort((a, b) => {
+    const minuteA = Number.isFinite(a.minute) ? a.minute : 0;
+    const minuteB = Number.isFinite(b.minute) ? b.minute : 0;
+    if (minuteA === minuteB) {
+      return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+    }
+    return minuteA - minuteB;
+  });
+
   return (
     <Stack spacing={1.5}>
-      {events.map((event) => {
+      {sortedEvents.map((event, index) => {
         const teamName = event.side === "HOME" ? homeTeamName : awayTeamName;
         return (
-          <Card key={event.id} variant="outlined" sx={{ borderColor: grey[200] }}>
+          <Card key={index} variant="outlined" sx={{ borderColor: grey[200] }}>
             <CardContent sx={{ py: 1.5 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Chip label={`${event.minute}'`} size="small" />

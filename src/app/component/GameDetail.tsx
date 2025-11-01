@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Alert,
   Box,
@@ -18,6 +18,7 @@ import MatchSummaryCard from "./MatchSummaryCard";
 import GameResisterScorer from "./GameResisterScorer";
 import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
+import { Squad } from "@/types/Squads";
 import GameResisterCard from "./GameResisterCard";
 import { ResultFormState } from "@/types/ResultFormState";
 import GameResultConfirm from "./GameResultConfirm";
@@ -27,14 +28,6 @@ type Props = {
   game_id: string;
 };
 
-const PLAYER_TEMPLATES = [
-  { number: "#9", name: "山田 太郎" },
-  { number: "#7", name: "佐藤 次郎" },
-  { number: "#8", name: "鈴木 三郎" },
-  { number: "#3", name: "田中 四郎" },
-  { number: "#11", name: "高橋 五郎" },
-];
-
 const GameDetail = ({ id, game_id }: Props) => {
   const [game, setGame] = useState<Game>();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -43,11 +36,8 @@ const GameDetail = ({ id, game_id }: Props) => {
   const [tab, setTab] = useState<number>(0);
 
   const [resultForm, setResultForm] = useState<ResultFormState>({
-    homeScore: "",
-    awayScore: "",
     momSide: "HOME",
     momPlayer: null,
-    note: "",
     confirmed: false,
   });
 
@@ -57,11 +47,14 @@ const GameDetail = ({ id, game_id }: Props) => {
     momName: "",
     momSide: null,
   });
+  const [homePlayers, setHomePlayers] = useState<PlayerOption[]>([]);
+  const [awayPlayers, setAwayPlayers] = useState<PlayerOption[]>([]);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     message: "",
     severity: "success",
   });
+  const [isResultConfirmed, setIsResultConfirmed] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -72,6 +65,7 @@ const GameDetail = ({ id, game_id }: Props) => {
         const json = await res.json();
 
         if (json.success) {
+          console.log(json.game);
           setGame(json.game);
           setComments(Array.isArray(json.comments) ? json.comments : []);
         } else {
@@ -99,6 +93,7 @@ const GameDetail = ({ id, game_id }: Props) => {
           ? "AWAY"
           : "HOME",
       momPlayer: null,
+      confirmed: Boolean(game.confirmed),
     }));
     setResultPreview({
       homeScore: game.home_team_score ?? 0,
@@ -111,13 +106,70 @@ const GameDetail = ({ id, game_id }: Props) => {
           ? "HOME"
           : null,
     });
+    setIsResultConfirmed(Boolean(game.confirmed));
   }, [game]);
 
-  const homePlayers = useMemo(() => createPlayerOptions("HOME"), []);
-  const awayPlayers = useMemo(() => createPlayerOptions("AWAY"), []);
+  useEffect(() => {
+    if (!game) {
+      setHomePlayers([]);
+      setAwayPlayers([]);
+      return;
+    }
+
+    const fetchSquads = async () => {
+      const { home_team_auth0_user_id, away_team_auth0_user_id } = game;
+
+      try {
+        if (home_team_auth0_user_id) {
+          const res = await fetch(`/api/user/squads?user_id=${home_team_auth0_user_id}`);
+          if (res.ok) {
+            const json = await res.json();
+            const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
+            setHomePlayers(squads.map(mapSquadToPlayerOption));
+          } else {
+            console.error("home squad fetch failed", res.status);
+            setHomePlayers([]);
+          }
+        } else {
+          setHomePlayers([]);
+        }
+
+        if (away_team_auth0_user_id) {
+          const res = await fetch(`/api/user/squads?user_id=${away_team_auth0_user_id}`);
+          if (res.ok) {
+            const json = await res.json();
+            const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
+            setAwayPlayers(squads.map(mapSquadToPlayerOption));
+          } else {
+            console.error("away squad fetch failed", res.status);
+            setAwayPlayers([]);
+          }
+        } else {
+          setAwayPlayers([]);
+        }
+      } catch (err) {
+        console.error("failed to fetch squads", err);
+        setHomePlayers([]);
+        setAwayPlayers([]);
+      }
+    };
+
+    fetchSquads();
+  }, [game]);
 
   const homeTeamName = game?.home_team_name ?? "ホームチーム";
   const awayTeamName = game?.away_team_name ?? "アウェイチーム";
+
+  const goalResistered = (side: string) => {
+    setResultPreview((prev) => ({
+      ...prev,
+      homeScore: prev.homeScore + (side === "HOME" ? 1 : 0),
+      awayScore: prev.awayScore + (side === "AWAY" ? 1 : 0),
+    }));
+    setResultForm((prev) => ({
+      ...prev,
+    }));
+  }
 
   const postComment = async (comment: string) => {
     if (!comment || comment === "") return;
@@ -188,51 +240,56 @@ const GameDetail = ({ id, game_id }: Props) => {
             awayEmblem={game.away_team_emblem_url}
             preview={resultPreview}
           />
-          <Box>
-            <Tabs
-              value={tab}
-              onChange={(_, value) => setTab(value)}
-              variant="scrollable"
-              scrollButtons="auto"
-              aria-label="game management tabs"
-            >
-              <Tab label="得点" />
-              <Tab label="カード" />
-              <Tab label="試合結果" />
-            </Tabs>
-            <TabPanel value={tab} index={0}>
-              <GameResisterScorer
-                homeTeamName={homeTeamName}
-                awayTeamName={awayTeamName}
-                homePlayers={homePlayers}
-                awayPlayers={awayPlayers}
-                setSnackbar={setSnackbar}
-              />
-            </TabPanel>
-            <TabPanel value={tab} index={1}>
-              <GameResisterCard
-                homeTeamName={homeTeamName}
-                awayTeamName={awayTeamName}
-                homePlayers={homePlayers}
-                awayPlayers={awayPlayers}
-                setSnackbar={setSnackbar}
-              />
-            </TabPanel>
-            <TabPanel value={tab} index={2}>
-              <GameResultConfirm
-                homeTeamName={homeTeamName}
-                awayTeamName={awayTeamName}
-                homePlayers={homePlayers}
-                awayPlayers={awayPlayers}
-                setSnackbar={setSnackbar}
-                preview={resultPreview}
-                resultForm={resultForm}
-                setResultForm={setResultForm}
-                setResultPreview={setResultPreview}
-              />
-            </TabPanel>
-          </Box>
-          <DisplayComments comments={comments} />
+          {isResultConfirmed ? (
+            <DisplayComments comments={comments} />
+          ) : (
+            <Box>
+              <Tabs
+                value={tab}
+                onChange={(_, value) => setTab(value)}
+                variant="scrollable"
+                scrollButtons="auto"
+                aria-label="game management tabs"
+              >
+                <Tab label="得点" />
+                <Tab label="カード" />
+                <Tab label="試合結果" />
+                <Tab label="コメント" />
+              </Tabs>
+              <TabPanel value={tab} index={0}>
+                <GameResisterScorer
+                  game={game}
+                  homePlayers={homePlayers}
+                  awayPlayers={awayPlayers}
+                  setSnackbar={setSnackbar}
+                  onGoalRegistered={goalResistered}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={1}>
+                <GameResisterCard
+                  game={game}
+                  homePlayers={homePlayers}
+                  awayPlayers={awayPlayers}
+                  setSnackbar={setSnackbar}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={2}>
+                <GameResultConfirm
+                  game={game}
+                  homePlayers={homePlayers}
+                  awayPlayers={awayPlayers}
+                  setSnackbar={setSnackbar}
+                  preview={resultPreview}
+                  resultForm={resultForm}
+                  setResultForm={setResultForm}
+                  setResultPreview={setResultPreview}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={3}>
+                <DisplayComments comments={comments} />
+              </TabPanel>
+            </Box>
+          )}
         </Stack>
       </Box>
       <BottomTextField onButtonClick={postComment} />
@@ -257,10 +314,9 @@ const TabPanel = ({ children, value, index }: { children?: ReactNode; value: num
   return <Box sx={{ py: 3 }}>{children}</Box>;
 };
 
-const createPlayerOptions = (side: TeamSide): PlayerOption[] =>
-  PLAYER_TEMPLATES.map((template, index) => ({
-    value: `${side}-${index}`,
-    label: `${template.number} ${template.name}`,
-  }));
+const mapSquadToPlayerOption = (player: Squad): PlayerOption => ({
+  value: player.footballapi_player_id,
+  label: player.player_name,
+});
 
 export default GameDetail;

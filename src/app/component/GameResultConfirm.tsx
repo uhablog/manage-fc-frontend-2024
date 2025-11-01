@@ -6,27 +6,22 @@ import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { SnackbarState } from "@/types/SnackbarState";
 import { ResultPreview } from "@/types/ResultPreview";
 import { ResultFormState } from "@/types/ResultFormState";
+import { Game } from "@/types/Game";
 
 type ResultFormErrors = Partial<{
-  homeScore: string;
-  awayScore: string;
   momPlayer: string;
   confirmed: string;
 }>;
 
 export default function GameResultConfirm({
-  homeTeamName,
-  awayTeamName,
+  game,
   homePlayers,
   awayPlayers,
   setSnackbar,
-  preview,
   resultForm,
   setResultForm,
-  setResultPreview
 }: {
-  homeTeamName: string;
-  awayTeamName: string;
+  game: Game
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
@@ -47,15 +42,7 @@ export default function GameResultConfirm({
   const handleResultSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors: ResultFormErrors = {};
-    const homeScoreValue = Number(resultForm.homeScore);
-    const awayScoreValue = Number(resultForm.awayScore);
 
-    if (Number.isNaN(homeScoreValue) || homeScoreValue < 0) {
-      errors.homeScore = "0以上の数字を入力してください。";
-    }
-    if (Number.isNaN(awayScoreValue) || awayScoreValue < 0) {
-      errors.awayScore = "0以上の数字を入力してください。";
-    }
     if (!resultForm.momPlayer) {
       errors.momPlayer = "MOMを選択してください。";
     }
@@ -69,23 +56,44 @@ export default function GameResultConfirm({
     setConfirmOpen(true);
   };
 
-  const handleResultFinalize = () => {
-    setResultPreview({
-      homeScore: Number(resultForm.homeScore),
-      awayScore: Number(resultForm.awayScore),
-      momName: resultForm.momPlayer?.label ?? "",
-      momSide: resultForm.momSide,
-    });
-    setConfirmOpen(false);
-    setResultForm((prev) => ({
-      ...prev,
-      confirmed: false,
-    }));
-    setSnackbar({
-      open: true,
-      message: "試合結果プレビューを更新しました（API未接続）。",
-      severity: "success",
-    });
+  const handleResultFinalize = async () => {
+
+    const momTeamId = resultForm.momSide === "HOME" ? game.home_team_id : game.away_team_id;
+    try {
+      
+      console.log('request sending...');
+      const response = await fetch(`/api/game/v2/confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          momTeam: momTeamId,
+          mom: {
+            player_name: resultForm.momPlayer?.label,
+            footballapi_player_id: resultForm.momPlayer?.value
+          },
+          game_id: game.game_id
+        })
+      });
+
+      if (response.ok) {
+        setConfirmOpen(false);
+        setResultForm((prev) => ({
+          ...prev,
+          confirmed: false,
+        }));
+        setSnackbar({
+          open: true,
+          message: "試合結果を確定しました",
+          severity: "success",
+        });
+      } else {
+        window.alert('試合結果の確定に失敗');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -95,41 +103,9 @@ export default function GameResultConfirm({
           <Card variant="outlined">
             <CardContent>
               <Stack component="form" spacing={2} onSubmit={handleResultSubmit}>
-                <Typography variant="h6">試合結果の確定（デザインのみ）</Typography>
+                <Typography variant="h6">試合結果の確定</Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <TextField
-                    label={homeTeamName}
-                    type="number"
-                    value={resultForm.homeScore}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setResultForm((prev) => ({
-                        ...prev,
-                        homeScore: value,
-                      }));
-                      setResultErrors((prev) => ({ ...prev, homeScore: undefined }));
-                    }}
-                    error={Boolean(resultErrors.homeScore)}
-                    helperText={resultErrors.homeScore}
-                    inputProps={{ min: 0 }}
-                  />
-                  <Typography variant="h6">-</Typography>
-                  <TextField
-                    label={awayTeamName}
-                    type="number"
-                    value={resultForm.awayScore}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setResultForm((prev) => ({
-                        ...prev,
-                        awayScore: value,
-                      }));
-                      setResultErrors((prev) => ({ ...prev, awayScore: undefined }));
-                    }}
-                    error={Boolean(resultErrors.awayScore)}
-                    helperText={resultErrors.awayScore}
-                    inputProps={{ min: 0 }}
-                  />
+                  <Typography variant="h6">{game.home_team_score} - {game.away_team_score}</Typography>
                 </Stack>
                 <ToggleButtonGroup
                   value={resultForm.momSide}
@@ -145,8 +121,8 @@ export default function GameResultConfirm({
                     setResultErrors((prev) => ({ ...prev, momPlayer: undefined }));
                   }}
                 >
-                  <ToggleButton value="HOME">{homeTeamName}</ToggleButton>
-                  <ToggleButton value="AWAY">{awayTeamName}</ToggleButton>
+                  <ToggleButton value="HOME">{game.home_team_name}</ToggleButton>
+                  <ToggleButton value="AWAY">{game.away_team_name}</ToggleButton>
                 </ToggleButtonGroup>
                 <Autocomplete
                   value={resultForm.momPlayer}
@@ -169,18 +145,6 @@ export default function GameResultConfirm({
                   )}
                   isOptionEqualToValue={(option, value) => option.value === value?.value}
                   disabled={momOptions.length === 0}
-                />
-                <TextField
-                  label="試合備考（任意）"
-                  value={resultForm.note}
-                  onChange={(event) =>
-                    setResultForm((prev) => ({
-                      ...prev,
-                      note: event.target.value,
-                    }))
-                  }
-                  multiline
-                  minRows={3}
                 />
                 <FormControlLabel
                   control={
@@ -212,23 +176,13 @@ export default function GameResultConfirm({
             </CardContent>
           </Card>
         </Grid2>
-        <Grid2 xs={12} md={6}>
-          <ResultPreviewCard
-            homeTeamName={homeTeamName}
-            awayTeamName={awayTeamName}
-            preview={preview}
-            note={resultForm.note}
-          />
-        </Grid2>
       </Grid2>
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>試合結果のプレビューを更新しますか？</DialogTitle>
+        <DialogTitle>試合結果を確定します</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            この操作はデザイン確認用です。API連携は行われません。
-          </DialogContentText>
+          <DialogContentText>確定後は得点・カードの登録はできません</DialogContentText>
           <Typography variant="body2" sx={{ mt: 2 }}>
-            {homeTeamName} {resultForm.homeScore} - {resultForm.awayScore} {awayTeamName}
+            {game.home_team_name} {game.home_team_score} - {game.away_team_score} {game.away_team_name}
           </Typography>
           {resultForm.momPlayer && (
             <Typography variant="body2" sx={{ mt: 1 }}>

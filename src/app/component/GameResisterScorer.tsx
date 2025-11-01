@@ -10,11 +10,12 @@ import {
   Typography,
 } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { GoalTimeline } from "./GoalTimeLine";
 import { PlayerOption } from "@/types/PlayerOption";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
 import { SnackbarState } from "@/types/SnackbarState";
+import { Game } from "@/types/Game";
 
 type GoalFormState = {
   side: TeamSide;
@@ -26,6 +27,7 @@ type GoalFormState = {
 type GoalFormErrors = Partial<{
   minute: string;
   scorer: string;
+  assist: string;
 }>;
 
 const OWN_GOAL_OPTION: PlayerOption = {
@@ -35,17 +37,17 @@ const OWN_GOAL_OPTION: PlayerOption = {
 };
 
 export default function GameResisterScorer({
-  homeTeamName,
-  awayTeamName,
+  game,
   homePlayers,
   awayPlayers,
-  setSnackbar
+  setSnackbar,
+  onGoalRegistered,
 }: {
-  homeTeamName: string;
-  awayTeamName: string;
+  game: Game
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
+  onGoalRegistered: (side: TeamSide) => void;
 }) {
 
   const [goalForm, setGoalForm] = useState<GoalFormState>({
@@ -57,6 +59,62 @@ export default function GameResisterScorer({
   const [goalErrors, setGoalErrors] = useState<GoalFormErrors>({});
   const [goalEvents, setGoalEvents] = useState<GoalTimelineEvent[]>([]);
 
+  useEffect(() => {
+    if (!game) {
+      setGoalEvents([]);
+      return;
+    }
+
+    const events: GoalTimelineEvent[] = [];
+
+    const findPlayerOption = (players: PlayerOption[], id: number, name: string): PlayerOption => {
+      const stringId = String(id);
+      return (
+        players.find((player) => player.value === stringId) ?? {
+          value: stringId,
+          label: name,
+        }
+      );
+    };
+
+    const buildEvents = (
+      scorers: { name: string; footballapi_player_id: number, minuts: number }[],
+      assists: { name: string; footballapi_player_id: number }[],
+      side: TeamSide,
+      players: PlayerOption[],
+    ) => {
+      scorers.forEach((scorer, index) => {
+        const scorerOption = findPlayerOption(players, scorer.footballapi_player_id, scorer.name);
+        const assistSource = assists[index];
+        const assistOption = assistSource
+          ? findPlayerOption(players, assistSource.footballapi_player_id, assistSource.name)
+          : null;
+
+        events.push({
+          minute: scorer.minuts,
+          side,
+          scorer: scorerOption,
+          assist: assistOption,
+        });
+      });
+    };
+
+    buildEvents(
+      game.home_team_scorer ?? [],
+      game.home_team_assists ?? [],
+      "HOME",
+      homePlayers,
+    );
+    buildEvents(
+      game.away_team_scorer ?? [],
+      game.away_team_assists ?? [],
+      "AWAY",
+      awayPlayers,
+    );
+
+    setGoalEvents(events);
+  }, [game, homePlayers, awayPlayers]);
+
   const goalScorerOptions = useMemo(() => {
     const base = goalForm.side === "HOME" ? homePlayers : awayPlayers;
     return [...base, OWN_GOAL_OPTION];
@@ -67,41 +125,79 @@ export default function GameResisterScorer({
     [goalForm.side, homePlayers, awayPlayers],
   );
 
-  const handleGoalSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleGoalSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const errors: GoalFormErrors = {};
     const minuteValue = Number(goalForm.minute);
-    if (Number.isNaN(minuteValue) || minuteValue < 0) {
-      errors.minute = "0以上の分を入力してください。";
+    const teamId = goalForm.side === "HOME" ? game.home_team_id : game.away_team_id;
+    if (Number.isNaN(minuteValue) || minuteValue < 1) {
+      errors.minute = "1以上の分を入力してください。";
+    }
+    if (Number.isNaN(minuteValue) || minuteValue > 100) {
+      errors.minute = "100以下の分を入力してください。";
     }
     if (!goalForm.scorer) {
       errors.scorer = "得点者を選択してください。";
+    }
+    if (goalForm.scorer?.value === goalForm.assist?.value) {
+      errors.scorer = "アシストとは別の選手を入力してください。"
+      errors.assist = "得点者とは別の選手を入力してください。"
     }
 
     setGoalErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    const newEvent: GoalTimelineEvent = {
-      id: `goal-${Date.now()}`,
-      minute: minuteValue,
-      side: goalForm.side,
-      scorer: goalForm.scorer!,
-      assist: goalForm.assist,
-    };
+    try {
 
-    setGoalEvents((prev) => [...prev, newEvent].sort((a, b) => a.minute - b.minute));
-    setGoalForm((prev) => ({
-      ...prev,
-      minute: "",
-      scorer: null,
-      assist: null,
-    }));
-    setGoalErrors({});
-    setSnackbar({
-      open: true,
-      message: "得点イベントを追加しました（API未接続）。",
-      severity: "success",
-    });
+      const response = await fetch(`/api/game/v2/goal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          game_id: game.game_id,
+          team_id: teamId,
+          minute: minuteValue,
+          scorer: {
+            player_name: goalForm.scorer?.label,
+            footballapi_player_id: goalForm.scorer?.value
+          },
+          assist: {
+            player_name: goalForm.assist?.label,
+            footballapi_player_id: goalForm.assist?.value
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const newEvent: GoalTimelineEvent = {
+          minute: minuteValue,
+          side: goalForm.side,
+          scorer: goalForm.scorer!,
+          assist: goalForm.assist,
+        };
+
+        setGoalEvents((prev) => [...prev, newEvent].sort((a, b) => a.minute - b.minute));
+        setGoalForm((prev) => ({
+          ...prev,
+          minute: "",
+          scorer: null,
+          assist: null,
+        }));
+        setGoalErrors({});
+        setSnackbar({
+          open: true,
+          message: "得点を追加しました",
+          severity: "success",
+        });
+        onGoalRegistered(goalForm.side);
+      } else {
+        window.alert('試合の登録に失敗');
+      }
+    } catch (err) {
+      console.error('Failed to submit game result:', err);
+    }
+
   };
 
   return(
@@ -110,7 +206,7 @@ export default function GameResisterScorer({
         <Card variant="outlined">
           <CardContent>
             <Stack component="form" spacing={2} onSubmit={handleGoalSubmit}>
-              <Typography variant="h6">得点の登録（デザインのみ）</Typography>
+              <Typography variant="h6">得点の登録</Typography>
               <ToggleButtonGroup
                 value={goalForm.side}
                 exclusive
@@ -126,8 +222,8 @@ export default function GameResisterScorer({
                   setGoalErrors({});
                 }}
               >
-                <ToggleButton value="HOME">{homeTeamName}</ToggleButton>
-                <ToggleButton value="AWAY">{awayTeamName}</ToggleButton>
+                <ToggleButton value="HOME">{game.home_team_name}</ToggleButton>
+                <ToggleButton value="AWAY">{game.away_team_name}</ToggleButton>
               </ToggleButtonGroup>
               <TextField
                 label="時間（分）"
@@ -177,7 +273,12 @@ export default function GameResisterScorer({
                 options={assistOptions}
                 getOptionLabel={(option) => option.label}
                 renderInput={(params) => (
-                  <TextField {...params} label="アシスト（任意）" />
+                  <TextField
+                    {...params}
+                    label="アシスト（任意）"
+                    error={Boolean(goalErrors.assist)}
+                    helperText={goalErrors.assist}
+                  />
                 )}
                 isOptionEqualToValue={(option, value) => option.value === value?.value}
               />
@@ -194,12 +295,12 @@ export default function GameResisterScorer({
         <Card variant="outlined">
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              登録済みの得点イベント
+              登録済みの得点
             </Typography>
             <GoalTimeline
               events={goalEvents}
-              homeTeamName={homeTeamName}
-              awayTeamName={awayTeamName}
+              homeTeamName={game.home_team_name}
+              awayTeamName={game.away_team_name}
             />
           </CardContent>
         </Card>

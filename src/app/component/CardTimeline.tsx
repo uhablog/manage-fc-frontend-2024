@@ -19,10 +19,10 @@ export const CardTimeline = ({
 
   return (
     <Stack spacing={1.5}>
-      {events.map((event) => {
+      {events.map((event, index) => {
         const teamName = event.side === "HOME" ? homeTeamName : awayTeamName;
         return (
-          <Card key={event.id} variant="outlined" sx={{ borderColor: grey[200] }}>
+          <Card key={index} variant="outlined" sx={{ borderColor: grey[200] }}>
             <CardContent sx={{ py: 1.5 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Chip label={`${event.minute}'`} size="small" />
