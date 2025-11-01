@@ -30,9 +30,6 @@ const GameFlowTimeline = ({ goalEvents, cardEvents, homeTeamName, awayTeamName }
     return (
       <Card variant="outlined">
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            試合の流れ
-          </Typography>
           <TimelineEmpty message="まだイベントが登録されていません。" />
         </CardContent>
       </Card>
