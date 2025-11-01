@@ -159,7 +159,7 @@ const GameAddV2 = ({ convention_id, teams}: Props) => {
             </Grid2>
           </Grid2>
           <Button type="submit" variant="contained" color="primary">
-            試合結果を開始
+            試合を開始
           </Button>
         </form>
       </Box>
