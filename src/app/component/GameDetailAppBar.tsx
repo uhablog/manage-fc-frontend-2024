@@ -43,7 +43,7 @@ export default function ButtonAppBar({convention_id, game_id}: Props) {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            試合詳細
+            MaeMob
           </Typography>
           <MuiLink component={NextLink} underline='none' href={`/conventions/${convention_id}`}>
             <Button color="secondary">大会へ</Button>

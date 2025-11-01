@@ -1,0 +1,1 @@
+type TeamSide = "HOME" | "AWAY";
