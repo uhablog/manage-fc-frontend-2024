@@ -48,9 +48,9 @@ export default function ButtonAppBar({convention_id, game_id}: Props) {
           <MuiLink component={NextLink} underline='none' href={`/conventions/${convention_id}`}>
             <Button color="secondary">大会へ</Button>
           </MuiLink>
-          <IconButton onClick={handleDelete}>
+          {/* <IconButton onClick={handleDelete}>
             <Delete />
-          </IconButton>
+          </IconButton> */}
         </Toolbar>
       </AppBar>
     </Box>
