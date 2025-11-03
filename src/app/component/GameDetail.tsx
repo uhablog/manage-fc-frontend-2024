@@ -25,6 +25,7 @@ import GameMomCard from "./GameMomCard";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
 import { CardTimelineEvent } from "@/types/CardTimelineEvent";
 import GameFlowTimeline from "./GameFlowTimeline";
+import { Facts } from "./Facts";
 
 type Props = {
   id: string;
@@ -296,11 +297,10 @@ const GameDetail = ({ id, game_id }: Props) => {
           {isResultConfirmed ? (
             <>
               <GameMomCard game={game} />
-              <GameFlowTimeline
+              <Facts
                 goalEvents={goalEvents}
                 cardEvents={cardEvents}
-                homeTeamName={game.home_team_name}
-                awayTeamName={game.away_team_name}
+                game={game}
               />
               <DisplayComments comments={comments} />
             </>
@@ -313,18 +313,17 @@ const GameDetail = ({ id, game_id }: Props) => {
                 scrollButtons="auto"
                 aria-label="game management tabs"
               >
-                <Tab label="Event" />
+                <Tab label="Facts" />
                 <Tab label="得点" />
                 <Tab label="カード" />
                 <Tab label="試合結果" />
                 <Tab label="コメント" />
               </Tabs>
               <TabPanel value={tab} index={0}>
-                <GameFlowTimeline
+                <Facts
                   goalEvents={goalEvents}
                   cardEvents={cardEvents}
-                  homeTeamName={game.home_team_name}
-                  awayTeamName={game.away_team_name}
+                  game={game}
                 />
               </TabPanel>
               <TabPanel value={tab} index={1}>
