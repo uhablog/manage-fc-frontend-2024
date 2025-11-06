@@ -71,7 +71,7 @@ const GameFlowTimeline = ({
   return (
     <Card variant="outlined">
       <CardContent>
-        <Typography variant="h6" align="center">Event</Typography>
+        <Typography variant="h6" align="center">Events</Typography>
         <Stack spacing={1.5}>{rendered}</Stack>
       </CardContent>
     </Card>

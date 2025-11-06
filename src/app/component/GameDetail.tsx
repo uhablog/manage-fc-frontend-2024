@@ -42,6 +42,7 @@ const GameDetail = ({ id, game_id }: Props) => {
   const [resultForm, setResultForm] = useState<ResultFormState>({
     momSide: "HOME",
     momPlayer: null,
+    momRating: null,
     confirmed: false,
   });
 
@@ -89,6 +90,7 @@ const GameDetail = ({ id, game_id }: Props) => {
           ? "AWAY"
           : "HOME",
       momPlayer: null,
+      momRating: null,
       confirmed: Boolean(game.confirmed),
     });
     setGoalEvents(sortGoalEvents(buildGoalEventsFromGame(game)));
