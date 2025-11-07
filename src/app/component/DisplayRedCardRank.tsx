@@ -77,15 +77,18 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
                         <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${card.footballapi_player_id}.png`} />
                       </ListItemAvatar>
                     </Grid2>
-                    <Grid2 xs={4}>
-                      <Typography variant="body2">{card.player_name}</Typography>
-                    </Grid2>
-                    <Grid2 xs={4}>
+                    <Grid2 xs={8}>
+                      <Typography
+                        component="p"
+                        sx={{
+                          fontWeight: "bold"
+                        }}
+                      >{card.player_name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
                           src={card.emblem_url ?? undefined}
                           alt={`${card.team_name} emblem`}
-                          sx={{ width: 25, height: 25 }}
+                          sx={{ width: 20, height: 20 }}
                         >
                           {card.team_name?.charAt(0) ?? "?"}
                         </Avatar>
@@ -106,7 +109,7 @@ const DisplayRedCardRank = ({id, initialLimit}: Props) => {
                       </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
-                      <Typography variant="body2">{card.score}</Typography>
+                      <Typography>{card.score}</Typography>
                     </Grid2>
                 </ListItem>
               ))}

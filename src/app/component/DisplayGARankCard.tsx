@@ -76,15 +76,18 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
                         <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${ga_data.footballapi_player_id}.png`} />
                       </ListItemAvatar>
                     </Grid2>
-                    <Grid2 xs={4}>
-                      <Typography variant="body2">{ga_data.scorer_name}</Typography>
-                    </Grid2>
-                    <Grid2 xs={4}>
+                    <Grid2 xs={8}>
+                      <Typography
+                        component="p"
+                        sx={{
+                          fontWeight: "bold"
+                        }}
+                      >{ga_data.scorer_name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
                           src={ga_data.emblem_url ?? undefined}
                           alt={`${ga_data.team_name} emblem`}
-                          sx={{ width: 25, height: 25 }}
+                          sx={{ width: 20, height: 20 }}
                         >
                           {ga_data.team_name?.charAt(0) ?? "?"}
                         </Avatar>
@@ -105,7 +108,7 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
                       </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
-                      <Typography variant="body2">{ga_data.total_points}</Typography>
+                      <Typography>{ga_data.total_points}</Typography>
                     </Grid2>
                 </ListItem>
               ))}
