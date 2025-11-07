@@ -26,6 +26,7 @@ import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
 import { CardTimelineEvent } from "@/types/CardTimelineEvent";
 import GameFlowTimeline from "./GameFlowTimeline";
 import { Facts } from "./Facts";
+import { HeadToHeadGameDetail } from "./HeadToHeadGameDetail";
 
 type Props = {
   id: string;
@@ -298,13 +299,35 @@ const GameDetail = ({ id, game_id }: Props) => {
           />
           {isResultConfirmed ? (
             <>
-              <GameMomCard game={game} />
-              <Facts
-                goalEvents={goalEvents}
-                cardEvents={cardEvents}
-                game={game}
-              />
-              <DisplayComments comments={comments} />
+              <Box>
+                <Tabs
+                  value={tab}
+                  onChange={(_, value) => setTab(value)}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  aria-label="game management tabs"
+                >
+                  <Tab label="Facts" />
+                  <Tab label="通算成績" />
+                  <Tab label="コメント" />
+                </Tabs>
+                <TabPanel value={tab} index={0}>
+                  <GameMomCard game={game} />
+                  <Facts
+                    goalEvents={goalEvents}
+                    cardEvents={cardEvents}
+                    game={game}
+                  />
+                </TabPanel>
+                <TabPanel value={tab} index={1}>
+                  <HeadToHeadGameDetail
+                    game={game}
+                  />
+                </TabPanel>
+                <TabPanel value={tab} index={2}>
+                  <DisplayComments comments={comments} />
+                </TabPanel>
+              </Box>
             </>
           ) : (
             <Box>
@@ -316,6 +339,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                 aria-label="game management tabs"
               >
                 <Tab label="Facts" />
+                <Tab label="通算成績" />
                 <Tab label="得点" />
                 <Tab label="カード" />
                 <Tab label="試合結果" />
@@ -329,6 +353,11 @@ const GameDetail = ({ id, game_id }: Props) => {
                 />
               </TabPanel>
               <TabPanel value={tab} index={1}>
+                <HeadToHeadGameDetail
+                  game={game}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={2}>
                 <GameResisterScorer
                   game={game}
                   homePlayers={homePlayers}
@@ -338,7 +367,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   onGoalAdded={handleGoalAdded}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={2}>
+              <TabPanel value={tab} index={3}>
                 <GameResisterCard
                   game={game}
                   homePlayers={homePlayers}
@@ -348,7 +377,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   onCardAdded={handleCardAdded}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={3}>
+              <TabPanel value={tab} index={4}>
                 <GameResultConfirm
                   game={game}
                   homePlayers={homePlayers}
@@ -358,7 +387,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   setResultForm={setResultForm}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={4}>
+              <TabPanel value={tab} index={5}>
                 <DisplayComments comments={comments} />
               </TabPanel>
             </Box>

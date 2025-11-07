@@ -149,21 +149,37 @@ export const HeadToHeadGameDetail = ({
                       spacing={2}
                       justifyContent="center"
                     >
-                      <Typography variant="body2" sx={{ flex: 1, textAlign: "center" }}>
-                        {homeName}
-                      </Typography>
-                      <Stack flex={1} alignItems="center">
+                      <Stack
+                        flex={1}
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        justifyContent="flex-end"
+                      >
+                        <Typography variant="body2" textAlign="right">
+                          {homeName}
+                        </Typography>
                         {homeAvatar}
                       </Stack>
-                      <Typography variant="body1" fontWeight="bold" sx={{ flex: 1, textAlign: "center" }}>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        sx={{ minWidth: 60, textAlign: "center" }}
+                      >
                         {match.score}
                       </Typography>
-                      <Stack flex={1} alignItems="center">
+                      <Stack
+                        flex={1}
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        justifyContent="flex-start"
+                      >
                         {awayAvatar}
+                        <Typography variant="body2" textAlign="left">
+                          {awayName}
+                        </Typography>
                       </Stack>
-                      <Typography variant="body2" sx={{ flex: 1, textAlign: "center" }}>
-                        {awayName}
-                      </Typography>
                     </Stack>
                   );
                 })
