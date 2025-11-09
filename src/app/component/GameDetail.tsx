@@ -26,6 +26,7 @@ import { CardTimelineEvent } from "@/types/CardTimelineEvent";
 import { Facts } from "./Facts";
 import { HeadToHeadGameDetail } from "./HeadToHeadGameDetail";
 import LineUpForm from "./LineUpForm";
+import { LineUp } from "./LineUp";
 
 type Props = {
   id: string;
@@ -297,6 +298,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   aria-label="game management tabs"
                 >
                   <Tab label="Facts" />
+                  <Tab label="LineUp" />
                   <Tab label="通算成績" />
                   <Tab label="コメント" />
                 </Tabs>
@@ -310,12 +312,21 @@ const GameDetail = ({ id, game_id }: Props) => {
                     />
                   </Stack>
                 </TabPanel>
-                <TabPanel value={tab} index={1}>
+              <TabPanel value={tab} index={1}>
+                <LineUp
+                  gameId={game_id}
+                  homeTeamId={game.home_team_id}
+                  awayTeamId={game.away_team_id}
+                  homeTeamName={game.home_team_name}
+                  awayTeamName={game.away_team_name}
+                />
+              </TabPanel>
+                <TabPanel value={tab} index={2}>
                   <HeadToHeadGameDetail
                     game={game}
                   />
                 </TabPanel>
-                <TabPanel value={tab} index={2}>
+                <TabPanel value={tab} index={3}>
                   <DisplayComments
                     game_id={game_id}
                     comments={comments}
