@@ -1,6 +1,6 @@
 import { Squad } from "@/types/Squads";
 import { useEffect, useState } from "react";
-import { Avatar, Card, CardContent, Fab, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, Fab, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { TransferDialog } from "./TransferDialog";
@@ -26,6 +26,7 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
     const fetchSquads = async () => {
       const res = await fetch(`/api/team/squads?team_id=${team_id}`);
       const json = await res.json();
+      console.log(json.squads);
       setSquads(json.squads);
     };
     fetchSquads()
@@ -52,7 +53,6 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
       <>
         <Card>
           <CardContent>
-            <Typography variant="h6"component="p">スカッド</Typography>
             <List>
               {squads.map( (player, index) => (
                 <ListItem

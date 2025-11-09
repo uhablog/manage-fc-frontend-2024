@@ -7,4 +7,5 @@ export type Squad = {
   nationality: string
   height: string
   weight: string
+  potision: string
 }
