@@ -52,6 +52,13 @@ const getRatingValue = (rating?: string | null) => {
   return Number.isFinite(value) ? value : null;
 };
 
+const getRatingColor = (rating: number | null) => {
+  if (rating === null) return "grey.500";
+  if (rating < 5) return "error.main";
+  if (rating < 7) return "warning.main";
+  return "success.main";
+};
+
 const createGroupedLineups = (): GroupedLineups => ({
   FW: [],
   MF: [],
@@ -182,7 +189,7 @@ const renderPlayerCard = (player: LineUpEntry) => {
             position: "absolute",
             top: -6,
             right: -6,
-            bgcolor: ratingValue !== null ? "primary.main" : "grey.500",
+            bgcolor: getRatingColor(ratingValue),
             color: "common.white",
             borderRadius: "12px",
             px: 0.75,
