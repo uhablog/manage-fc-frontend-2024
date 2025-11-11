@@ -1,6 +1,6 @@
 import { Squad } from "@/types/Squads";
 import { useEffect, useState } from "react";
-import { Avatar, Card, CardContent, Fab, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material";
+import { Avatar, Card, CardContent, Fab, List, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from "@mui/material";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { TransferDialog } from "./TransferDialog";
@@ -53,6 +53,17 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
       <>
         <Card>
           <CardContent>
+            <Stack
+              direction="row"
+              spacing={2}
+              justifyContent="flex-end"
+              sx={{ px: 2, pb: 1 }}
+            >
+              <Typography variant="caption">G</Typography>
+              <Typography variant="caption">A</Typography>
+              <Typography variant="caption">Rating</Typography>
+              <Typography variant="caption">試合</Typography>
+            </Stack>
             <List>
               {squads.map( (player, index) => (
                 <ListItem
@@ -60,11 +71,19 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
                   disableGutters
                   sx={{width: '320px'}}
                   onClick={() => handleClick(player.footballapi_player_id)}
+                  secondaryAction={
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Typography variant="body2">{player.goals}</Typography>
+                      <Typography variant="body2">{player.assists}</Typography>
+                      <Typography variant="body2">{player.avg_rating ? player.avg_rating : 0}</Typography>
+                      <Typography variant="body2">{player.rating_count}</Typography>
+                    </Stack>
+                  }
                 >
                   <ListItemAvatar>
                     <Avatar alt="Remy Sharp" src={`https://media.api-sports.io/football/players/${player.footballapi_player_id}.png`} />
                   </ListItemAvatar>
-                  <ListItemText primary={`${player.player_name}`} />
+                  <ListItemText primary={player.player_name} />
                 </ListItem>
               ))}
             </List>
