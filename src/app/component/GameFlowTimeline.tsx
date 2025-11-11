@@ -23,7 +23,12 @@ type FlowEvent = {
   cardType?: "YELLOW" | "RED";
 };
 
-const GameFlowTimeline = ({ goalEvents, cardEvents, homeTeamName, awayTeamName }: Props) => {
+const GameFlowTimeline = ({
+  goalEvents,
+  cardEvents,
+  homeTeamName,
+  awayTeamName
+}: Props) => {
   const combinedEvents = buildFlowEvents(goalEvents, cardEvents, homeTeamName, awayTeamName);
 
   if (combinedEvents.length === 0) {
@@ -66,7 +71,7 @@ const GameFlowTimeline = ({ goalEvents, cardEvents, homeTeamName, awayTeamName }
   return (
     <Card variant="outlined">
       <CardContent>
-        <Typography variant="h6" sx={{ mb: 2 }}>Event</Typography>
+        <Typography variant="h6" align="center">Events</Typography>
         <Stack spacing={1.5}>{rendered}</Stack>
       </CardContent>
     </Card>

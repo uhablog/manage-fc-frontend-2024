@@ -4,8 +4,15 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const team_id = searchParams.get("team_id");
+  const limit = searchParams.get("limit");
+
+  let url = `${process.env.API_ENDPOINT}/api/game?team_id=${team_id}`;
+  if (limit) {
+    url += `&limit=${limit}`;
+  }
+
   const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.API_ENDPOINT}/api/game?team_id=${team_id}`, {
+  const res = await fetch(url, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessTokenResult.accessToken}`,

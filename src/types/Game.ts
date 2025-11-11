@@ -23,6 +23,7 @@ export type Game = {
   home_team_emblem_url?: string | null
   away_team_emblem_url?: string | null
   confirmed: boolean
+  mom_rating: number
 }
 
 type Scorers = {

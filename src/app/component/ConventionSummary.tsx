@@ -2,12 +2,12 @@ import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import DisplayTeams from "./DisplayTeams";
 import DisplayScorer from "./DisplayScorer";
 import DisplayGames from "./DisplayGames";
-import { Typography } from "@mui/material";
 import DisplayAssistRankCard from "./DisplayAssistRankCard";
 import DisplayGARankCard from "./DisplayGARankCard";
 import DisplayMomRankCard from "./DisplayMomRankCard";
 import DisplayYellowCardRank from "./DisplayYellowCardRank";
 import DisplayRedCardRank from "./DisplayRedCardRank";
+import { DisplayRatingRank } from "./DisplayRatingRank";
 
 type Props = {
   id: string
@@ -35,6 +35,9 @@ const ConventionSummary = ({id}: Props) => {
         </Grid2>
         <Grid2 xs={12} md={4}>
           <DisplayMomRankCard id={id} initialLimit={5} />
+        </Grid2>
+        <Grid2 xs={12} md={4}>
+          <DisplayRatingRank id={id} initialLimit={5} />
         </Grid2>
         <Grid2 xs={12} md={4}>
           <DisplayYellowCardRank id={id} initialLimit={5} />

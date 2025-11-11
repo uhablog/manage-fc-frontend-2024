@@ -79,15 +79,18 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                         <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${scorer.footballapi_player_id}.png`} />
                       </ListItemAvatar>
                     </Grid2>
-                    <Grid2 xs={4}>
-                      <Typography variant="body2">{scorer.scorer_name}</Typography>
-                    </Grid2>
-                    <Grid2 xs={4}>
+                    <Grid2 xs={8}>
+                      <Typography
+                        component="p"
+                        sx={{
+                          fontWeight: "bold"
+                        }}
+                      >{scorer.scorer_name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
                           src={scorer.emblem_url ?? undefined}
                           alt={`${scorer.team_name} emblem`}
-                          sx={{ width: 25, height: 25}}
+                          sx={{ width: 20, height: 20}}
                         >
                           {scorer.scorer_name?.charAt(0) ?? "?"}
                         </Avatar>
@@ -108,7 +111,7 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                       </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
-                      <Typography variant="body2">{scorer.score}</Typography>
+                      <Typography>{scorer.score}</Typography>
                     </Grid2>
                 </ListItem>
               ))}
