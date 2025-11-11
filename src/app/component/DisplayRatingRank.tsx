@@ -80,7 +80,7 @@ export const DisplayRatingRank = ({
                         <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${player.footballapi_player_id}.png`} />
                       </ListItemAvatar>
                     </Grid2>
-                    <Grid2 xs={8}>
+                    <Grid2 xs={6}>
                       <Typography
                         component="p"
                         sx={{
@@ -111,8 +111,8 @@ export const DisplayRatingRank = ({
                         </MuiLink>
                       </Stack>
                     </Grid2>
-                    <Grid2 xs={1}>
-                      <Typography>{player.avg_rating}</Typography>
+                    <Grid2 xs={3}>
+                      <Typography>{player.avg_rating}({player.rating_count}試合)</Typography>
                     </Grid2>
                 </ListItem>
               ))}

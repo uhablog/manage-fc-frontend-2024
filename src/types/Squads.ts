@@ -8,4 +8,9 @@ export type Squad = {
   height: string
   weight: string
   potision: string
+  position?: string
+  goals: string
+  assists: string
+  avg_rating: string
+  rating_count: string
 }
