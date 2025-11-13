@@ -138,7 +138,6 @@ const GameDetail = ({ id, game_id }: Props) => {
           const res = await fetch(`/api/team/squads?team_id=${away_team_id}`);
           if (res.ok) {
             const json = await res.json();
-            console.log(json);
             const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
             setAwaySquads(squads);
             setAwayPlayers(squads.map(mapSquadToPlayerOption));
@@ -185,6 +184,7 @@ const GameDetail = ({ id, game_id }: Props) => {
               name: event.scorer.label,
               footballapi_player_id: parsePlayerId(event.scorer.value),
               minuts: normalizeMinute(event.minute),
+              penalty: Boolean(event.penalty),
             },
           ],
           home_team_assists: updatedAssists,
@@ -206,6 +206,7 @@ const GameDetail = ({ id, game_id }: Props) => {
             name: event.scorer.label,
             footballapi_player_id: parsePlayerId(event.scorer.value),
             minuts: normalizeMinute(event.minute),
+            penalty: Boolean(event.penalty),
           },
         ],
         away_team_assists: updatedAssists,
@@ -467,6 +468,7 @@ const sortCardEvents = (events: CardTimelineEvent[]): CardTimelineEvent[] =>
   });
 
 const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
+  console.log(game);
   const events: GoalTimelineEvent[] = [];
 
   const createOption = (id: number | string | null | undefined, name: string): PlayerOption => ({
@@ -475,7 +477,7 @@ const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
   });
 
   const build = (
-    scorers: { name: string; footballapi_player_id: number; minuts: number }[] = [],
+    scorers: { name: string; footballapi_player_id: number; minuts: number; penalty?: boolean }[] = [],
     assists: { name: string; footballapi_player_id: number }[] = [],
     side: TeamSide,
   ) => {
@@ -491,6 +493,7 @@ const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
         side,
         scorer: scorerOption,
         assist: assistOption,
+        penalty: Boolean(scorer.penalty),
       });
     });
   };

@@ -3,6 +3,8 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
+  FormControlLabel,
   Stack,
   TextField,
   ToggleButton,
@@ -22,6 +24,7 @@ type GoalFormState = {
   minute: string;
   scorer: PlayerOption | null;
   assist: PlayerOption | null;
+  penalty: boolean;
 };
 
 type GoalFormErrors = Partial<{
@@ -57,6 +60,7 @@ export default function GameResisterScorer({
     minute: "",
     scorer: null,
     assist: null,
+    penalty: false,
   });
   const [goalErrors, setGoalErrors] = useState<GoalFormErrors>({});
   const goalScorerOptions = useMemo(() => {
@@ -102,6 +106,7 @@ export default function GameResisterScorer({
           game_id: game.game_id,
           team_id: teamId,
           minute: minuteValue,
+          penalty: goalForm.penalty,
           scorer: {
             player_name: goalForm.scorer?.label,
             footballapi_player_id: goalForm.scorer?.value,
@@ -121,6 +126,7 @@ export default function GameResisterScorer({
           side: goalForm.side,
           scorer: goalForm.scorer!,
           assist: goalForm.assist,
+          penalty: goalForm.penalty,
         };
 
         onGoalAdded(newEvent);
@@ -129,6 +135,7 @@ export default function GameResisterScorer({
           minute: "",
           scorer: null,
           assist: null,
+          penalty: false,
         }));
         setGoalErrors({});
         setSnackbar({
@@ -163,6 +170,7 @@ export default function GameResisterScorer({
                     minute: "",
                     scorer: null,
                     assist: null,
+                    penalty: false,
                   });
                   setGoalErrors({});
                 }}
@@ -226,6 +234,20 @@ export default function GameResisterScorer({
                   />
                 )}
                 isOptionEqualToValue={(option, value) => option.value === value?.value}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={goalForm.penalty}
+                    onChange={(_, checked) =>
+                      setGoalForm((prev) => ({
+                        ...prev,
+                        penalty: checked,
+                      }))
+                    }
+                  />
+                }
+                label="PKでの得点"
               />
               <Stack direction="row" justifyContent="flex-end">
                 <Button type="submit" variant="contained">

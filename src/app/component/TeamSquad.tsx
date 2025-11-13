@@ -26,7 +26,6 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
     const fetchSquads = async () => {
       const res = await fetch(`/api/team/squads?team_id=${team_id}`);
       const json = await res.json();
-      console.log(json.squads);
       setSquads(json.squads);
     };
     fetchSquads()

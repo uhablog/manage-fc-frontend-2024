@@ -16,7 +16,6 @@ const DisplayTeams = ({id}: Props) => {
     const fetchTeams = async () => {
       const res = await fetch(`/api/convention/${id}/teams`);
       const json = await res.json();
-      console.log('display teams: ',json.data);
       setTeams(json.data);
     }
 

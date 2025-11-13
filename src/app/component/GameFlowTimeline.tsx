@@ -142,6 +142,9 @@ const buildFlowEvents = (
 ): FlowEvent[] => {
   const goalItems: FlowEvent[] = goals.map((goal) => {
     const descriptionParts: string[] = [];
+    if (goal.penalty) {
+      descriptionParts.push("Penalty");
+    }
     if (goal.assist) {
       descriptionParts.push(`Assist: ${goal.assist.label}`);
     }

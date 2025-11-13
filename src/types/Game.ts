@@ -30,6 +30,7 @@ type Scorers = {
   name: string
   footballapi_player_id: number
   minuts: number
+  penalty: boolean
 }
 
 type Assists = {

@@ -111,7 +111,7 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                       </Stack>
                     </Grid2>
                     <Grid2 xs={1}>
-                      <Typography>{scorer.score}</Typography>
+                      <Typography>{scorer.score}({scorer.penalty_score})</Typography>
                     </Grid2>
                 </ListItem>
               ))}
