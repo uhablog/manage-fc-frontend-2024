@@ -17,12 +17,14 @@ import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
 import { Squad } from "@/types/Squads";
 import GameResisterCard from "./GameResisterCard";
+import GameResisterPenaltyStop from "./GameResisterPenaltyStop";
 import { ResultFormState } from "@/types/ResultFormState";
 import GameResultConfirm from "./GameResultConfirm";
 import GameScore from "./GameScore";
 import GameMomCard from "./GameMomCard";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
 import { CardTimelineEvent } from "@/types/CardTimelineEvent";
+import { PenaltyStopTimelineEvent } from "@/types/PenaltyStopTimelineEvent";
 import { Facts } from "./Facts";
 import { HeadToHeadGameDetail } from "./HeadToHeadGameDetail";
 import LineUpForm from "./LineUpForm";
@@ -59,6 +61,7 @@ const GameDetail = ({ id, game_id }: Props) => {
   });
   const [goalEvents, setGoalEvents] = useState<GoalTimelineEvent[]>([]);
   const [cardEvents, setCardEvents] = useState<CardTimelineEvent[]>([]);
+  const [penaltyStopEvents, setPenaltyStopEvents] = useState<PenaltyStopTimelineEvent[]>([]);
   const [isResultConfirmed, setIsResultConfirmed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -99,6 +102,7 @@ const GameDetail = ({ id, game_id }: Props) => {
     });
     setGoalEvents(sortGoalEvents(buildGoalEventsFromGame(game)));
     setCardEvents(sortCardEvents(buildCardEventsFromGame(game)));
+    setPenaltyStopEvents(sortPenaltyStopEvents(buildPenaltyStopEventsFromGame(game)));
     setIsResultConfirmed(Boolean(game.confirmed));
   }, [game]);
 
@@ -250,6 +254,10 @@ const GameDetail = ({ id, game_id }: Props) => {
     });
   };
 
+  const handlePenaltyStopAdded = (event: PenaltyStopTimelineEvent) => {
+    setPenaltyStopEvents((prev) => sortPenaltyStopEvents([...prev, event]));
+  };
+
   const handleSnackbarClose = () => {
     setSnackbar((prev) => ({
       ...prev,
@@ -309,6 +317,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                     <Facts
                       goalEvents={goalEvents}
                       cardEvents={cardEvents}
+                      penaltyStopEvents={penaltyStopEvents}
                       game={game}
                     />
                   </Stack>
@@ -349,6 +358,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                 <Tab label="通算成績" />
                 <Tab label="得点" />
                 <Tab label="カード" />
+                <Tab label="PKストップ" />
                 <Tab label="ラインナップ" />
                 <Tab label="試合結果" />
                 <Tab label="コメント" />
@@ -357,6 +367,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                 <Facts
                   goalEvents={goalEvents}
                   cardEvents={cardEvents}
+                  penaltyStopEvents={penaltyStopEvents}
                   game={game}
                 />
               </TabPanel>
@@ -386,6 +397,15 @@ const GameDetail = ({ id, game_id }: Props) => {
                 />
               </TabPanel>
               <TabPanel value={tab} index={4}>
+                <GameResisterPenaltyStop
+                  game={game}
+                  homePlayers={homePlayers}
+                  awayPlayers={awayPlayers}
+                  setSnackbar={setSnackbar}
+                  onPenaltyStopAdded={handlePenaltyStopAdded}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={5}>
                 <LineUpForm
                   gameId={game.game_id}
                   homeSquads={homeSquads}
@@ -400,7 +420,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   }
                 />
               </TabPanel>
-              <TabPanel value={tab} index={5}>
+              <TabPanel value={tab} index={6}>
                 <GameResultConfirm
                   game={game}
                   homePlayers={homePlayers}
@@ -410,7 +430,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   setResultForm={setResultForm}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={6}>
+              <TabPanel value={tab} index={7}>
                 <DisplayComments
                   game_id={game_id}
                   comments={comments}
@@ -445,6 +465,7 @@ const TabPanel = ({ children, value, index }: { children?: ReactNode; value: num
 const mapSquadToPlayerOption = (player: Squad): PlayerOption => ({
   value: String(player.footballapi_player_id),
   label: player.player_name,
+  position: player.position ?? player.potision,
 });
 
 const sortGoalEvents = (events: GoalTimelineEvent[]): GoalTimelineEvent[] =>
@@ -468,7 +489,6 @@ const sortCardEvents = (events: CardTimelineEvent[]): CardTimelineEvent[] =>
   });
 
 const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
-  console.log(game);
   const events: GoalTimelineEvent[] = [];
 
   const createOption = (id: number | string | null | undefined, name: string): PlayerOption => ({
@@ -533,6 +553,44 @@ const buildCardEventsFromGame = (game: Game): CardTimelineEvent[] => {
   build(game.away_team_red_cards, "AWAY", "RED");
 
   return sortCardEvents(events);
+};
+
+const sortPenaltyStopEvents = (events: PenaltyStopTimelineEvent[]): PenaltyStopTimelineEvent[] =>
+  [...events].sort((a, b) => {
+    const minuteA = normalizeMinute(a.minute);
+    const minuteB = normalizeMinute(b.minute);
+    if (minuteA === minuteB) {
+      return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+    }
+    return minuteA - minuteB;
+  });
+
+const buildPenaltyStopEventsFromGame = (game: Game): PenaltyStopTimelineEvent[] => {
+  const events: PenaltyStopTimelineEvent[] = [];
+
+  const createOption = (id: number | string | null | undefined, name: string): PlayerOption => ({
+    value: String(id ?? name),
+    label: name,
+  });
+
+  const build = (
+    stops: { name: string; footballapi_player_id: number; minute?: number | null; minuts?: number | null }[] = [],
+    side: TeamSide,
+  ) => {
+    stops.forEach((stop) => {
+      const resolvedMinute = stop.minute ?? stop.minuts;
+      events.push({
+        minute: normalizeMinute(resolvedMinute),
+        side,
+        goalkeeper: createOption(stop.footballapi_player_id, stop.name),
+      });
+    });
+  };
+
+  build(game.home_team_penalty_stops, "HOME");
+  build(game.away_team_penalty_stops, "AWAY");
+
+  return sortPenaltyStopEvents(events);
 };
 
 const normalizeMinute = (minute: number | null | undefined) => {

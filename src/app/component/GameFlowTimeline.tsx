@@ -1,15 +1,18 @@
 import { Card, CardContent, Chip, Divider, Stack, Typography, Box } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
+import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 import { grey } from "@mui/material/colors";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
 import { CardTimelineEvent } from "@/types/CardTimelineEvent";
+import { PenaltyStopTimelineEvent } from "@/types/PenaltyStopTimelineEvent";
 import { TimelineEmpty } from "./TimeLineEmpty";
 import type { ReactNode } from "react";
 
 type Props = {
   goalEvents: GoalTimelineEvent[];
   cardEvents: CardTimelineEvent[];
+  penaltyStopEvents: PenaltyStopTimelineEvent[];
   homeTeamName: string;
   awayTeamName: string;
 };
@@ -17,7 +20,7 @@ type Props = {
 type FlowEvent = {
   minute: number;
   side: TeamSide;
-  type: "GOAL" | "CARD";
+  type: "GOAL" | "CARD" | "PENALTY_STOP";
   title: string;
   description?: string;
   cardType?: "YELLOW" | "RED";
@@ -26,10 +29,17 @@ type FlowEvent = {
 const GameFlowTimeline = ({
   goalEvents,
   cardEvents,
+  penaltyStopEvents,
   homeTeamName,
   awayTeamName
 }: Props) => {
-  const combinedEvents = buildFlowEvents(goalEvents, cardEvents, homeTeamName, awayTeamName);
+  const combinedEvents = buildFlowEvents(
+    goalEvents,
+    cardEvents,
+    penaltyStopEvents,
+    homeTeamName,
+    awayTeamName,
+  );
 
   if (combinedEvents.length === 0) {
     return (
@@ -80,14 +90,17 @@ const GameFlowTimeline = ({
 
 const EventCard = ({ event }: { event: FlowEvent }) => {
   const isHome = event.side === "HOME";
-  const icon = event.type === "GOAL" ? (
-    <SportsSoccerIcon fontSize="small" color={isHome ? "success" : "primary"} />
-  ) : (
-    <SquareRoundedIcon
-      fontSize="small"
-      sx={{ color: event.cardType === "YELLOW" ? "#fbc02d" : "#d32f2f" }}
-    />
-  );
+  const icon =
+    event.type === "GOAL" ? (
+      <SportsSoccerIcon fontSize="small" color={isHome ? "success" : "primary"} />
+    ) : event.type === "CARD" ? (
+      <SquareRoundedIcon
+        fontSize="small"
+        sx={{ color: event.cardType === "YELLOW" ? "#fbc02d" : "#d32f2f" }}
+      />
+    ) : (
+      <SportsHandballIcon fontSize="small" color={isHome ? "secondary" : "action"} />
+    );
 
   const content = (
     <Stack spacing={0.5} sx={{ textAlign: isHome ? "left" : "right" }}>
@@ -137,6 +150,7 @@ const EventCard = ({ event }: { event: FlowEvent }) => {
 const buildFlowEvents = (
   goals: GoalTimelineEvent[],
   cards: CardTimelineEvent[],
+  penaltyStops: PenaltyStopTimelineEvent[],
   _homeTeamName: string,
   _awayTeamName: string,
 ): FlowEvent[] => {
@@ -167,13 +181,27 @@ const buildFlowEvents = (
     };
   });
 
-  return [...goalItems, ...cardItems].sort((a, b) => {
+  const penaltyStopItems: FlowEvent[] = penaltyStops.map((stop) => ({
+    minute: normalizeMinute(stop.minute),
+    side: stop.side,
+    type: "PENALTY_STOP",
+    title: stop.goalkeeper.label,
+    description: "PKストップ",
+  }));
+
+  const typePriority: Record<FlowEvent["type"], number> = {
+    GOAL: 0,
+    PENALTY_STOP: 1,
+    CARD: 2,
+  };
+
+  return [...goalItems, ...penaltyStopItems, ...cardItems].sort((a, b) => {
     const diff = a.minute - b.minute;
     if (diff !== 0) return diff;
-    if (a.type === b.type) {
-      return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+    if (a.type !== b.type) {
+      return typePriority[a.type] - typePriority[b.type];
     }
-    return a.type === "GOAL" ? -1 : 1;
+    return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
   });
 };
 
