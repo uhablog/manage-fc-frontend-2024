@@ -1,12 +1,19 @@
 import { Comment } from "@/types/Comment";
 import { Card, CardContent, List, ListItem, ListItemText, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import BottomTextField from "./BottomTextField";
 
 type Props = {
+  game_id: string
   comments: Comment[]
+  setComments: Dispatch<SetStateAction<Comment[]>>
 }
 
-const DisplayComments = ({comments}: Props) => {
+const DisplayComments = ({
+  game_id,
+  comments,
+  setComments
+}: Props) => {
 
   const [noComment, setNoComment] = useState<boolean>(false);
 
@@ -17,6 +24,34 @@ const DisplayComments = ({comments}: Props) => {
       setNoComment(false);
     }
   }, [comments]);
+
+  const postComment = async (comment: string) => {
+    if (!comment || comment === "") return;
+
+    try {
+      const response = await fetch(`/api/game/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          game_id,
+          comment,
+        }),
+      });
+      const json = await response.json();
+      if (json.success) {
+        const newComment = {
+          comment: json.comment.comment,
+          id: json.comment.id,
+          user_id: json.comment.user_id,
+        };
+        setComments((prev) => [newComment, ...prev]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -37,6 +72,7 @@ const DisplayComments = ({comments}: Props) => {
           }
         </CardContent>
       </Card>
+      <BottomTextField onButtonClick={postComment} />
     </>
   )
 };

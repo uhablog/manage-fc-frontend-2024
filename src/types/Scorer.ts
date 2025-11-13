@@ -8,4 +8,5 @@ export type Scorer = {
   team_id: string
   auth0_user_id: string
   emblem_url?: string | null
+  penalty_score: string
 }

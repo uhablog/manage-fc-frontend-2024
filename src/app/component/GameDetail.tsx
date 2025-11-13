@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import ButtonAppBar from "./GameDetailAppBar";
 import DisplayComments from "./DisplayComments";
-import BottomTextField from "./BottomTextField";
 import { Game } from "@/types/Game";
 import { Comment } from "@/types/Comment";
 import GameResisterScorer from "./GameResisterScorer";
@@ -18,13 +17,18 @@ import { PlayerOption } from "@/types/PlayerOption";
 import { SnackbarState } from "@/types/SnackbarState";
 import { Squad } from "@/types/Squads";
 import GameResisterCard from "./GameResisterCard";
+import GameResisterPenaltyStop from "./GameResisterPenaltyStop";
 import { ResultFormState } from "@/types/ResultFormState";
 import GameResultConfirm from "./GameResultConfirm";
 import GameScore from "./GameScore";
 import GameMomCard from "./GameMomCard";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
 import { CardTimelineEvent } from "@/types/CardTimelineEvent";
-import GameFlowTimeline from "./GameFlowTimeline";
+import { PenaltyStopTimelineEvent } from "@/types/PenaltyStopTimelineEvent";
+import { Facts } from "./Facts";
+import { HeadToHeadGameDetail } from "./HeadToHeadGameDetail";
+import LineUpForm from "./LineUpForm";
+import { LineUp } from "./LineUp";
 
 type Props = {
   id: string;
@@ -41,11 +45,15 @@ const GameDetail = ({ id, game_id }: Props) => {
   const [resultForm, setResultForm] = useState<ResultFormState>({
     momSide: "HOME",
     momPlayer: null,
+    momRating: null,
     confirmed: false,
   });
 
   const [homePlayers, setHomePlayers] = useState<PlayerOption[]>([]);
   const [awayPlayers, setAwayPlayers] = useState<PlayerOption[]>([]);
+  const [homeSquads, setHomeSquads] = useState<Squad[]>([]);
+  const [awaySquads, setAwaySquads] = useState<Squad[]>([]);
+  const [squadsLoading, setSquadsLoading] = useState<boolean>(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     message: "",
@@ -53,6 +61,7 @@ const GameDetail = ({ id, game_id }: Props) => {
   });
   const [goalEvents, setGoalEvents] = useState<GoalTimelineEvent[]>([]);
   const [cardEvents, setCardEvents] = useState<CardTimelineEvent[]>([]);
+  const [penaltyStopEvents, setPenaltyStopEvents] = useState<PenaltyStopTimelineEvent[]>([]);
   const [isResultConfirmed, setIsResultConfirmed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -88,10 +97,12 @@ const GameDetail = ({ id, game_id }: Props) => {
           ? "AWAY"
           : "HOME",
       momPlayer: null,
+      momRating: null,
       confirmed: Boolean(game.confirmed),
     });
     setGoalEvents(sortGoalEvents(buildGoalEventsFromGame(game)));
     setCardEvents(sortCardEvents(buildCardEventsFromGame(game)));
+    setPenaltyStopEvents(sortPenaltyStopEvents(buildPenaltyStopEventsFromGame(game)));
     setIsResultConfirmed(Boolean(game.confirmed));
   }, [game]);
 
@@ -99,44 +110,58 @@ const GameDetail = ({ id, game_id }: Props) => {
     if (!game) {
       setHomePlayers([]);
       setAwayPlayers([]);
+      setHomeSquads([]);
+      setAwaySquads([]);
+      setSquadsLoading(false);
       return;
     }
 
     const fetchSquads = async () => {
-      const { home_team_auth0_user_id, away_team_auth0_user_id } = game;
+      const { home_team_id, away_team_id } = game;
+      setSquadsLoading(true);
 
       try {
-        if (home_team_auth0_user_id) {
-          const res = await fetch(`/api/user/squads?user_id=${home_team_auth0_user_id}`);
+        if (home_team_id) {
+          const res = await fetch(`/api/team/squads?team_id=${home_team_id}`);
           if (res.ok) {
             const json = await res.json();
             const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
+            setHomeSquads(squads);
             setHomePlayers(squads.map(mapSquadToPlayerOption));
           } else {
             console.error("home squad fetch failed", res.status);
+            setHomeSquads([]);
             setHomePlayers([]);
           }
         } else {
+          setHomeSquads([]);
           setHomePlayers([]);
         }
 
-        if (away_team_auth0_user_id) {
-          const res = await fetch(`/api/user/squads?user_id=${away_team_auth0_user_id}`);
+        if (away_team_id) {
+          const res = await fetch(`/api/team/squads?team_id=${away_team_id}`);
           if (res.ok) {
             const json = await res.json();
             const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
+            setAwaySquads(squads);
             setAwayPlayers(squads.map(mapSquadToPlayerOption));
           } else {
             console.error("away squad fetch failed", res.status);
+            setAwaySquads([]);
             setAwayPlayers([]);
           }
         } else {
+          setAwaySquads([]);
           setAwayPlayers([]);
         }
       } catch (err) {
         console.error("failed to fetch squads", err);
+        setHomeSquads([]);
+        setAwaySquads([]);
         setHomePlayers([]);
         setAwayPlayers([]);
+      } finally {
+        setSquadsLoading(false);
       }
     };
 
@@ -163,6 +188,7 @@ const GameDetail = ({ id, game_id }: Props) => {
               name: event.scorer.label,
               footballapi_player_id: parsePlayerId(event.scorer.value),
               minuts: normalizeMinute(event.minute),
+              penalty: Boolean(event.penalty),
             },
           ],
           home_team_assists: updatedAssists,
@@ -184,6 +210,7 @@ const GameDetail = ({ id, game_id }: Props) => {
             name: event.scorer.label,
             footballapi_player_id: parsePlayerId(event.scorer.value),
             minuts: normalizeMinute(event.minute),
+            penalty: Boolean(event.penalty),
           },
         ],
         away_team_assists: updatedAssists,
@@ -227,32 +254,8 @@ const GameDetail = ({ id, game_id }: Props) => {
     });
   };
 
-  const postComment = async (comment: string) => {
-    if (!comment || comment === "") return;
-
-    try {
-      const response = await fetch(`/api/game/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          game_id,
-          comment,
-        }),
-      });
-      const json = await response.json();
-      if (json.success) {
-        const newComment = {
-          comment: json.comment.comment,
-          id: json.comment.id,
-          user_id: json.comment.user_id,
-        };
-        setComments((prev) => [newComment, ...prev]);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+  const handlePenaltyStopAdded = (event: PenaltyStopTimelineEvent) => {
+    setPenaltyStopEvents((prev) => sortPenaltyStopEvents([...prev, event]));
   };
 
   const handleSnackbarClose = () => {
@@ -295,14 +298,52 @@ const GameDetail = ({ id, game_id }: Props) => {
           />
           {isResultConfirmed ? (
             <>
-              <GameMomCard game={game} />
-              <GameFlowTimeline
-                goalEvents={goalEvents}
-                cardEvents={cardEvents}
-                homeTeamName={game.home_team_name}
-                awayTeamName={game.away_team_name}
-              />
-              <DisplayComments comments={comments} />
+              <Box>
+                <Tabs
+                  value={tab}
+                  onChange={(_, value) => setTab(value)}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  aria-label="game management tabs"
+                >
+                  <Tab label="Facts" />
+                  <Tab label="LineUp" />
+                  <Tab label="通算成績" />
+                  <Tab label="コメント" />
+                </Tabs>
+                <TabPanel value={tab} index={0}>
+                  <Stack spacing={3}>
+                    <GameMomCard game={game} />
+                    <Facts
+                      goalEvents={goalEvents}
+                      cardEvents={cardEvents}
+                      penaltyStopEvents={penaltyStopEvents}
+                      game={game}
+                    />
+                  </Stack>
+                </TabPanel>
+              <TabPanel value={tab} index={1}>
+                <LineUp
+                  gameId={game_id}
+                  homeTeamId={game.home_team_id}
+                  awayTeamId={game.away_team_id}
+                  homeTeamName={game.home_team_name}
+                  awayTeamName={game.away_team_name}
+                />
+              </TabPanel>
+                <TabPanel value={tab} index={2}>
+                  <HeadToHeadGameDetail
+                    game={game}
+                  />
+                </TabPanel>
+                <TabPanel value={tab} index={3}>
+                  <DisplayComments
+                    game_id={game_id}
+                    comments={comments}
+                    setComments={setComments}
+                  />
+                </TabPanel>
+              </Box>
             </>
           ) : (
             <Box>
@@ -313,21 +354,29 @@ const GameDetail = ({ id, game_id }: Props) => {
                 scrollButtons="auto"
                 aria-label="game management tabs"
               >
-                <Tab label="Event" />
+                <Tab label="Facts" />
+                <Tab label="通算成績" />
                 <Tab label="得点" />
                 <Tab label="カード" />
+                <Tab label="PKストップ" />
+                <Tab label="ラインナップ" />
                 <Tab label="試合結果" />
                 <Tab label="コメント" />
               </Tabs>
               <TabPanel value={tab} index={0}>
-                <GameFlowTimeline
+                <Facts
                   goalEvents={goalEvents}
                   cardEvents={cardEvents}
-                  homeTeamName={game.home_team_name}
-                  awayTeamName={game.away_team_name}
+                  penaltyStopEvents={penaltyStopEvents}
+                  game={game}
                 />
               </TabPanel>
               <TabPanel value={tab} index={1}>
+                <HeadToHeadGameDetail
+                  game={game}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={2}>
                 <GameResisterScorer
                   game={game}
                   homePlayers={homePlayers}
@@ -337,7 +386,7 @@ const GameDetail = ({ id, game_id }: Props) => {
                   onGoalAdded={handleGoalAdded}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={2}>
+              <TabPanel value={tab} index={3}>
                 <GameResisterCard
                   game={game}
                   homePlayers={homePlayers}
@@ -347,7 +396,31 @@ const GameDetail = ({ id, game_id }: Props) => {
                   onCardAdded={handleCardAdded}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={3}>
+              <TabPanel value={tab} index={4}>
+                <GameResisterPenaltyStop
+                  game={game}
+                  homePlayers={homePlayers}
+                  awayPlayers={awayPlayers}
+                  setSnackbar={setSnackbar}
+                  onPenaltyStopAdded={handlePenaltyStopAdded}
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={5}>
+                <LineUpForm
+                  gameId={game.game_id}
+                  homeSquads={homeSquads}
+                  awaySquads={awaySquads}
+                  loadingSquads={squadsLoading}
+                  onSubmitSuccess={() =>
+                    setSnackbar({
+                      open: true,
+                      message: "ラインナップを送信しました。",
+                      severity: "success",
+                    })
+                  }
+                />
+              </TabPanel>
+              <TabPanel value={tab} index={6}>
                 <GameResultConfirm
                   game={game}
                   homePlayers={homePlayers}
@@ -357,14 +430,17 @@ const GameDetail = ({ id, game_id }: Props) => {
                   setResultForm={setResultForm}
                 />
               </TabPanel>
-              <TabPanel value={tab} index={4}>
-                <DisplayComments comments={comments} />
+              <TabPanel value={tab} index={7}>
+                <DisplayComments
+                  game_id={game_id}
+                  comments={comments}
+                  setComments={setComments}
+                />
               </TabPanel>
             </Box>
           )}
         </Stack>
       </Box>
-      <BottomTextField onButtonClick={postComment} />
 
       <Snackbar
         open={snackbar.open}
@@ -389,6 +465,7 @@ const TabPanel = ({ children, value, index }: { children?: ReactNode; value: num
 const mapSquadToPlayerOption = (player: Squad): PlayerOption => ({
   value: String(player.footballapi_player_id),
   label: player.player_name,
+  position: player.position ?? player.potision,
 });
 
 const sortGoalEvents = (events: GoalTimelineEvent[]): GoalTimelineEvent[] =>
@@ -420,7 +497,7 @@ const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
   });
 
   const build = (
-    scorers: { name: string; footballapi_player_id: number; minuts: number }[] = [],
+    scorers: { name: string; footballapi_player_id: number; minuts: number; penalty?: boolean }[] = [],
     assists: { name: string; footballapi_player_id: number }[] = [],
     side: TeamSide,
   ) => {
@@ -436,6 +513,7 @@ const buildGoalEventsFromGame = (game: Game): GoalTimelineEvent[] => {
         side,
         scorer: scorerOption,
         assist: assistOption,
+        penalty: Boolean(scorer.penalty),
       });
     });
   };
@@ -475,6 +553,44 @@ const buildCardEventsFromGame = (game: Game): CardTimelineEvent[] => {
   build(game.away_team_red_cards, "AWAY", "RED");
 
   return sortCardEvents(events);
+};
+
+const sortPenaltyStopEvents = (events: PenaltyStopTimelineEvent[]): PenaltyStopTimelineEvent[] =>
+  [...events].sort((a, b) => {
+    const minuteA = normalizeMinute(a.minute);
+    const minuteB = normalizeMinute(b.minute);
+    if (minuteA === minuteB) {
+      return a.side === "HOME" && b.side === "AWAY" ? -1 : 1;
+    }
+    return minuteA - minuteB;
+  });
+
+const buildPenaltyStopEventsFromGame = (game: Game): PenaltyStopTimelineEvent[] => {
+  const events: PenaltyStopTimelineEvent[] = [];
+
+  const createOption = (id: number | string | null | undefined, name: string): PlayerOption => ({
+    value: String(id ?? name),
+    label: name,
+  });
+
+  const build = (
+    stops: { name: string; footballapi_player_id: number; minute?: number | null; minuts?: number | null }[] = [],
+    side: TeamSide,
+  ) => {
+    stops.forEach((stop) => {
+      const resolvedMinute = stop.minute ?? stop.minuts;
+      events.push({
+        minute: normalizeMinute(resolvedMinute),
+        side,
+        goalkeeper: createOption(stop.footballapi_player_id, stop.name),
+      });
+    });
+  };
+
+  build(game.home_team_penalty_stops, "HOME");
+  build(game.away_team_penalty_stops, "AWAY");
+
+  return sortPenaltyStopEvents(events);
 };
 
 const normalizeMinute = (minute: number | null | undefined) => {

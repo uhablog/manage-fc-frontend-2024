@@ -5,4 +5,5 @@ export type GoalTimelineEvent = {
   side: TeamSide;
   scorer: PlayerOption;
   assist?: PlayerOption | null;
+  penalty?: boolean;
 };

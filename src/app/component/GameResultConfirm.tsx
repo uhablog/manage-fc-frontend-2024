@@ -8,6 +8,7 @@ import { Game } from "@/types/Game";
 
 type ResultFormErrors = Partial<{
   momPlayer: string;
+  momRating: string;
   confirmed: string;
 }>;
 
@@ -42,6 +43,11 @@ export default function GameResultConfirm({
     if (!resultForm.momPlayer) {
       errors.momPlayer = "MOMを選択してください。";
     }
+    if (resultForm.momRating === null || Number.isNaN(resultForm.momRating)) {
+      errors.momRating = "MOMの評価点を入力してください。";
+    } else if (resultForm.momRating < 0 || resultForm.momRating > 10) {
+      errors.momRating = "0〜10の範囲で入力してください。";
+    }
     if (!resultForm.confirmed) {
       errors.confirmed = "確定前に内容を確認してください。";
     }
@@ -56,8 +62,6 @@ export default function GameResultConfirm({
 
     const momTeamId = resultForm.momSide === "HOME" ? game.home_team_id : game.away_team_id;
     try {
-      
-      console.log('request sending...');
       const response = await fetch(`/api/game/v2/confirm`, {
         method: 'POST',
         headers: {
@@ -67,7 +71,8 @@ export default function GameResultConfirm({
           momTeam: momTeamId,
           mom: {
             player_name: resultForm.momPlayer?.label,
-            footballapi_player_id: resultForm.momPlayer?.value
+            footballapi_player_id: resultForm.momPlayer?.value,
+            rating: resultForm.momRating,
           },
           game_id: game.game_id
         })
@@ -78,6 +83,7 @@ export default function GameResultConfirm({
         setResultForm((prev) => ({
           ...prev,
           confirmed: false,
+          momRating: null,
         }));
         setSnackbar({
           open: true,
@@ -143,6 +149,25 @@ export default function GameResultConfirm({
                   isOptionEqualToValue={(option, value) => option.value === value?.value}
                   disabled={momOptions.length === 0}
                 />
+                <TextField
+                  label="MOM評価点"
+                  type="number"
+                  inputProps={{ min: 0, max: 10, step: 0.1 }}
+                  value={resultForm.momRating ?? ""}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    const numericValue = value === "" ? null : Number(value);
+                    if (numericValue === null || !Number.isNaN(numericValue)) {
+                      setResultForm((prev) => ({
+                        ...prev,
+                        momRating: numericValue,
+                      }));
+                      setResultErrors((prev) => ({ ...prev, momRating: undefined }));
+                    }
+                  }}
+                  error={Boolean(resultErrors.momRating)}
+                  helperText={resultErrors.momRating}
+                />
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -184,6 +209,11 @@ export default function GameResultConfirm({
           {resultForm.momPlayer && (
             <Typography variant="body2" sx={{ mt: 1 }}>
               MOM: {resultForm.momPlayer.label}
+            </Typography>
+          )}
+          {resultForm.momRating !== null && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              MOM評価点: {resultForm.momRating}
             </Typography>
           )}
         </DialogContent>
