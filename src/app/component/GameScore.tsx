@@ -97,7 +97,7 @@ const GameScore = ({
                   <Box
                     key={index}
                     onClick={() => handleClick(`${scorer.footballapi_player_id}`, game?.home_team_id)}
-                  >{scorer.name}</Box>
+                  >{scorer.name} { scorer.penalty ? "(Pen)": ""}</Box>
                 ))}
               </Typography>
             </Grid2>
@@ -110,7 +110,7 @@ const GameScore = ({
                   <Box
                     key={index}
                     onClick={() => handleClick(`${scorer.footballapi_player_id}`, game?.away_team_id)}
-                  >{scorer.name}</Box>
+                  >{scorer.name} { scorer.penalty ? "(Pen)": ""}</Box>
                 ))}
               </Typography>
             </Grid2>
