@@ -12,7 +12,6 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
-  MenuItem,
   Snackbar,
   Stack,
   Tab,
@@ -77,14 +76,6 @@ const LineUpForm = ({
   const [activeSide, setActiveSide] = useState<SideKey>(
     homeSquads.length > 0 ? "HOME" : "AWAY"
   );
-  const ratingOptions = useMemo(() => {
-    const values: string[] = [];
-    for (let i = 0; i <= 20; i += 1) {
-      values.push((i * 0.5).toFixed(1));
-    }
-    return values;
-  }, []);
-
   const sideConfigs: SideConfig[] = useMemo(
     () => [
       { key: "HOME", label: "ホーム", squads: homeSquads },
@@ -282,7 +273,7 @@ const LineUpForm = ({
               </Typography>
             </Box>
             <TextField
-              select
+              type="number"
               label="レーティング (任意)"
               value={ratings[player.id] ?? ""}
               onChange={(event) => handleRatingChange(player.id, event.target.value)}
@@ -290,19 +281,15 @@ const LineUpForm = ({
                 minWidth: { md: 160 },
                 width: { xs: "100%", md: "auto" },
               }}
-              SelectProps={{
-                displayEmpty: true,
+              inputProps={{
+                step: 0.1,
+                min: 0,
+                max: 10,
               }}
-            >
-              <MenuItem value="">
-                <em>未入力</em>
-              </MenuItem>
-              {ratingOptions.map((value) => (
-                <MenuItem key={value} value={value}>
-                  {value}
-                </MenuItem>
-              ))}
-            </TextField>
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
           </Box>
         ))}
       </Stack>
