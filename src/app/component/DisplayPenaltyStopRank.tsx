@@ -14,7 +14,6 @@ import {
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import NextLink from "next/link";
 import { useEffect, useState } from "react";
-import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 type Props = {
   id: string;
@@ -24,9 +23,6 @@ type Props = {
 const DisplayPenaltyStopRank = ({ id, initialLimit }: Props) => {
   const [penaltyStops, setPenaltyStops] = useState<PenaltyStopRank[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
-  const [open, setOpen] = useState<boolean>(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<string>("");
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
 
   useEffect(() => {
     const fetchPenaltyStops = async () => {
@@ -59,16 +55,6 @@ const DisplayPenaltyStopRank = ({ id, initialLimit }: Props) => {
     }
   };
 
-  const onClose = () => {
-    setOpen(false);
-  };
-
-  const handleClick = (playerId: string, teamId: string) => {
-    setSelectedPlayer(playerId);
-    setSelectedTeamId(teamId);
-    setOpen(true);
-  };
-
   const visibleStops = limit ? penaltyStops.slice(0, limit) : penaltyStops;
 
   return (
@@ -81,68 +67,75 @@ const DisplayPenaltyStopRank = ({ id, initialLimit }: Props) => {
           <List>
             <Grid2 container spacing={2}>
               {visibleStops.map((stop, index) => (
-                <ListItem
+                <MuiLink
                   key={`${stop.footballapi_player_id}-${index}`}
-                  disableGutters
-                  onClick={() => handleClick(stop.footballapi_player_id, stop.team_id)}
-                  sx={{
-                    borderRadius: 1,
-                    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
-                    "&:hover": {
-                      backgroundColor: "action.hover",
-                      boxShadow: 1,
-                      transform: "translateY(-1px)",
-                    },
-                  }}
+                  component={NextLink}
+                  underline="none"
+                  color="black"
+                  href={`/player/${stop.footballapi_player_id}?convention_id=${id}`}
+                  style={{ textDecoration: "none", width: "100%" }}
                 >
-                  <Grid2 xs={1}>
-                    <Typography variant="body2">{stop.rank}</Typography>
-                  </Grid2>
-                  <Grid2 xs={2}>
-                    <ListItemAvatar>
-                      <Avatar
-                        alt={`penalty stop rank ${index + 1}`}
-                        src={`https://media.api-sports.io/football/players/${stop.footballapi_player_id}.png`}
-                      />
-                    </ListItemAvatar>
-                  </Grid2>
-                  <Grid2 xs={8}>
-                    <Typography
-                      component="p"
-                      sx={{
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {stop.gk_name}
-                    </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Avatar
-                        src={stop.emblem_url ?? undefined}
-                        alt={`${stop.team_name} emblem`}
-                        sx={{ width: 20, height: 20 }}
-                      >
-                        {stop.team_name?.charAt(0) ?? "?"}
-                      </Avatar>
-                      <MuiLink
-                        component={NextLink}
-                        underline="none"
-                        color="black"
-                        href={`/conventions/${id}/team/${stop.team_id}`}
+                  <ListItem
+                    disableGutters
+                    sx={{
+                      borderRadius: 1,
+                      transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                        boxShadow: 1,
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    <Grid2 xs={1}>
+                      <Typography variant="body2">{stop.rank}</Typography>
+                    </Grid2>
+                    <Grid2 xs={2}>
+                      <ListItemAvatar>
+                        <Avatar
+                          alt={`penalty stop rank ${index + 1}`}
+                          src={`https://media.api-sports.io/football/players/${stop.footballapi_player_id}.png`}
+                        />
+                      </ListItemAvatar>
+                    </Grid2>
+                    <Grid2 xs={8}>
+                      <Typography
+                        component="p"
                         sx={{
-                          "&:hover": {
-                            color: "blue",
-                            textDecoration: "underline",
-                          },
+                          fontWeight: "bold",
                         }}
                       >
-                        <Typography variant="body2">{stop.team_name}</Typography>
-                      </MuiLink>
-                    </Stack>
-                  </Grid2>
-                  <Grid2 xs={1}>
-                    <Typography>{stop.saves}</Typography>
-                  </Grid2>
-                </ListItem>
+                        {stop.gk_name}
+                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar
+                          src={stop.emblem_url ?? undefined}
+                          alt={`${stop.team_name} emblem`}
+                          sx={{ width: 20, height: 20 }}
+                        >
+                          {stop.team_name?.charAt(0) ?? "?"}
+                        </Avatar>
+                        <MuiLink
+                          component={NextLink}
+                          underline="none"
+                          color="black"
+                          href={`/conventions/${id}/team/${stop.team_id}`}
+                          sx={{
+                            "&:hover": {
+                              color: "blue",
+                              textDecoration: "underline",
+                            },
+                          }}
+                        >
+                          <Typography variant="body2">{stop.team_name}</Typography>
+                        </MuiLink>
+                      </Stack>
+                    </Grid2>
+                    <Grid2 xs={1}>
+                      <Typography>{stop.saves}</Typography>
+                    </Grid2>
+                  </ListItem>
+                </MuiLink>
               ))}
             </Grid2>
           </List>
@@ -153,7 +146,6 @@ const DisplayPenaltyStopRank = ({ id, initialLimit }: Props) => {
           )}
         </CardContent>
       </Card>
-      <PlayerStatsDialog open={open} onClose={onClose} team_id={selectedTeamId} player_id={selectedPlayer} />
     </>
   );
 };
