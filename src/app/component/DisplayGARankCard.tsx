@@ -3,7 +3,6 @@ import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
-import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 type Props = {
   id: string
@@ -14,9 +13,6 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
 
   const [ga_rank, setGaRank] = useState<GA[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
-  const [ open, setOpen ] = useState<boolean>(false);
-  const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
-  const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
   // アシストランクの取得
   useEffect(() => {
     const fetchGaRank = async () => {
@@ -39,13 +35,6 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
     }
   }
 
-  const onClose = () => { setOpen(false) };
-  const handleClick = (player_id: string, team_id: string) => {
-    setSelectedPlayer(player_id);
-    setSelectedTeamId(team_id);
-    setOpen(true);
-  }
-
   return (
     <>
       <Card>
@@ -54,63 +43,70 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
           <List>
             <Grid2 container spacing={2}>
               {(limit ? ga_rank.slice(0, limit) : ga_rank).map((ga_data, index) => (
-                <ListItem
+                <MuiLink
                   key={index}
-                  disableGutters
-                  onClick={() => handleClick(ga_data.footballapi_player_id, ga_data.team_id)}
-                  sx={{
-                    borderRadius: 1,
-                    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
-                    "&:hover": {
-                      backgroundColor: "action.hover",
-                      boxShadow: 1,
-                      transform: "translateY(-1px)"
-                    }
-                  }}
+                  component={NextLink}
+                  underline="none"
+                  color='black'
+                  href={`/player/${ga_data.footballapi_player_id}?convention_id=${id}`}
+                  style={{ textDecoration: "none", width: "100%" }}
                 >
-                    <Grid2 xs={1}>
-                      <Typography variant="body2">{ga_data.rank}</Typography>
-                    </Grid2>
-                    <Grid2 xs={2}>
-                      <ListItemAvatar>
-                        <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${ga_data.footballapi_player_id}.png`} />
-                      </ListItemAvatar>
-                    </Grid2>
-                    <Grid2 xs={8}>
-                      <Typography
-                        component="p"
-                        sx={{
-                          fontWeight: "bold"
-                        }}
-                      >{ga_data.scorer_name}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Avatar
-                          src={ga_data.emblem_url ?? undefined}
-                          alt={`${ga_data.team_name} emblem`}
-                          sx={{ width: 20, height: 20 }}
-                        >
-                          {ga_data.team_name?.charAt(0) ?? "?"}
-                        </Avatar>
-                        <MuiLink
-                          component={NextLink}
-                          underline="none"
-                          color={'black'}
-                          href={`/conventions/${id}/team/${ga_data.team_id}`}
+                  <ListItem
+                    disableGutters
+                    sx={{
+                      borderRadius: 1,
+                      transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                        boxShadow: 1,
+                        transform: "translateY(-1px)"
+                      }
+                    }}
+                  >
+                      <Grid2 xs={1}>
+                        <Typography variant="body2">{ga_data.rank}</Typography>
+                      </Grid2>
+                      <Grid2 xs={2}>
+                        <ListItemAvatar>
+                          <Avatar alt={`scorer rank ${index+1}`} src={`https://media.api-sports.io/football/players/${ga_data.footballapi_player_id}.png`} />
+                        </ListItemAvatar>
+                      </Grid2>
+                      <Grid2 xs={8}>
+                        <Typography
+                          component="p"
                           sx={{
-                            '&:hover': {
-                              color: 'blue',
-                              textDecoration: 'underline'
-                            }
+                            fontWeight: "bold"
                           }}
-                        >
-                          <Typography variant="body2">{ga_data.team_name}</Typography>
-                        </MuiLink>
-                      </Stack>
-                    </Grid2>
-                    <Grid2 xs={1}>
-                      <Typography>{ga_data.total_points}</Typography>
-                    </Grid2>
-                </ListItem>
+                        >{ga_data.scorer_name}</Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Avatar
+                            src={ga_data.emblem_url ?? undefined}
+                            alt={`${ga_data.team_name} emblem`}
+                            sx={{ width: 20, height: 20 }}
+                          >
+                            {ga_data.team_name?.charAt(0) ?? "?"}
+                          </Avatar>
+                          <MuiLink
+                            component={NextLink}
+                            underline="none"
+                            color={'black'}
+                            href={`/conventions/${id}/team/${ga_data.team_id}`}
+                            sx={{
+                              '&:hover': {
+                                color: 'blue',
+                                textDecoration: 'underline'
+                              }
+                            }}
+                          >
+                            <Typography variant="body2">{ga_data.team_name}</Typography>
+                          </MuiLink>
+                        </Stack>
+                      </Grid2>
+                      <Grid2 xs={1}>
+                        <Typography>{ga_data.total_points}</Typography>
+                      </Grid2>
+                  </ListItem>
+                </MuiLink>
               ))}
             </Grid2>
           </List>
@@ -122,12 +118,6 @@ const DisplayGARankCard = ({id, initialLimit}: Props) => {
           }
         </CardContent>
       </Card>
-      <PlayerStatsDialog
-        open={open}
-        onClose={onClose}
-        team_id={selectedTeamId}
-        player_id={selectedPlayer}
-      />
     </>
   )
 };

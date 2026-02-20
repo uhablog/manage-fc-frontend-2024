@@ -3,7 +3,6 @@ import { Avatar, Button, Card, CardContent, List, ListItem, ListItemAvatar, Link
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
-import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 type Props = {
   id: string
@@ -14,9 +13,6 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
   
   const [scorers, setScorers] = useState<Scorer[]>([]);
   const [limit, setLimit] = useState<number | undefined>(initialLimit);
-  const [ open, setOpen ] = useState<boolean>(false);
-  const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
-  const [ selectedTeamId, setSelectedTeamId ] = useState<string>('');
 
   // 得点者の取得
   useEffect(() => {
@@ -41,13 +37,6 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
     }
   }
 
-  const onClose = () => { setOpen(false) };
-  const handleClick = (player_id: string, team_id: string) => {
-    setSelectedPlayer(player_id);
-    setSelectedTeamId(team_id);
-    setOpen(true);
-  }
-
 
   return (
     <>
@@ -57,20 +46,27 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
           <List>
             <Grid2 container spacing={2}>
               {(limit ? scorers.slice(0, limit) : scorers).map((scorer, index) => (
-                <ListItem
+                <MuiLink
                   key={index}
-                  disableGutters
-                  onClick={() => handleClick(scorer.footballapi_player_id, scorer.team_id)}
-                  sx={{
-                    borderRadius: 1,
-                    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
-                    "&:hover": {
-                      backgroundColor: "action.hover",
-                      boxShadow: 1,
-                      transform: "translateY(-1px)"
-                    }
-                  }}
+                  component={NextLink}
+                  underline="none"
+                  color='black'
+                  href={`/player/${scorer.footballapi_player_id}?convention_id=${id}`}
+                  style={{ textDecoration: "none", width: "100%" }}
                 >
+                  <ListItem
+                    disableGutters
+                    sx={{
+                      borderRadius: 1,
+                      transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                      cursor: "pointer",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                        boxShadow: 1,
+                        transform: "translateY(-1px)"
+                      }
+                    }}
+                  >
                     <Grid2 xs={1}>
                       <Typography variant="body2">{scorer.rank}</Typography>
                     </Grid2>
@@ -97,12 +93,11 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                         <MuiLink
                           component={NextLink}
                           underline="none"
-                          color={'black'}
+                          color="inherit"
                           href={`/conventions/${id}/team/${scorer.team_id}`}
                           sx={{
                             '&:hover': {
-                              color: 'blue',
-                              textDecoration: 'underline'
+                              textDecoration: 'none'
                             }
                           }}
                         >
@@ -113,7 +108,8 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
                     <Grid2 xs={1}>
                       <Typography>{scorer.score}({scorer.penalty_score})</Typography>
                     </Grid2>
-                </ListItem>
+                  </ListItem>
+                </MuiLink>
               ))}
             </Grid2>
           </List>
@@ -125,12 +121,6 @@ const DisplayScorer = ({ id, initialLimit }: Props) => {
           }
         </CardContent>
       </Card>
-      <PlayerStatsDialog
-        open={open}
-        onClose={onClose}
-        team_id={selectedTeamId}
-        player_id={selectedPlayer}
-      />
     </>
   )
 };
