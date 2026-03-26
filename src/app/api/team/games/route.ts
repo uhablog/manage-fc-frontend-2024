@@ -21,6 +21,8 @@ export async function GET(request: NextRequest) {
 
   if (!res.ok) {
     console.error("試合情報の取得に失敗");
+    const json = await res.json();
+    console.log(json.message);
     return Response.json({
       success: false,
       message: "試合情報取得失敗",

@@ -26,23 +26,3 @@ export async function GET(
     data: games,
   });
 };
-
-export async function POST(
-  request: Request,
-) {
-  const accessTokenResult = await getAccessToken();
-  const res = await fetch(`${process.env.API_ENDPOINT}/api/game`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify(await request.json())
-  });
-  const result = await res.json();
-
-  return Response.json({
-    result
-  });
-};
