@@ -1,13 +1,14 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 
 export async function GET(
   request: Request,
-  { params }: { params: { footballapi_player_id: string } }
+  context: { params: Promise<{ footballapi_player_id: string }> }
 ) {
+  const params = await context.params;
   let accessTokenResult;
   
   try {
-    accessTokenResult = await getAccessToken();
+    accessTokenResult = await auth0.getAccessToken();
   } catch (error) {
     console.error("Failed to get access token:", error);
     return Response.json(
@@ -16,7 +17,7 @@ export async function GET(
     );
   }
   
-  if (!accessTokenResult?.accessToken) {
+  if (!accessTokenResult?.token) {
     return Response.json(
       { message: "Unauthorized - No access token" },
       { status: 401 }
@@ -29,7 +30,7 @@ export async function GET(
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${accessTokenResult.accessToken}`,
+        Authorization: `Bearer ${accessTokenResult.token}`,
       },
     }
   );

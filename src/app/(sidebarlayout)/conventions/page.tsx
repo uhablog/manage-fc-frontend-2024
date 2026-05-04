@@ -1,10 +1,14 @@
-import { Session, getAccessToken, getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import DisplayConventions from "@/app/component/DisplayConventions";
+import { redirect } from "next/navigation";
 
-export default withPageAuthRequired(async function Home() {
+export default async function Home() {
 
-  const accessToken = (await getAccessToken()).accessToken;
-  const session: Session | null | undefined = await getSession();
+  const session = await auth0.getSession();
+  if (!session) {
+    redirect("/auth/login?returnTo=/conventions");
+  }
+  const accessToken = (await auth0.getAccessToken()).token;
   const user = session?.user;
 
   // 大会一覧の取得
@@ -36,4 +40,4 @@ export default withPageAuthRequired(async function Home() {
       <DisplayConventions conventions={conventions?.data} />
     </>
   );
-}, {returnTo: '/conventions'});
+}

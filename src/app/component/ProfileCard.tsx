@@ -1,9 +1,9 @@
-import { UserProfile } from "@auth0/nextjs-auth0/client";
+import type { User } from "@auth0/nextjs-auth0/types";
 import { Box, Button, Card, CardActions, CardContent, Tab, Tabs, Typography } from "@mui/material";
 import Image from "next/image";
 
 type Props = {
-  user: UserProfile
+  user: User
   value: number
   handleChange: (event: React.SyntheticEvent, newValue: number) => void
 }
@@ -29,7 +29,7 @@ const ProfileCard = ({ user, value, handleChange }: Props) => {
           />
           <Typography variant="h5" component="div">{user?.name}</Typography>
           <CardActions>
-            <Button size="small" href="/api/auth/logout" variant="contained" color="primary">
+            <Button size="small" href="/auth/logout" variant="contained" color="primary">
               Logout
             </Button>
           </CardActions>

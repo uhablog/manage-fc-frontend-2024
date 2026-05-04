@@ -17,15 +17,20 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { PlayerConventionStats } from "@/types/PlayerConventionStats";
-import { getAccessToken, withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import NextLink from "next/link";
+import { redirect } from "next/navigation";
 
-export default withPageAuthRequired(async function PlayerPage({ params, searchParams }: any) {
+export default async function PlayerPage({ params, searchParams }: any) {
+  const session = await auth0.getSession();
+  if (!session) {
+    redirect(`/auth/login?returnTo=/player/${params.footballapi_player_id}`);
+  }
   const footballapi_player_id = params.footballapi_player_id as string;
   const convention_id = (searchParams?.convention_id as string) || "";
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
 
-  if (!accessTokenResult?.accessToken) {
+  if (!accessTokenResult?.token) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h6" color="error">
@@ -41,7 +46,7 @@ export default withPageAuthRequired(async function PlayerPage({ params, searchPa
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${accessTokenResult.accessToken}`,
+        "Authorization": `Bearer ${accessTokenResult.token}`,
       },
       cache: "no-store",
     }
@@ -229,4 +234,4 @@ export default withPageAuthRequired(async function PlayerPage({ params, searchPa
       </Card>
     </Container>
   );
-}, { returnTo: '/conventions' });
+}
