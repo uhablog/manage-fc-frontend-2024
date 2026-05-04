@@ -18,7 +18,6 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { PlayerConventionStats } from "@/types/PlayerConventionStats";
 import { auth0 } from "@/libs/auth0";
-import NextLink from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function PlayerPage({ params, searchParams }: any) {
@@ -98,7 +97,6 @@ export default async function PlayerPage({ params, searchParams }: any) {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 戻るボタン */}
       <Button
-        component={NextLink}
         href={convention_id ? `/conventions/${convention_id}` : "/conventions"}
         startIcon={<ArrowBackIcon />}
         sx={{ mb: 3 }}
