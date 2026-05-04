@@ -1,14 +1,15 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 
 export async function GET(
   request: Request,
-  { params }: { params: {id: string}}
+  context: { params: Promise<{ id: string }> }
 ) {
-  const accessTokenResult = await getAccessToken();
+  const params = await context.params;
+  const accessTokenResult = await auth0.getAccessToken();
   const res = await fetch(`${process.env.API_ENDPOINT}/api/convention/teams?q=${params.id}`, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`
+      'Authorization': `Bearer ${accessTokenResult.token}`
     }
   });
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from "@/theme";
@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <UserProvider>
+      <Auth0Provider>
         <body className={inter.className}>
           <AppRouterCacheProvider>
             <ThemeProvider theme={theme} >
@@ -29,7 +29,7 @@ export default function RootLayout({
             </ThemeProvider>
           </AppRouterCacheProvider>
         </body>
-      </UserProvider>
+      </Auth0Provider>
     </html>
   );
 }

@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -6,12 +6,12 @@ export async function GET(
 ) {
   const searchParams = request.nextUrl.searchParams;
   const team_id = searchParams.get('team_id');
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
   console.log('route.ts: ', team_id);
   const res = await fetch(`${process.env.API_ENDPOINT}/api/team?team_id=${team_id}`, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`
+      'Authorization': `Bearer ${accessTokenResult.token}`
     }
   });
 

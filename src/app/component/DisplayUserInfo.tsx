@@ -2,12 +2,12 @@ import ProfileCard from "./ProfileCard";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { useState } from "react";
 import CustomTabPanel from "./CustomTabPanel";
-import { UserProfile } from "@auth0/nextjs-auth0/client";
+import type { User } from "@auth0/nextjs-auth0/types";
 import UserSummary from "./UserSummary";
 import UserSquad from "./UserSquad";
 
 type Props = {
-  user: UserProfile
+  user: User
 }
 
 const DisplayUserInfo = ({ user }: Props) => {

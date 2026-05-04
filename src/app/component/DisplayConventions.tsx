@@ -1,3 +1,5 @@
+"use client";
+
 import { Convention } from "@/types/Convention";
 import { Add } from "@mui/icons-material";
 import { Card, CardContent, Fab, Link as MuiLink, Typography } from "@mui/material";
