@@ -4,16 +4,22 @@ import { SnackbarState } from "@/types/SnackbarState";
 import { PenaltyStopTimelineEvent } from "@/types/PenaltyStopTimelineEvent";
 import {
   Autocomplete,
+  Box,
   Button,
   Card,
   CardContent,
+  Chip,
   Stack,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2";
+import { grey } from "@mui/material/colors";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { EventActionButtons } from "./EventActionButtons";
+import { TimelineEmpty } from "./TimeLineEmpty";
 
 type PenaltyStopFormState = {
   side: TeamSide;
@@ -32,7 +38,8 @@ type Props = {
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
-  onPenaltyStopAdded: (event: PenaltyStopTimelineEvent) => void;
+  penaltyStopEvents: PenaltyStopTimelineEvent[];
+  onEventChanged: () => Promise<void>;
 };
 
 const createInitialFormState = (side: TeamSide = "HOME"): PenaltyStopFormState => ({
@@ -67,11 +74,13 @@ export default function GameResisterPenaltyStop({
   homePlayers,
   awayPlayers,
   setSnackbar,
-  onPenaltyStopAdded,
+  penaltyStopEvents,
+  onEventChanged,
 }: Props) {
   const [form, setForm] = useState<PenaltyStopFormState>(() => createInitialFormState());
   const [errors, setErrors] = useState<PenaltyStopFormErrors>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [editingEvent, setEditingEvent] = useState<PenaltyStopTimelineEvent | null>(null);
 
   const goalkeeperOptions = useMemo(() => {
     const source = form.side === "HOME" ? homePlayers : awayPlayers;
@@ -81,6 +90,17 @@ export default function GameResisterPenaltyStop({
   const resetForm = (side: TeamSide) => {
     setForm(createInitialFormState(side));
     setErrors({});
+    setEditingEvent(null);
+  };
+
+  const startEditing = (event: PenaltyStopTimelineEvent) => {
+    setForm({
+      side: event.side,
+      minute: String(event.minute),
+      goalkeeper: event.goalkeeper,
+    });
+    setErrors({});
+    setEditingEvent(event);
   };
 
   const handleGoalkeeperChange = (_: unknown, value: PlayerOption | null) => {
@@ -139,13 +159,18 @@ export default function GameResisterPenaltyStop({
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/game/v2/penalty-stop`, {
-        method: "POST",
+      const response = await fetch(
+        editingEvent
+          ? `/api/game/v2/penalty-stop/${editingEvent.id}`
+          : `/api/game/v2/penalty-stop`,
+        {
+        method: editingEvent ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      });
+        },
+      );
 
       const data = await response.json().catch(() => null);
 
@@ -153,19 +178,12 @@ export default function GameResisterPenaltyStop({
         throw new Error(data?.message ?? "PKストップの登録に失敗しました。");
       }
 
+      await onEventChanged();
+      const wasEditing = Boolean(editingEvent);
       setSnackbar({
         open: true,
         severity: "success",
-        message: "PKストップを登録しました。",
-      });
-      onPenaltyStopAdded({
-        minute: minuteValue,
-        side: form.side,
-        goalkeeper: {
-          value: selectedGoalkeeper.value,
-          label: selectedGoalkeeper.label,
-          position: selectedGoalkeeper.position,
-        },
+        message: wasEditing ? "PKストップを更新しました。" : "PKストップを登録しました。",
       });
       resetForm(form.side);
     } catch (error) {
@@ -181,17 +199,24 @@ export default function GameResisterPenaltyStop({
   };
 
   return (
-    <Card variant="outlined">
-      <CardContent>
-        <Stack component="form" spacing={2} onSubmit={handleSubmit}>
-          <Typography variant="h6">PKストップの登録</Typography>
+    <Grid2 container spacing={2}>
+      <Grid2 xs={12} md={6}>
+        <Card variant="outlined">
+          <CardContent>
+            <Stack component="form" spacing={2} onSubmit={handleSubmit}>
+          <Typography variant="h6">{editingEvent ? "PKストップの編集" : "PKストップの登録"}</Typography>
           <ToggleButtonGroup
             value={form.side}
             exclusive
             fullWidth
             onChange={(_, value) => {
               if (!value) return;
-              resetForm(value);
+              setForm((prev) => ({
+                ...prev,
+                side: value,
+                goalkeeper: null,
+              }));
+              setErrors({});
             }}
           >
             <ToggleButton value="HOME">{game.home_team_name}</ToggleButton>
@@ -232,13 +257,84 @@ export default function GameResisterPenaltyStop({
               {errors.team}
             </Typography>
           )}
-          <Stack direction="row" justifyContent="flex-end">
+          <Stack direction="row" spacing={1} justifyContent="flex-end">
+            {editingEvent && (
+              <Button onClick={() => resetForm(form.side)} disabled={submitting}>
+                編集をキャンセル
+              </Button>
+            )}
             <Button type="submit" variant="contained" disabled={submitting}>
-              PKストップを追加
+              {editingEvent ? "PKストップを更新" : "PKストップを追加"}
             </Button>
           </Stack>
-        </Stack>
-      </CardContent>
-    </Card>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid2>
+      <Grid2 xs={12} md={6}>
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              登録済みのPKストップ
+            </Typography>
+            {penaltyStopEvents.length === 0 ? (
+              <TimelineEmpty message="まだPKストップが登録されていません。" />
+            ) : (
+              <Stack spacing={1.5}>
+                {penaltyStopEvents.map((event) => (
+                  <Card key={event.id} variant="outlined" sx={{ borderColor: grey[200] }}>
+                    <CardContent sx={{ py: 1.5 }}>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Chip label={`${event.minute}'`} size="small" />
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle1">{event.goalkeeper.label}</Typography>
+                          <Typography variant="body2" color={grey[600]}>
+                            {event.side === "HOME" ? game.home_team_name : game.away_team_name}
+                          </Typography>
+                        </Box>
+                        <EventActionButtons
+                          eventLabel={`${event.minute}分 ${event.goalkeeper.label}のPKストップ`}
+                          onEdit={() => startEditing(event)}
+                          onDelete={async () => {
+                            try {
+                              const response = await fetch(
+                                `/api/game/v2/penalty-stop/${event.id}`,
+                                { method: "DELETE" },
+                              );
+                              const data = await response.json().catch(() => null);
+                              if (!response.ok) {
+                                throw new Error(data?.message ?? "PKストップの削除に失敗しました。");
+                              }
+                              if (editingEvent?.id === event.id) {
+                                resetForm(form.side);
+                              }
+                              await onEventChanged();
+                              setSnackbar({
+                                open: true,
+                                severity: "success",
+                                message: "PKストップを削除しました。",
+                              });
+                            } catch (error) {
+                              setSnackbar({
+                                open: true,
+                                severity: "error",
+                                message: error instanceof Error
+                                  ? error.message
+                                  : "PKストップの削除に失敗しました。",
+                              });
+                              throw error;
+                            }
+                          }}
+                        />
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      </Grid2>
+    </Grid2>
   );
 }

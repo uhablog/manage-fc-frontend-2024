@@ -3,16 +3,21 @@ import { TimelineEmpty } from "./TimeLineEmpty";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import { grey } from "@mui/material/colors";
 import { GoalTimelineEvent } from "@/types/GoalTimelineEvent";
+import { EventActionButtons } from "./EventActionButtons";
 
 
 export const GoalTimeline = ({
   events,
   homeTeamName,
   awayTeamName,
+  onEdit,
+  onDelete,
 }: {
   events: GoalTimelineEvent[];
   homeTeamName: string;
   awayTeamName: string;
+  onEdit?: (event: GoalTimelineEvent) => void;
+  onDelete?: (event: GoalTimelineEvent) => Promise<void>;
 }) => {
   if (events.length === 0) {
     return <TimelineEmpty message="まだ得点が登録されていません。" />;
@@ -29,10 +34,10 @@ export const GoalTimeline = ({
 
   return (
     <Stack spacing={1.5}>
-      {sortedEvents.map((event, index) => {
+      {sortedEvents.map((event) => {
         const teamName = event.side === "HOME" ? homeTeamName : awayTeamName;
         return (
-          <Card key={index} variant="outlined" sx={{ borderColor: grey[200] }}>
+          <Card key={event.id} variant="outlined" sx={{ borderColor: grey[200] }}>
             <CardContent sx={{ py: 1.5 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Chip label={`${event.minute}'`} size="small" />
@@ -50,6 +55,13 @@ export const GoalTimeline = ({
                   fontSize="small"
                   color={event.side === "HOME" ? "success" : "primary"}
                 />
+                {onEdit && onDelete && (
+                  <EventActionButtons
+                    eventLabel={`${event.minute}分 ${event.scorer.label}の得点`}
+                    onEdit={() => onEdit(event)}
+                    onDelete={() => onDelete(event)}
+                  />
+                )}
               </Stack>
             </CardContent>
           </Card>

@@ -19,7 +19,5 @@ export async function POST(
   });
 
   const result = await res.json();
-  return Response.json({
-    ...result
-  });
+  return Response.json({ ...result }, { status: res.status });
 }

@@ -3,15 +3,20 @@ import { TimelineEmpty } from "./TimeLineEmpty";
 import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
+import { EventActionButtons } from "./EventActionButtons";
 
 export const CardTimeline = ({
   events,
   homeTeamName,
   awayTeamName,
+  onEdit,
+  onDelete,
 }: {
   events: CardTimelineEvent[];
   homeTeamName: string;
   awayTeamName: string;
+  onEdit?: (event: CardTimelineEvent) => void;
+  onDelete?: (event: CardTimelineEvent) => Promise<void>;
 }) => {
   if (events.length === 0) {
     return <TimelineEmpty message="まだカードが登録されていません。" />;
@@ -19,10 +24,10 @@ export const CardTimeline = ({
 
   return (
     <Stack spacing={1.5}>
-      {events.map((event, index) => {
+      {events.map((event) => {
         const teamName = event.side === "HOME" ? homeTeamName : awayTeamName;
         return (
-          <Card key={index} variant="outlined" sx={{ borderColor: grey[200] }}>
+          <Card key={event.id} variant="outlined" sx={{ borderColor: grey[200] }}>
             <CardContent sx={{ py: 1.5 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Chip label={`${event.minute}'`} size="small" />
@@ -38,6 +43,13 @@ export const CardTimeline = ({
                     color: event.cardType === "YELLOW" ? "#fbc02d" : "#d32f2f",
                   }}
                 />
+                {onEdit && onDelete && (
+                  <EventActionButtons
+                    eventLabel={`${event.minute}分 ${event.player.label}のカード`}
+                    onEdit={() => onEdit(event)}
+                    onDelete={() => onDelete(event)}
+                  />
+                )}
               </Stack>
             </CardContent>
           </Card>
