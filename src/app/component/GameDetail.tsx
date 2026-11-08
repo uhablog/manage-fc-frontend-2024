@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Alert,
   Box,
@@ -35,6 +35,13 @@ type Props = {
   game_id: string;
 };
 
+type FetchGameOptions = {
+  showLoading?: boolean;
+  background?: boolean;
+};
+
+const GAME_REFRESH_INTERVAL_MS = 10_000;
+
 const GameDetail = ({ id, game_id }: Props) => {
   const [game, setGame] = useState<Game>();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -63,55 +70,123 @@ const GameDetail = ({ id, game_id }: Props) => {
   const [cardEvents, setCardEvents] = useState<CardTimelineEvent[]>([]);
   const [penaltyStopEvents, setPenaltyStopEvents] = useState<PenaltyStopTimelineEvent[]>([]);
   const [isResultConfirmed, setIsResultConfirmed] = useState<boolean>(false);
+  const gameRequestControllerRef = useRef<AbortController | null>(null);
+  const gameRequestInFlightRef = useRef(false);
+  const initializedResultGameIdRef = useRef<string | null>(null);
+  const previousConfirmedRef = useRef<boolean | null>(null);
 
-  const fetchGame = useCallback(async (showLoading = true) => {
-    if (showLoading) setLoading(true);
-    setError(null);
+  const fetchGame = useCallback(async ({
+    showLoading = true,
+    background = false,
+  }: FetchGameOptions = {}) => {
+    if (background && gameRequestInFlightRef.current) return;
+
+    gameRequestControllerRef.current?.abort();
+    const controller = new AbortController();
+    gameRequestControllerRef.current = controller;
+    gameRequestInFlightRef.current = true;
+
+    if (showLoading) {
+      setLoading(true);
+      setError(null);
+    }
+
     try {
-      const res = await fetch(`/api/game?game_id=${game_id}`);
+      const res = await fetch(`/api/game?game_id=${game_id}`, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new Error(`試合情報の取得に失敗しました (${res.status})`);
+      }
+
       const json = await res.json();
 
       if (json.success) {
         setGame(json.game);
         setComments(Array.isArray(json.comments) ? json.comments : []);
+        setError(null);
       } else {
-        setError("試合情報の取得に失敗しました。");
+        throw new Error(json.message ?? "試合情報の取得に失敗しました。");
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       console.error(err);
-      setError("試合情報の取得に失敗しました。");
+      if (!background) {
+        setError("試合情報の取得に失敗しました。");
+      }
     } finally {
-      if (showLoading) setLoading(false);
+      if (gameRequestControllerRef.current === controller) {
+        gameRequestControllerRef.current = null;
+        gameRequestInFlightRef.current = false;
+        if (showLoading) setLoading(false);
+      }
     }
   }, [game_id]);
 
   useEffect(() => {
-    fetchGame();
+    void fetchGame();
+
+    return () => {
+      gameRequestControllerRef.current?.abort();
+    };
   }, [fetchGame]);
 
   const refreshGame = useCallback(async () => {
-    await fetchGame(false);
+    await fetchGame({ showLoading: false });
+  }, [fetchGame]);
+
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      void fetchGame({ showLoading: false, background: true });
+    };
+
+    const intervalId = window.setInterval(refreshWhenVisible, GAME_REFRESH_INTERVAL_MS);
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, [fetchGame]);
 
   useEffect(() => {
     if (!game) return;
-    setResultForm({
-      momSide:
-        game.mom_team_id && game.away_team_id && game.mom_team_id === game.away_team_id
-          ? "AWAY"
-          : "HOME",
-      momPlayer: null,
-      momRating: null,
-      confirmed: Boolean(game.confirmed),
-    });
+
+    if (initializedResultGameIdRef.current !== game.game_id) {
+      initializedResultGameIdRef.current = game.game_id;
+      setResultForm({
+        momSide:
+          game.mom_team_id && game.away_team_id && game.mom_team_id === game.away_team_id
+            ? "AWAY"
+            : "HOME",
+        momPlayer: null,
+        momRating: null,
+        confirmed: Boolean(game.confirmed),
+      });
+      setTab(0);
+    }
+
     setGoalEvents(sortGoalEvents(buildGoalEventsFromGame(game)));
     setCardEvents(sortCardEvents(buildCardEventsFromGame(game)));
     setPenaltyStopEvents(sortPenaltyStopEvents(buildPenaltyStopEventsFromGame(game)));
-    setIsResultConfirmed(Boolean(game.confirmed));
+
+    const confirmed = Boolean(game.confirmed);
+    if (previousConfirmedRef.current !== null && previousConfirmedRef.current !== confirmed) {
+      setTab(0);
+    }
+    previousConfirmedRef.current = confirmed;
+    setIsResultConfirmed(confirmed);
   }, [game]);
 
+  const homeTeamId = game?.home_team_id;
+  const awayTeamId = game?.away_team_id;
+
   useEffect(() => {
-    if (!game) {
+    if (!homeTeamId && !awayTeamId) {
       setHomePlayers([]);
       setAwayPlayers([]);
       setHomeSquads([]);
@@ -120,13 +195,16 @@ const GameDetail = ({ id, game_id }: Props) => {
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchSquads = async () => {
-      const { home_team_id, away_team_id } = game;
       setSquadsLoading(true);
 
       try {
-        if (home_team_id) {
-          const res = await fetch(`/api/team/squads?team_id=${home_team_id}`);
+        if (homeTeamId) {
+          const res = await fetch(`/api/team/squads?team_id=${homeTeamId}`, {
+            signal: controller.signal,
+          });
           if (res.ok) {
             const json = await res.json();
             const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
@@ -142,8 +220,10 @@ const GameDetail = ({ id, game_id }: Props) => {
           setHomePlayers([]);
         }
 
-        if (away_team_id) {
-          const res = await fetch(`/api/team/squads?team_id=${away_team_id}`);
+        if (awayTeamId) {
+          const res = await fetch(`/api/team/squads?team_id=${awayTeamId}`, {
+            signal: controller.signal,
+          });
           if (res.ok) {
             const json = await res.json();
             const squads: Squad[] = Array.isArray(json.squads) ? json.squads : [];
@@ -159,18 +239,25 @@ const GameDetail = ({ id, game_id }: Props) => {
           setAwayPlayers([]);
         }
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         console.error("failed to fetch squads", err);
         setHomeSquads([]);
         setAwaySquads([]);
         setHomePlayers([]);
         setAwayPlayers([]);
       } finally {
-        setSquadsLoading(false);
+        if (!controller.signal.aborted) {
+          setSquadsLoading(false);
+        }
       }
     };
 
-    fetchSquads();
-  }, [game]);
+    void fetchSquads();
+
+    return () => {
+      controller.abort();
+    };
+  }, [homeTeamId, awayTeamId]);
 
   const handleSnackbarClose = () => {
     setSnackbar((prev) => ({
