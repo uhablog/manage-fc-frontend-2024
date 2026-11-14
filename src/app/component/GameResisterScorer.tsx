@@ -45,14 +45,14 @@ export default function GameResisterScorer({
   awayPlayers,
   setSnackbar,
   goalEvents,
-  onGoalAdded,
+  onEventChanged,
 }: {
   game: Game
   homePlayers: PlayerOption[];
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
   goalEvents: GoalTimelineEvent[];
-  onGoalAdded: (event: GoalTimelineEvent) => void;
+  onEventChanged: () => Promise<void>;
 }) {
 
   const [goalForm, setGoalForm] = useState<GoalFormState>({
@@ -63,6 +63,8 @@ export default function GameResisterScorer({
     penalty: false,
   });
   const [goalErrors, setGoalErrors] = useState<GoalFormErrors>({});
+  const [editingEvent, setEditingEvent] = useState<GoalTimelineEvent | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const goalScorerOptions = useMemo(() => {
     const base = goalForm.side === "HOME" ? homePlayers : awayPlayers;
     return [...base, OWN_GOAL_OPTION];
@@ -73,16 +75,41 @@ export default function GameResisterScorer({
     [goalForm.side, homePlayers, awayPlayers],
   );
 
+  const resetForm = (side: TeamSide = goalForm.side) => {
+    setGoalForm({
+      side,
+      minute: "",
+      scorer: null,
+      assist: null,
+      penalty: false,
+    });
+    setGoalErrors({});
+    setEditingEvent(null);
+  };
+
+  const startEditing = (event: GoalTimelineEvent) => {
+    setGoalForm({
+      side: event.side,
+      minute: String(event.minute),
+      scorer: event.scorer,
+      assist: event.assist ?? null,
+      penalty: Boolean(event.penalty),
+    });
+    setGoalErrors({});
+    setEditingEvent(event);
+  };
+
   const handleGoalSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submitting) return;
     const errors: GoalFormErrors = {};
     const minuteValue = Number(goalForm.minute);
     const teamId = goalForm.side === "HOME" ? game.home_team_id : game.away_team_id;
-    if (Number.isNaN(minuteValue) || minuteValue < 1) {
-      errors.minute = "1以上の分を入力してください。";
+    if (Number.isNaN(minuteValue) || minuteValue < 0) {
+      errors.minute = "0以上の分を入力してください。";
     }
-    if (Number.isNaN(minuteValue) || minuteValue > 100) {
-      errors.minute = "100以下の分を入力してください。";
+    if (Number.isNaN(minuteValue) || minuteValue > 150) {
+      errors.minute = "150以下の分を入力してください。";
     }
     if (!goalForm.scorer) {
       errors.scorer = "得点者を選択してください。";
@@ -95,10 +122,12 @@ export default function GameResisterScorer({
     setGoalErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
+    setSubmitting(true);
     try {
-
-      const response = await fetch(`/api/game/v2/goal`, {
-        method: 'POST',
+      const response = await fetch(
+        editingEvent ? `/api/game/v2/goal/${editingEvent.id}` : `/api/game/v2/goal`,
+        {
+        method: editingEvent ? "PATCH" : "POST",
         headers: {
           'Content-Type': 'application/json',
         },
@@ -118,36 +147,32 @@ export default function GameResisterScorer({
               }
             : null,
         }),
-      });
+        },
+      );
+
+      const data = await response.json().catch(() => null);
 
       if (response.ok) {
-        const newEvent: GoalTimelineEvent = {
-          minute: minuteValue,
-          side: goalForm.side,
-          scorer: goalForm.scorer!,
-          assist: goalForm.assist,
-          penalty: goalForm.penalty,
-        };
-
-        onGoalAdded(newEvent);
-        setGoalForm((prev) => ({
-          ...prev,
-          minute: "",
-          scorer: null,
-          assist: null,
-          penalty: false,
-        }));
-        setGoalErrors({});
+        await onEventChanged();
+        const wasEditing = Boolean(editingEvent);
+        resetForm(goalForm.side);
         setSnackbar({
           open: true,
-          message: "得点を追加しました",
+          message: wasEditing ? "得点を更新しました" : "得点を追加しました",
           severity: "success",
         });
       } else {
-        window.alert('試合の登録に失敗');
+        throw new Error(data?.message ?? "得点イベントの保存に失敗しました。");
       }
     } catch (err) {
       console.error('Failed to submit game result:', err);
+      setSnackbar({
+        open: true,
+        message: err instanceof Error ? err.message : "得点イベントの保存に失敗しました。",
+        severity: "error",
+      });
+    } finally {
+      setSubmitting(false);
     }
 
   };
@@ -158,20 +183,19 @@ export default function GameResisterScorer({
         <Card variant="outlined">
           <CardContent>
             <Stack component="form" spacing={2} onSubmit={handleGoalSubmit}>
-              <Typography variant="h6">得点の登録</Typography>
+              <Typography variant="h6">{editingEvent ? "得点の編集" : "得点の登録"}</Typography>
               <ToggleButtonGroup
                 value={goalForm.side}
                 exclusive
                 fullWidth
                 onChange={(_, value) => {
                   if (!value) return;
-                  setGoalForm({
+                  setGoalForm((prev) => ({
+                    ...prev,
                     side: value,
-                    minute: "",
                     scorer: null,
                     assist: null,
-                    penalty: false,
-                  });
+                  }));
                   setGoalErrors({});
                 }}
               >
@@ -192,7 +216,7 @@ export default function GameResisterScorer({
                 }}
                 error={Boolean(goalErrors.minute)}
                 helperText={goalErrors.minute}
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 0, max: 150 }}
               />
               <Autocomplete
                 value={goalForm.scorer}
@@ -249,9 +273,14 @@ export default function GameResisterScorer({
                 }
                 label="PKでの得点"
               />
-              <Stack direction="row" justifyContent="flex-end">
-                <Button type="submit" variant="contained">
-                  得点を追加
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                {editingEvent && (
+                  <Button onClick={() => resetForm()} disabled={submitting}>
+                    編集をキャンセル
+                  </Button>
+                )}
+                <Button type="submit" variant="contained" disabled={submitting}>
+                  {editingEvent ? "得点を更新" : "得点を追加"}
                 </Button>
               </Stack>
             </Stack>
@@ -268,6 +297,30 @@ export default function GameResisterScorer({
               events={goalEvents}
               homeTeamName={game.home_team_name}
               awayTeamName={game.away_team_name}
+              onEdit={startEditing}
+              onDelete={async (event) => {
+                try {
+                  const response = await fetch(`/api/game/v2/goal/${event.id}`, {
+                    method: "DELETE",
+                  });
+                  const data = await response.json().catch(() => null);
+                  if (!response.ok) {
+                    throw new Error(data?.message ?? "得点イベントの削除に失敗しました。");
+                  }
+                  if (editingEvent?.id === event.id) {
+                    resetForm();
+                  }
+                  await onEventChanged();
+                  setSnackbar({ open: true, message: "得点を削除しました", severity: "success" });
+                } catch (error) {
+                  setSnackbar({
+                    open: true,
+                    message: error instanceof Error ? error.message : "得点イベントの削除に失敗しました。",
+                    severity: "error",
+                  });
+                  throw error;
+                }
+              }}
             />
           </CardContent>
         </Card>

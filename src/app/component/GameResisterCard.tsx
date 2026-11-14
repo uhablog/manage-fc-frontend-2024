@@ -35,7 +35,7 @@ type Props = {
   awayPlayers: PlayerOption[];
   setSnackbar: Dispatch<SetStateAction<SnackbarState>>;
   cardEvents: CardTimelineEvent[];
-  onCardAdded: (event: CardTimelineEvent) => void;
+  onEventChanged: () => Promise<void>;
 };
 
 export default function GameResisterCard({
@@ -44,7 +44,7 @@ export default function GameResisterCard({
   awayPlayers,
   setSnackbar,
   cardEvents,
-  onCardAdded,
+  onEventChanged,
 }: Props) {
   const [cardForm, setCardForm] = useState<CardFormState>({
     side: "HOME",
@@ -53,22 +53,42 @@ export default function GameResisterCard({
     cardType: "YELLOW",
   });
   const [cardErrors, setCardErrors] = useState<CardFormErrors>({});
+  const [editingEvent, setEditingEvent] = useState<CardTimelineEvent | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const cardPlayerOptions = useMemo(
     () => (cardForm.side === "HOME" ? homePlayers : awayPlayers),
     [cardForm.side, homePlayers, awayPlayers],
   );
 
+  const resetForm = (side: TeamSide = cardForm.side) => {
+    setCardForm({ side, minute: "", player: null, cardType: "YELLOW" });
+    setCardErrors({});
+    setEditingEvent(null);
+  };
+
+  const startEditing = (event: CardTimelineEvent) => {
+    setCardForm({
+      side: event.side,
+      minute: String(event.minute),
+      player: event.player,
+      cardType: event.cardType,
+    });
+    setCardErrors({});
+    setEditingEvent(event);
+  };
+
   const handleCardSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submitting) return;
 
     const errors: CardFormErrors = {};
     const minuteValue = Number(cardForm.minute);
-    if (Number.isNaN(minuteValue) || minuteValue < 1) {
-      errors.minute = "1以上の分を入力してください。";
+    if (Number.isNaN(minuteValue) || minuteValue < 0) {
+      errors.minute = "0以上の分を入力してください。";
     }
-    if (Number.isNaN(minuteValue) || minuteValue > 100) {
-      errors.minute = "100以下の分を入力してください。";
+    if (Number.isNaN(minuteValue) || minuteValue > 150) {
+      errors.minute = "150以下の分を入力してください。";
     }
     if (!cardForm.player) {
       errors.player = "対象選手を選択してください。";
@@ -77,9 +97,12 @@ export default function GameResisterCard({
     setCardErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
+    setSubmitting(true);
     try {
-      const response = await fetch(`/api/game/v2/card`, {
-        method: "POST",
+      const response = await fetch(
+        editingEvent ? `/api/game/v2/card/${editingEvent.id}` : `/api/game/v2/card`,
+        {
+        method: editingEvent ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -93,33 +116,32 @@ export default function GameResisterCard({
           minute: cardForm.minute,
           card_type: cardForm.cardType,
         }),
-      });
+        },
+      );
+
+      const data = await response.json().catch(() => null);
 
       if (response.ok) {
-        const newEvent: CardTimelineEvent = {
-          minute: minuteValue,
-          side: cardForm.side,
-          player: cardForm.player!,
-          cardType: cardForm.cardType,
-        };
-
-        onCardAdded(newEvent);
-        setCardForm((prev) => ({
-          ...prev,
-          minute: "",
-          player: null,
-        }));
-        setCardErrors({});
+        await onEventChanged();
+        const wasEditing = Boolean(editingEvent);
+        resetForm(cardForm.side);
         setSnackbar({
           open: true,
-          message: "カードイベントを追加しました",
+          message: wasEditing ? "カードイベントを更新しました" : "カードイベントを追加しました",
           severity: "success",
         });
       } else {
-        window.alert("カードイベントの登録に失敗しました");
+        throw new Error(data?.message ?? "カードイベントの保存に失敗しました。");
       }
     } catch (error) {
       console.error("Failed to submit card event", error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : "カードイベントの保存に失敗しました。",
+        severity: "error",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -129,19 +151,18 @@ export default function GameResisterCard({
         <Card variant="outlined">
           <CardContent>
             <Stack component="form" spacing={2} onSubmit={handleCardSubmit}>
-              <Typography variant="h6">カードの登録</Typography>
+              <Typography variant="h6">{editingEvent ? "カードの編集" : "カードの登録"}</Typography>
               <ToggleButtonGroup
                 value={cardForm.side}
                 exclusive
                 fullWidth
                 onChange={(_, value) => {
                   if (!value) return;
-                  setCardForm({
+                  setCardForm((prev) => ({
+                    ...prev,
                     side: value,
-                    minute: "",
                     player: null,
-                    cardType: cardForm.cardType,
-                  });
+                  }));
                   setCardErrors({});
                 }}
               >
@@ -177,7 +198,7 @@ export default function GameResisterCard({
                 }}
                 error={Boolean(cardErrors.minute)}
                 helperText={cardErrors.minute}
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 0, max: 150 }}
               />
               <Autocomplete
                 value={cardForm.player}
@@ -200,9 +221,14 @@ export default function GameResisterCard({
                 )}
                 isOptionEqualToValue={(option, value) => option.value === value?.value}
               />
-              <Stack direction="row" justifyContent="flex-end">
-                <Button type="submit" variant="contained">
-                  カードを追加
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                {editingEvent && (
+                  <Button onClick={() => resetForm()} disabled={submitting}>
+                    編集をキャンセル
+                  </Button>
+                )}
+                <Button type="submit" variant="contained" disabled={submitting}>
+                  {editingEvent ? "カードを更新" : "カードを追加"}
                 </Button>
               </Stack>
             </Stack>
@@ -219,6 +245,28 @@ export default function GameResisterCard({
               events={cardEvents}
               homeTeamName={game.home_team_name}
               awayTeamName={game.away_team_name}
+              onEdit={startEditing}
+              onDelete={async (event) => {
+                try {
+                  const response = await fetch(`/api/game/v2/card/${event.id}`, { method: "DELETE" });
+                  const data = await response.json().catch(() => null);
+                  if (!response.ok) {
+                    throw new Error(data?.message ?? "カードイベントの削除に失敗しました。");
+                  }
+                  if (editingEvent?.id === event.id) {
+                    resetForm();
+                  }
+                  await onEventChanged();
+                  setSnackbar({ open: true, message: "カードイベントを削除しました", severity: "success" });
+                } catch (error) {
+                  setSnackbar({
+                    open: true,
+                    message: error instanceof Error ? error.message : "カードイベントの削除に失敗しました。",
+                    severity: "error",
+                  });
+                  throw error;
+                }
+              }}
             />
           </CardContent>
         </Card>

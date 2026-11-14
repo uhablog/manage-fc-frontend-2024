@@ -29,24 +29,35 @@ export type Game = {
 }
 
 type Scorers = {
+  id: string
   name: string
   footballapi_player_id: number
   minuts: number
   penalty: boolean
+  assist: {
+    id: string
+    name: string
+    footballapi_player_id: number
+  } | null
 }
 
 type Assists = {
+  id?: string
   name: string
   footballapi_player_id: number
+  scorer_id?: string | null
+  minuts?: number
 }
 
 type Cards = {
+  id: string
   name: string
   footballapi_player_id: number
   minuts: number
 }
 
 type PenaltyStop = {
+  id: string
   name: string
   footballapi_player_id: number
   minute?: number

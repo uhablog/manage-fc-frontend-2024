@@ -1,6 +1,13 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, max-age=0",
+};
+
 export async function GET(
   request: NextRequest
 ) {
@@ -9,6 +16,7 @@ export async function GET(
   const accessTokenResult = await getAccessToken();
   const res = await fetch(`${process.env.API_ENDPOINT}/api/game?game_id=${game_id}`, {
     method: 'GET',
+    cache: 'no-store',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
     }
@@ -19,11 +27,14 @@ export async function GET(
     return Response.json({
       success: false,
       message: 'gameの取得に失敗'
+    }, {
+      headers: NO_STORE_HEADERS,
     });
   };
 
   const comment_res = await fetch(`${process.env.API_ENDPOINT}/api/game/comment?game_id=${game_id}`, {
     method: 'GET',
+    cache: 'no-store',
     headers: {
       'Authorization': `Bearer ${accessTokenResult.accessToken}`
     }
@@ -36,6 +47,8 @@ export async function GET(
     game,
     ...comment,
     success: true
+  }, {
+    headers: NO_STORE_HEADERS,
   });
 }
 
