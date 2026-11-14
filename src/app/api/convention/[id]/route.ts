@@ -1,0 +1,28 @@
+import { getAccessToken } from "@auth0/nextjs-auth0";
+import { NextRequest } from "next/server";
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } },
+) {
+  const accessTokenResult = await getAccessToken();
+  const body = await request.json();
+  const response = await fetch(
+    `${process.env.API_ENDPOINT}/api/convention/${encodeURIComponent(params.id)}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessTokenResult.accessToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  const result = await response.json().catch(() => ({
+    success: false,
+    message: "大会情報の更新に失敗しました。",
+  }));
+
+  return Response.json(result, { status: response.status });
+}
