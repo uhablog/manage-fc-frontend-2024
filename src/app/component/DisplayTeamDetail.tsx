@@ -80,9 +80,13 @@ const DisplayTeamDetail = ({
           <Grid2 xs={12}>
             <TeamDetailHeader
               convention_id={convention_id}
+              team_id={team_id}
               teamData={teamData}
               value={value}
               handleChange={handleChange}
+              onTeamUpdated={(updatedTeam) => {
+                setTeamData((current) => current ? { ...current, ...updatedTeam } : current);
+              }}
             />
             <CustomTabPanel value={value} index={0}>
               <TeamSummary
