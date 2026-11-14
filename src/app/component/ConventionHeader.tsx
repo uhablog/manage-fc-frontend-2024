@@ -16,6 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -33,6 +34,7 @@ function a11yProps(index: number) {
 
 const ConventionHeader = ({id, value, handleChange}: Props) => {
 
+  const router = useRouter();
   const [convention, setConvention] = useState<Convention>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [conventionName, setConventionName] = useState("");
@@ -40,6 +42,12 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
   const [nameError, setNameError] = useState("");
   const [dateError, setDateError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const [copyConventionName, setCopyConventionName] = useState("");
+  const [copyHeldDay, setCopyHeldDay] = useState("");
+  const [copyNameError, setCopyNameError] = useState("");
+  const [copyDateError, setCopyDateError] = useState("");
+  const [copying, setCopying] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -70,6 +78,22 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
     setDialogOpen(false);
     setNameError("");
     setDateError("");
+  };
+
+  const openCopyDialog = () => {
+    if (!convention) return;
+    setCopyConventionName(convention.convention_name);
+    setCopyHeldDay("");
+    setCopyNameError("");
+    setCopyDateError("");
+    setCopyDialogOpen(true);
+  };
+
+  const closeCopyDialog = () => {
+    if (copying) return;
+    setCopyDialogOpen(false);
+    setCopyNameError("");
+    setCopyDateError("");
   };
 
   const isRealDate = (value: string) => {
@@ -122,6 +146,49 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
     }
   };
 
+  const handleCopy = async () => {
+    const normalizedName = copyConventionName.trim();
+    const nextNameError = !normalizedName
+      ? "大会名を入力してください。"
+      : normalizedName.length > 500
+        ? "大会名は500文字以内で入力してください。"
+        : "";
+    const nextDateError = !isRealDate(copyHeldDay)
+      ? "開催日を正しく入力してください。"
+      : "";
+
+    setCopyNameError(nextNameError);
+    setCopyDateError(nextDateError);
+    if (nextNameError || nextDateError) return;
+
+    setCopying(true);
+    try {
+      const response = await fetch(`/api/convention/${encodeURIComponent(id)}/copy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          convention_name: normalizedName,
+          held_day: copyHeldDay,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "大会のコピーに失敗しました。");
+      }
+
+      setCopyDialogOpen(false);
+      router.push(`/conventions/${result.data.id}`);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : "大会のコピーに失敗しました。",
+        severity: "error",
+      });
+    } finally {
+      setCopying(false);
+    }
+  };
+
   return (
     <>
       <Card>
@@ -141,9 +208,14 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
                 </Typography>
               )}
             </Box>
-            <Button variant="outlined" onClick={openDialog} disabled={!convention}>
-              編集
-            </Button>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              <Button variant="outlined" onClick={openDialog} disabled={!convention}>
+                編集
+              </Button>
+              <Button variant="outlined" onClick={openCopyDialog} disabled={!convention}>
+                コピー
+              </Button>
+            </Stack>
           </Stack>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
@@ -193,6 +265,42 @@ const ConventionHeader = ({id, value, handleChange}: Props) => {
           <Button onClick={closeDialog} disabled={submitting}>キャンセル</Button>
           <Button onClick={handleSubmit} variant="contained" disabled={submitting}>
             {submitting ? "更新中..." : "更新"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={copyDialogOpen} onClose={closeCopyDialog} fullWidth maxWidth="sm">
+        <DialogTitle>大会をコピー</DialogTitle>
+        <DialogContent>
+          <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
+            参加チームの名前・マネージャー・担当ユーザーを引き継ぎ、現在の保有選手から新しいスカッドを作成します。試合や成績はコピーしません。
+          </Alert>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="normal"
+            label="大会名"
+            value={copyConventionName}
+            onChange={(event) => setCopyConventionName(event.target.value)}
+            error={Boolean(copyNameError)}
+            helperText={copyNameError}
+            inputProps={{ maxLength: 501 }}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            type="date"
+            label="開催日"
+            value={copyHeldDay}
+            onChange={(event) => setCopyHeldDay(event.target.value)}
+            error={Boolean(copyDateError)}
+            helperText={copyDateError}
+            InputLabelProps={{ shrink: true }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeCopyDialog} disabled={copying}>キャンセル</Button>
+          <Button onClick={handleCopy} variant="contained" disabled={copying}>
+            {copying ? "コピー中..." : "コピーを作成"}
           </Button>
         </DialogActions>
       </Dialog>
