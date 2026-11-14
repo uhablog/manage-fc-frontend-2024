@@ -1,7 +1,8 @@
 'use client';
 import { Box, Drawer, List, ListItem, ListItemIcon, Link as MuiLink, Typography, useTheme } from "@mui/material";
-import { AccountBox, Home } from "@mui/icons-material";
+import { AccountBox, AdminPanelSettings, Home } from "@mui/icons-material";
 import NextLink from "next/link";
+import { useAdminAccess } from "@/libs/useAdminAccess";
 
 const list_items = [
   {
@@ -24,6 +25,13 @@ const drawerWidth = 240;
 function Sidebar() {
 
   const theme = useTheme();
+  const isAdmin = useAdminAccess();
+  const visibleBottomItems = isAdmin
+    ? [
+        { title: '管理', icon: <AdminPanelSettings/>, href: '/admin/players' },
+        ...bottom_items
+      ]
+    : bottom_items;
 
   return (
     <>
@@ -66,7 +74,7 @@ function Sidebar() {
         <Box flexGrow={1} /> {/* This will push the content below it to the bottom */}
         <Box>
           <List>
-            {bottom_items.map(( item, index ) => (
+            {visibleBottomItems.map(( item, index ) => (
               <MuiLink component={NextLink} underline="none" href={item.href} key={index}>
                 <ListItem>
                   <ListItemIcon>

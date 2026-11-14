@@ -1,8 +1,9 @@
 'use client'
-import { AccountBalance, Home } from "@mui/icons-material";
+import { AccountBalance, AdminPanelSettings, Home } from "@mui/icons-material";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
 import Link from "next/link";
 import { useState } from "react";
+import { useAdminAccess } from "@/libs/useAdminAccess";
 
 const nav_items = [
   {
@@ -22,6 +23,13 @@ const nav_items = [
 const MobileBottomNav = () => {
 
   const [value, setValue] = useState<string>('conventions');
+  const isAdmin = useAdminAccess();
+  const visibleItems = isAdmin
+    ? [
+        ...nav_items,
+        { value: '/admin/players', label: '管理', icon: <AdminPanelSettings/>, href: '/admin/players' }
+      ]
+    : nav_items;
 
   return (
     <BottomNavigation
@@ -37,7 +45,7 @@ const MobileBottomNav = () => {
         bottom: 0,
       }}
     >
-      {nav_items.map((item, index) => (
+      {visibleItems.map((item, index) => (
         <BottomNavigationAction key={index} value={item.value} label={item.label} icon={item.icon} LinkComponent={Link} href={item.href} />
       ))}
     </BottomNavigation>

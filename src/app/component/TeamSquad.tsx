@@ -1,27 +1,18 @@
 import { Squad } from "@/types/Squads";
 import { useEffect, useMemo, useState } from "react";
-import { Avatar, Card, CardContent, Fab, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
-import { useUser } from "@auth0/nextjs-auth0/client";
-import { TransferDialog } from "./TransferDialog";
 
 type Props = {
   team_id: string
-  auth0_user_id: string
 }
 
-const TeamSquad = ({team_id, auth0_user_id}: Props) => {
-
-  // user情報取得
-  const { user, error, isLoading } = useUser();
+const TeamSquad = ({team_id}: Props) => {
 
   const [ squads, setSquads ] = useState<Squad[]>([]);
   const [ open, setOpen ] = useState<boolean>(false);
   const [ selectedPlayer, setSelectedPlayer ] = useState<string>('');
   
-  // 移籍ダイアログ関連
-  const [ openTransferDialog, setOpenTransferDialog ] = useState<boolean>(false);
-
   useEffect(() => {
     const fetchSquads = async () => {
       const res = await fetch(`/api/team/squads?team_id=${team_id}`);
@@ -33,10 +24,6 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
 
   const onClose = () => {
     setOpen(false);
-  }
-
-  const onCloseTransferDialog = () => {
-    setOpenTransferDialog(false);
   }
 
   const handleClick = (player_id: string) => {
@@ -67,12 +54,8 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
     return [...preferred, ...rest];
   }, [groupedSquads]);
 
-  if (isLoading) return <>Loading...</>
-  if (error) return <div>{error.message}</div>
-
   return (
-    user && (
-      <>
+    <>
         {orderedPositions.map((position) => {
           const players = groupedSquads[position];
           if (!players || players.length === 0) return null;
@@ -110,24 +93,7 @@ const TeamSquad = ({team_id, auth0_user_id}: Props) => {
           team_id={team_id}
           player_id={selectedPlayer}
         />
-        { user.sub === auth0_user_id &&
-          <>
-            <Fab
-              color="primary"
-              onClick={() => setOpenTransferDialog(true)}
-            >
-              移籍
-            </Fab>
-            <TransferDialog
-              open={openTransferDialog}
-              onClose={onCloseTransferDialog}
-              squad={squads}
-              team_id={team_id}
-            />
-          </>
-        }
-      </>
-    )
+    </>
   )
 }
 
