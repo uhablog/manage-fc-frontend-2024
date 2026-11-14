@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -11,11 +11,11 @@ export async function GET(request: NextRequest) {
     url += `&limit=${limit}`;
   }
 
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${accessTokenResult.accessToken}`,
+      Authorization: `Bearer ${accessTokenResult.token}`,
     },
   });
 

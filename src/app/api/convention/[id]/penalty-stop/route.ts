@@ -1,19 +1,20 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
+  const params = await context.params;
   const { searchParams } = new URL(request.url);
   const stat = searchParams.get("stat");
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
 
   const endpoint = `${process.env.API_ENDPOINT}/api/penalty-stop?convention_id=${params.id}`
 
   const res = await fetch(endpoint, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${accessTokenResult.accessToken}`,
+      Authorization: `Bearer ${accessTokenResult.token}`,
     },
   });
 

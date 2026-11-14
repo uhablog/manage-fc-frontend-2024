@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   const searchParams = request.nextUrl.searchParams;
   const convention_id = searchParams.get('convention_id');
   const user_id = searchParams.get('user_id');
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
 
   let fetchUrl = `${process.env.API_ENDPOINT}/api/convention`;
   if (convention_id) {
@@ -19,7 +19,7 @@ export async function GET(
   const res = await fetch(fetchUrl, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`
+      'Authorization': `Bearer ${accessTokenResult.token}`
     }
   });
 
@@ -40,12 +40,12 @@ export async function GET(
 export async function POST(
   request: Request
 ) {
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
   const reqBody = await request.json();
   const res = await fetch(`${process.env.API_ENDPOINT}/api/convention`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`,
+      'Authorization': `Bearer ${accessTokenResult.token}`,
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },

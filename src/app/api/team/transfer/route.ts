@@ -1,13 +1,13 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 
 export async function POST(
   request: Request
 ) {
-  const accessTokenResult = await getAccessToken();
+  const accessTokenResult = await auth0.getAccessToken();
   const res = await fetch(`${process.env.API_ENDPOINT}/api/team/transfer`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`,
+      'Authorization': `Bearer ${accessTokenResult.token}`,
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },

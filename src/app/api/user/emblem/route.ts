@@ -1,4 +1,4 @@
-import { getAccessToken, getSession } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import { del, list, put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
     }
 
-    const session = await getSession();
+    const session = await auth0.getSession();
 
     if (!session?.user?.sub) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
 
     let url: string | null = null;
     try {
-      const accessTokenResult = await getAccessToken();
-      if (accessTokenResult?.accessToken) {
-        url = await fetchEmblemUrlFromDb(userId, accessTokenResult.accessToken);
+      const accessTokenResult = await auth0.getAccessToken();
+      if (accessTokenResult?.token) {
+        url = await fetchEmblemUrlFromDb(userId, accessTokenResult.token);
       }
     } catch (error) {
       console.error("Failed to load emblem from database", error);
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    const session = await getSession();
+    const session = await auth0.getSession();
 
     if (!session?.user?.sub) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -114,9 +114,9 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      const accessTokenResult = await getAccessToken();
-      if (accessTokenResult?.accessToken) {
-        await saveEmblemUrlToDb(url, accessTokenResult.accessToken);
+      const accessTokenResult = await auth0.getAccessToken();
+      if (accessTokenResult?.token) {
+        await saveEmblemUrlToDb(url, accessTokenResult.token);
       }
     } catch (error) {
       console.error("Failed to persist emblem url in database", error);

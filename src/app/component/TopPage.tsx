@@ -1,3 +1,5 @@
+"use client";
+
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import Groups2RoundedIcon from "@mui/icons-material/Groups2Rounded";
@@ -85,7 +87,7 @@ export const TopPageComponent = () => {
             </Typography>
             <Button
               component={NextLink}
-              href={`/api/auth/login?returnTo=/conventions`}
+              href={`/auth/login?returnTo=/conventions`}
               variant="contained"
               endIcon={<ArrowForwardRoundedIcon />}
             >
@@ -120,7 +122,7 @@ export const TopPageComponent = () => {
                   <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                     <Button
                       component={NextLink}
-                      href="/api/auth/login?returnTo=/conventions"
+                      href="/auth/login?returnTo=/conventions"
                       size="large"
                       variant="contained"
                       endIcon={<ArrowForwardRoundedIcon />}
@@ -264,7 +266,7 @@ export const TopPageComponent = () => {
               </Typography>
               <Button
                 component={NextLink}
-                href="/api/auth/login?returnTo=/conventions"
+                href="/auth/login?returnTo=/conventions"
                 size="large"
                 variant="contained"
                 color="primary"

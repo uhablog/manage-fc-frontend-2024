@@ -1,16 +1,16 @@
-import { getAccessToken, getSession } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/libs/auth0";
 import { NextRequest } from "next/server";
 
 export async function POST(
   request: NextRequest
 ) {
-  const accessTokenResult = await getAccessToken();
-  const session = await getSession();
+  const accessTokenResult = await auth0.getAccessToken();
+  const session = await auth0.getSession();
   const body = await request.json();
   const res = await fetch(`${process.env.API_ENDPOINT}/api/game/comment`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessTokenResult.accessToken}`,
+      'Authorization': `Bearer ${accessTokenResult.token}`,
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
